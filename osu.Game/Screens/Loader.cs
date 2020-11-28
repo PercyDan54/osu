@@ -14,6 +14,7 @@ using osu.Framework.Threading;
 using osu.Game.Configuration;
 using osu.Game.Graphics.UserInterface;
 using IntroSequence = osu.Game.Configuration.IntroSequence;
+using osu.Framework.Development;
 
 namespace osu.Game.Screens
 {
@@ -104,8 +105,7 @@ namespace osu.Game.Screens
         [BackgroundDependencyLoader]
         private void load(OsuGameBase game, OsuConfigManager config)
         {
-            //showDisclaimer = game.IsDeployedBuild;
-            showDisclaimer = false;
+            showDisclaimer = game.IsDeployedBuild;
             introSequence = config.Get<IntroSequence>(OsuSetting.IntroSequence);
         }
 
