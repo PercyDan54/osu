@@ -50,21 +50,23 @@ namespace osu.Game.Database
         /// Creates the download request for this <typeparamref name="TModel"/>.
         /// </summary>
         /// <param name="model">The <typeparamref name="TModel"/> to be downloaded.</param>
+        ///  <param name="UseSayobot">Decides whether to use sayobot to download</param>
         /// <param name="minimiseDownloadSize">Whether this download should be optimised for slow connections. Generally means extras are not included in the download bundle.</param>
         /// <returns>The request object.</returns>
-        protected abstract ArchiveDownloadRequest<TModel> CreateDownloadRequest(TModel model, bool minimiseDownloadSize);
+        protected abstract ArchiveDownloadRequest<TModel> CreateDownloadRequest(TModel model, bool UseSayobot, bool minimiseDownloadSize);
 
         /// <summary>
         /// Begin a download for the requested <typeparamref name="TModel"/>.
         /// </summary>
         /// <param name="model">The <typeparamref name="TModel"/> to be downloaded.</param>
+        /// <param name="UseSayobot">Decides whether to use sayobot to download</param>
         /// <param name="minimiseDownloadSize">Whether this download should be optimised for slow connections. Generally means extras are not included in the download bundle.</param>
         /// <returns>Whether the download was started.</returns>
-        public bool Download(TModel model, bool minimiseDownloadSize = false)
+        public bool Download(TModel model, bool UseSayobot, bool minimiseDownloadSize = false)
         {
             if (!canDownload(model)) return false;
 
-            var request = CreateDownloadRequest(model, minimiseDownloadSize);
+            var request = CreateDownloadRequest(model, UseSayobot, minimiseDownloadSize);
 
             DownloadNotification notification = new DownloadNotification
             {

@@ -51,6 +51,17 @@ namespace osu.Game.Input.Bindings
 
             new KeyBinding(new[] { InputKey.Control, InputKey.Shift, InputKey.R }, GlobalAction.RandomSkin),
         };
+        public IEnumerable<KeyBinding> MvisControlKeyBindings => new[]
+{
+            new KeyBinding(InputKey.Left, GlobalAction.MvisMusicPrev),
+            new KeyBinding(InputKey.Right, GlobalAction.MvisMusicNext),
+            new KeyBinding(InputKey.Space, GlobalAction.MvisTogglePause),
+            new KeyBinding(InputKey.Tab, GlobalAction.MvisToggleOverlayLock),
+            new KeyBinding(InputKey.Menu, GlobalAction.MvisTogglePlayList),
+            new KeyBinding(InputKey.L, GlobalAction.MvisToggleTrackLoop),
+            new KeyBinding(InputKey.Enter, GlobalAction.MvisOpenInSongSelect),
+            new KeyBinding(InputKey.Slash, GlobalAction.MvisSelectCollection),
+        };
 
         public IEnumerable<KeyBinding> EditorKeyBindings => new[]
         {
@@ -69,6 +80,7 @@ namespace osu.Game.Input.Bindings
             new KeyBinding(new[] { InputKey.Control, InputKey.Plus }, GlobalAction.IncreaseScrollSpeed),
             new KeyBinding(new[] { InputKey.Control, InputKey.Minus }, GlobalAction.DecreaseScrollSpeed),
             new KeyBinding(InputKey.MouseMiddle, GlobalAction.PauseGameplay),
+            new KeyBinding(InputKey.Space, GlobalAction.TogglePauseReplay),
             new KeyBinding(InputKey.Control, GlobalAction.HoldForHUD),
         };
 
@@ -163,10 +175,10 @@ namespace osu.Game.Input.Bindings
         [Description("Toggle now playing overlay")]
         ToggleNowPlaying,
 
-        [Description("Previous Selection")]
+        [Description("Previous selection")]
         SelectPrevious,
 
-        [Description("Next Selection")]
+        [Description("Next selection")]
         SelectNext,
 
         [Description("Home")]
@@ -175,26 +187,39 @@ namespace osu.Game.Input.Bindings
         [Description("Toggle notifications")]
         ToggleNotifications,
 
-        [Description("Pause")]
+        [Description("Pause gameplay")]
         PauseGameplay,
 
         // Editor
-        [Description("Setup Mode")]
+        [Description("Setup mode")]
         EditorSetupMode,
 
-        [Description("Compose Mode")]
+        [Description("Compose mode")]
         EditorComposeMode,
 
-        [Description("Design Mode")]
+        [Description("Design mode")]
         EditorDesignMode,
 
-        [Description("Timing Mode")]
+        [Description("Timing mode")]
         EditorTimingMode,
 
         [Description("Hold for HUD")]
         HoldForHUD,
 
-        [Description("Random Skin")]
+        [Description("Random skin")]
         RandomSkin,
+
+        [Description("Pause / resume replay")]
+        TogglePauseReplay,
+
+        MvisMusicPrev,
+        MvisMusicNext,
+        MvisSelectCollection,
+        MvisTogglePause,
+        MvisToggleOverlayLock,
+        MvisForceLockOverlayChanges,
+        MvisTogglePlayList,
+        MvisToggleTrackLoop,
+        MvisOpenInSongSelect
     }
 }

@@ -78,5 +78,9 @@ namespace osu.Game.Users
                 Room = room;
             }
         }
+        public class InMvis : UserActivity
+        {
+            public override string Status => "Listening to song";
+        }
     }
 }

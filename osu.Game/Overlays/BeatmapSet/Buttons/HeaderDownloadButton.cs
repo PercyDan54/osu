@@ -8,6 +8,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -29,6 +30,7 @@ namespace osu.Game.Overlays.BeatmapSet.Buttons
         public string TooltipText => button.Enabled.Value ? "download this beatmap" : "login to download";
 
         private readonly IBindable<User> localUser = new Bindable<User>();
+        private BindableBool useSayobot = new BindableBool();
 
         private ShakeContainer shakeContainer;
         private HeaderButton button;
@@ -43,7 +45,7 @@ namespace osu.Game.Overlays.BeatmapSet.Buttons
         }
 
         [BackgroundDependencyLoader]
-        private void load(IAPIProvider api, BeatmapManager beatmaps)
+        private void load(IAPIProvider api, BeatmapManager beatmaps, MfConfigManager mfconfig)
         {
             FillFlowContainer textSprites;
 
@@ -104,7 +106,7 @@ namespace osu.Game.Overlays.BeatmapSet.Buttons
                     return;
                 }
 
-                beatmaps.Download(BeatmapSet.Value, noVideo);
+                beatmaps.Download(BeatmapSet.Value, mfconfig.Get<bool>(MfSetting.UseSayobot), noVideo);
             };
 
             localUser.BindTo(api.LocalUser);

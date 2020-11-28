@@ -101,7 +101,7 @@ namespace osu.Game.Overlays.Profile
             underscore.Colour = colourProvider.Highlight1;
         }
 
-        private class SectionTriangles : Container
+        public class SectionTriangles : Container
         {
             private readonly Triangles triangles;
             private readonly Box foreground;

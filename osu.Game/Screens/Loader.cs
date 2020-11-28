@@ -104,7 +104,8 @@ namespace osu.Game.Screens
         [BackgroundDependencyLoader]
         private void load(OsuGameBase game, OsuConfigManager config)
         {
-            showDisclaimer = game.IsDeployedBuild;
+            //showDisclaimer = game.IsDeployedBuild;
+            showDisclaimer = false;
             introSequence = config.Get<IntroSequence>(OsuSetting.IntroSequence);
         }
 

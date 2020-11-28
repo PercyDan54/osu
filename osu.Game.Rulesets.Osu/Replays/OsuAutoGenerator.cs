@@ -43,7 +43,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         /// <summary>
         /// What easing to use when moving between hitobjects
         /// </summary>
-        private Easing preferredEasing => DelayedMovements ? Easing.InOutCubic : Easing.Out;
+        private Easing preferredEasing => Easing.Out;
 
         #endregion
 
@@ -84,12 +84,6 @@ namespace osu.Game.Rulesets.Osu.Replays
             for (int i = 0; i < Beatmap.HitObjects.Count; i++)
             {
                 OsuHitObject h = Beatmap.HitObjects[i];
-
-                if (DelayedMovements && i > 0)
-                {
-                    OsuHitObject prev = Beatmap.HitObjects[i - 1];
-                    addDelayedMovements(h, prev);
-                }
 
                 addHitObjectReplay(h);
             }
