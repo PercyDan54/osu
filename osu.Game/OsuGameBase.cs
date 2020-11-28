@@ -136,7 +136,7 @@ namespace osu.Game
         private void load()
         {
             VersionHash = "c53a455a0438d9e9c09056845bcd57a6";
-;
+
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
             dependencies.Cache(contextFactory = new DatabaseContextFactory(Storage));
