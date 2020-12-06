@@ -116,7 +116,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2020.1128.0";
+        public virtual string Version => "2020.1204.0";
 
         public OsuGameBase()
         {
