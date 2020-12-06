@@ -220,6 +220,8 @@ namespace osu.Game.Input.Bindings
         MvisForceLockOverlayChanges,
         MvisTogglePlayList,
         MvisToggleTrackLoop,
-        MvisOpenInSongSelect
+        MvisOpenInSongSelect,
+        [Description("Toggle in-game interface")]
+        ToggleInGameInterface,
     }
 }
