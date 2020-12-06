@@ -12,15 +12,16 @@ using osu.Game.Users;
 
 namespace osu.Game.Rulesets.Osu.Mods
 {
-    public class OsuModAutoplay : ModAutoplay<OsuHitObject>
+    public class OsuModDance : ModAutoplay<OsuHitObject>
     {
         public override Type[] IncompatibleMods => base.IncompatibleMods.Append(typeof(OsuModAutopilotDance)).Append(typeof(OsuModAutopilot)).Append(typeof(OsuModSpunOut)).ToArray();
+        public override string Name => "Cursor dance";
+        public override string Description => "Watch a perfect automated cursor dance through the song.";
 
-        public override string Name => "Autoplay";
         public override Score CreateReplayScore(IBeatmap beatmap) => new Score
         {
-            ScoreInfo = new ScoreInfo { User = new User { Username = "AutoPlay" } },
-            Replay = new OsuAutoGenerator(beatmap).Generate()
+            ScoreInfo = new ScoreInfo { User = new User { Username = "danser" } },
+            Replay = new OsuDanceGenerator(beatmap).Generate()
         };
     }
 }

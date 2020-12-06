@@ -22,7 +22,7 @@ namespace osu.Game.Rulesets.Osu.Mods
         public override string Description => @"Spinners will be automatically completed.";
         public override double ScoreMultiplier => 0.9;
         public override bool Ranked => true;
-        public override Type[] IncompatibleMods => new[] { typeof(ModAutoplay), typeof(OsuModAutopilot) };
+        public override Type[] IncompatibleMods => new[] { typeof(ModAutoplay), typeof(OsuModAutopilotDance) };
 
         public void ApplyToDrawableHitObjects(IEnumerable<DrawableHitObject> drawables)
         {

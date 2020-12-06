@@ -48,7 +48,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
                 {
                     new OsuModHardRock(),
                     new OsuModDoubleTime(),
-                    new OsuModAutoplay()
+                    new OsuModDance()
                 }
             });
         }

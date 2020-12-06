@@ -69,12 +69,12 @@ namespace osu.Game.Rulesets.Osu
                 yield return new OsuModSuddenDeath();
 
             if (mods.HasFlag(LegacyMods.Autopilot))
-                yield return new OsuModAutopilot();
+                yield return new OsuModAutopilotDance();
 
             if (mods.HasFlag(LegacyMods.Cinema))
                 yield return new OsuModCinema();
             else if (mods.HasFlag(LegacyMods.Autoplay))
-                yield return new OsuModAutoplay();
+                yield return new OsuModDance();
 
             if (mods.HasFlag(LegacyMods.Easy))
                 yield return new OsuModEasy();
@@ -115,7 +115,7 @@ namespace osu.Game.Rulesets.Osu
             {
                 switch (mod)
                 {
-                    case OsuModAutopilot _:
+                    case OsuModAutopilotDance _:
                         value |= LegacyMods.Autopilot;
                         break;
 
@@ -168,9 +168,9 @@ namespace osu.Game.Rulesets.Osu
                 case ModType.Automation:
                     return new Mod[]
                     {
-                        new MultiMod(new OsuModAutoplay(), new OsuModAutoplayNormal(), new OsuModCinema()),
+                        new MultiMod(new OsuModDance(), new OsuModAutoplay(), new OsuModCinema()),
                         new OsuModRelax(),
-                        new MultiMod(new OsuModAutopilot(), new OsuModAutopilotNormal()),
+                        new MultiMod(new OsuModAutopilotDance(), new OsuModAutopilot()),
                         new OsuModSpunOut(),
                     };
 
@@ -179,6 +179,7 @@ namespace osu.Game.Rulesets.Osu
                     {
                         new OsuModTransform(),
                         new OsuModWiggle(),
+                        new OsuModAR(),
                         new OsuModSpinIn(),
                         new MultiMod(new OsuModGrow(), new OsuModDeflate()),
                         new MultiMod(new ModWindUp(), new ModWindDown()),
