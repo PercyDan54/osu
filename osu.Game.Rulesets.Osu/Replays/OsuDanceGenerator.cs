@@ -5,17 +5,17 @@ using System;
 using osu.Framework.Graphics;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu.Beatmaps;
-using osu.Game.Rulesets.Osu.Configuration;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Replays.Movers;
 using osu.Game.Rulesets.Osu.Replays.Movers.Sliders;
 using osu.Game.Rulesets.Osu.UI;
 using osuTK;
-using static osu.Game.Rulesets.Osu.Configuration.OsuDanceMover;
+using static osu.Game.Configuration.OsuDanceMover;
 
 namespace osu.Game.Rulesets.Osu.Replays
 {
@@ -36,7 +36,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         private readonly float spinRadiusStart;
         private readonly float spinRadiusEnd;
         private readonly BaseDanceObjectMover<Slider> sliderMover;
-        private readonly OsuRulesetConfigManager config;
+        private readonly MfConfigManager config;
 
         private bool tapRight;
         private readonly double frameTime;
@@ -44,15 +44,61 @@ namespace osu.Game.Rulesets.Osu.Replays
         // yes, this is intended.
         // ReSharper disable once AssignmentInConditionalExpression
         private OsuAction action() => (tapRight = !tapRight) ? OsuAction.LeftButton : OsuAction.RightButton;
+        private static void calcSpinnerStartPosAndDirection(Vector2 prevPos, out Vector2 startPosition, out float spinnerDirection)
+        {
+            Vector2 spinCentreOffset = SPINNER_CENTRE - prevPos;
+            float distFromCentre = spinCentreOffset.Length;
+            float distToTangentPoint = MathF.Sqrt(distFromCentre * distFromCentre - SPIN_RADIUS * SPIN_RADIUS);
+
+            if (distFromCentre > SPIN_RADIUS)
+            {
+                // Previous cursor position was outside spin circle, set startPosition to the tangent point.
+
+                // Angle between centre offset and tangent point offset.
+                float angle = MathF.Asin(SPIN_RADIUS / distFromCentre);
+
+                if (angle > 0)
+                {
+                    spinnerDirection = -1;
+                }
+                else
+                {
+                    spinnerDirection = 1;
+                }
+
+                // Rotate by angle so it's parallel to tangent line
+                spinCentreOffset.X = spinCentreOffset.X * MathF.Cos(angle) - spinCentreOffset.Y * MathF.Sin(angle);
+                spinCentreOffset.Y = spinCentreOffset.X * MathF.Sin(angle) + spinCentreOffset.Y * MathF.Cos(angle);
+
+                // Set length to distToTangentPoint
+                spinCentreOffset.Normalize();
+                spinCentreOffset *= distToTangentPoint;
+
+                // Move along the tangent line, now startPosition is at the tangent point.
+                startPosition = prevPos + spinCentreOffset;
+            }
+            else if (spinCentreOffset.Length > 0)
+            {
+                // Previous cursor position was inside spin circle, set startPosition to the nearest point on spin circle.
+                startPosition = SPINNER_CENTRE - spinCentreOffset * (SPIN_RADIUS / spinCentreOffset.Length);
+                spinnerDirection = 1;
+            }
+            else
+            {
+                // Degenerate case where cursor position is exactly at the centre of the spin circle.
+                startPosition = SPINNER_CENTRE + new Vector2(0, -SPIN_RADIUS);
+                spinnerDirection = 1;
+            }
+        }
 
         public OsuDanceGenerator(IBeatmap beatmap)
             : base(beatmap)
         {
-            config = OsuRulesetConfigManager.Instance;
-            frameTime = 1000.0 / config.Get<float>(OsuRulesetSetting.ReplayFramerate);
-            spinRadiusStart = config.Get<float>(OsuRulesetSetting.SpinnerRadius);
-            spinRadiusEnd = config.Get<float>(OsuRulesetSetting.SpinnerRadius2);
-            mover = GetMover(config.Get<OsuDanceMover>(OsuRulesetSetting.DanceMover));
+            config = MfConfigManager.Instance;
+            frameTime = 1000.0 / config.Get<float>(MfSetting.ReplayFramerate);
+            spinRadiusStart = config.Get<float>(MfSetting.SpinnerRadius);
+            spinRadiusEnd = config.Get<float>(MfSetting.SpinnerRadius2);
+            mover = GetMover(config.Get<OsuDanceMover>(MfSetting.DanceMover));
             sliderMover = new SimpleSliderMover();
 
             mover.Beatmap = Beatmap;
@@ -81,6 +127,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         {
             float sDirection = -1;
             var tap = action();
+            Vector2 startPosition = o.StackedPosition;
             switch (o)
             {
                 case Slider s:
@@ -96,6 +143,7 @@ namespace osu.Game.Rulesets.Osu.Replays
                     break;
 
                 case Spinner s:
+                    calcSpinnerStartPosAndDirection(((OsuReplayFrame)Frames[^1]).Position, out startPosition, out sDirection);
                     Vector2 difference = s.StackedPosition - SPINNER_CENTRE;
 
                     float radius = difference.Length;
@@ -150,7 +198,7 @@ namespace osu.Game.Rulesets.Osu.Replays
                 {
                     var v = mover.Update(t);
 
-                    if (config.Get<bool>(OsuRulesetSetting.BorderBounce))
+                    if (config.Get<bool>(MfSetting.BorderBounce))
                     {
                         if (v.X < x0) v.X = x0 - (v.X - x0);
                         if (v.Y < y0) v.Y = y0 - (v.Y - y0);

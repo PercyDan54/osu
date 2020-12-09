@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using osu.Game.Rulesets.Osu.Configuration;
+using osu.Game.Configuration;
 using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 using static osu.Game.Rulesets.Osu.Replays.Movers.MoverUtilExtensions;
@@ -25,10 +25,10 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public FlowerMover()
         {
-            var c = OsuRulesetConfigManager.Instance;
-            mult = c.Get<float>(OsuRulesetSetting.JumpMulti);
-            nmult = c.Get<float>(OsuRulesetSetting.JumpMulti);
-            offsetMult = c.Get<float>(OsuRulesetSetting.AngleOffset);
+            var c = MfConfigManager.Instance;
+            mult = c.Get<float>(MfSetting.JumpMulti);
+            nmult = c.Get<float>(MfSetting.JumpMulti);
+            offsetMult = c.Get<float>(MfSetting.AngleOffset);
         }
 
         public override void OnObjChange()

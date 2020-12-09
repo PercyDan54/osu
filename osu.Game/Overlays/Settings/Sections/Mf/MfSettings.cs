@@ -12,7 +12,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
         protected override string Header => "Custom osu settings";
 
         [BackgroundDependencyLoader]
-        private void load(MfConfigManager config, OsuConfigManager osuConfig)
+        private void load(MfConfigManager config)
         {
             Children = new Drawable[]
             {

@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using osu.Game.Rulesets.Osu.Configuration;
+using osu.Game.Configuration;
 using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 using static osu.Game.Rulesets.Osu.Replays.Movers.MoverUtilExtensions;
@@ -22,10 +22,10 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public TestMover()
         {
-            var c = OsuRulesetConfigManager.Instance;
-            jmult = c.Get<float>(OsuRulesetSetting.JumpMulti);
-            njmult = c.Get<float>(OsuRulesetSetting.NextJumpMulti);
-            offsetMult = c.Get<float>(OsuRulesetSetting.AngleOffset);
+            var c = MfConfigManager.Instance;
+            jmult = c.Get<float>(MfSetting.JumpMulti);
+            njmult = c.Get<float>(MfSetting.NextJumpMulti);
+            offsetMult = c.Get<float>(MfSetting.AngleOffset);
         }
 
         private (float, bool) nextAngle()

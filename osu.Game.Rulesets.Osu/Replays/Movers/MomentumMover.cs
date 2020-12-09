@@ -2,7 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using osu.Game.Rulesets.Osu.Configuration;
+using osu.Game.Configuration;
 using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 using static osu.Game.Rulesets.Osu.Replays.Movers.MoverUtilExtensions;
@@ -23,11 +23,11 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public MomentumMover()
         {
-            var c = OsuRulesetConfigManager.Instance;
-            jmult = c.Get<float>(OsuRulesetSetting.JumpMulti);
-            nmult = c.Get<float>(OsuRulesetSetting.NextJumpMulti);
-            offsetMult = c.Get<float>(OsuRulesetSetting.AngleOffset);
-            skipstacks = c.Get<bool>(OsuRulesetSetting.SkipStackAngles);
+            var c = MfConfigManager.Instance;
+            jmult = c.Get<float>(MfSetting.JumpMulti);
+            nmult = c.Get<float>(MfSetting.NextJumpMulti);
+            offsetMult = c.Get<float>(MfSetting.AngleOffset);
+            skipstacks = c.Get<bool>(MfSetting.SkipStackAngles);
         }
 
         private bool same(OsuHitObject o1, OsuHitObject o2) => o1.StackedPosition == o2.StackedPosition || (skipstacks && o1.Position == o2.Position);

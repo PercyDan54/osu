@@ -10,10 +10,12 @@ namespace osu.Game.Configuration
     public class MfConfigManager : IniConfigManager<MfSetting>
     {
         protected override string Filename => "mf.ini";
+        public static MfConfigManager Instance { get; private set; }
 
         public MfConfigManager(Storage storage)
             : base(storage)
         {
+            Instance = this;
         }
 
         protected override void InitialiseDefaults()
@@ -27,9 +29,6 @@ namespace osu.Game.Configuration
             Set(MfSetting.OptUI, true);
             Set(MfSetting.TrianglesEnabled, true);
             Set(MfSetting.SongSelectBgBlur, 0.2f, 0f, 1f);
-
-            //Intro Settings
-            Set(MfSetting.IntroLoadDirectToSongSelect, false);
 
             //Gameplay Settings
             Set(MfSetting.SamplePlaybackGain, 1f, 0f, 20f);
@@ -63,8 +62,16 @@ namespace osu.Game.Configuration
             Set(MfSetting.MvisGreen, 0, 0, 255);
             Set(MfSetting.MvisBlue, 0, 0, 255);
 
-            //File Select Filter
-            Set(MfSetting.FileFilter, FileFilterType.All);
+            //Dance settings
+            Set(MfSetting.DanceMover, OsuDanceMover.Momentum);
+            Set(MfSetting.AngleOffset, 8f / 18f, 0f, 2f, float.Epsilon);
+            Set(MfSetting.JumpMulti, 2f / 3f, 0f, 2f, float.Epsilon);
+            Set(MfSetting.ReplayFramerate, 60f, 15f, 240f, 1f);
+            Set(MfSetting.SpinnerRadius, 235f, 10f, 350f, 1f);
+            Set(MfSetting.SpinnerRadius2, 15f, 10f, 250f, 1f);
+            Set(MfSetting.NextJumpMulti, 2f / 3f, 0f, 2f, float.Epsilon);
+            Set(MfSetting.SkipStackAngles, true);
+            Set(MfSetting.BorderBounce, true);
         }
     }
 
@@ -100,8 +107,15 @@ namespace osu.Game.Configuration
         MvisInterfaceBlue,
         SamplePlaybackGain,
         SongSelectBgBlur,
-        IntroLoadDirectToSongSelect,
-        FileFilter,
+        ReplayFramerate,
+        SpinnerRadius,
+        SpinnerRadius2,
+        DanceMover,
+        AngleOffset,
+        JumpMulti,
+        NextJumpMulti,
+        BorderBounce,
+        SkipStackAngles,
     }
 
     public enum MvisBarType
@@ -110,16 +124,10 @@ namespace osu.Game.Configuration
         Rounded,
         Fall
     }
-
-    public enum FileFilterType
+    public enum OsuDanceMover
     {
-        [Description("皮肤文件")]
-        Skin,
-        [Description("谱面文件")]
-        Beatmap,
-        [Description("回放文件")]
-        Replay,
-        [Description("全部")]
-        All
+        HalfCircle,
+        Flower,
+        Momentum
     }
 }
