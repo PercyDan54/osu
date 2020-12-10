@@ -12,7 +12,6 @@ using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Replays.Movers;
-using osu.Game.Rulesets.Osu.Replays.Movers.Sliders;
 using osu.Game.Rulesets.Osu.UI;
 using osuTK;
 using static osu.Game.Configuration.OsuDanceMover;
@@ -35,15 +34,26 @@ namespace osu.Game.Rulesets.Osu.Replays
         private readonly BaseDanceMover mover;
         private readonly float spinRadiusStart;
         private readonly float spinRadiusEnd;
-        private readonly BaseDanceObjectMover<Slider> sliderMover;
         private readonly MfConfigManager config;
 
-        private bool tapRight;
+        private int buttonIndex;
         private readonly double frameTime;
 
-        // yes, this is intended.
-        // ReSharper disable once AssignmentInConditionalExpression
-        private OsuAction action() => (tapRight = !tapRight) ? OsuAction.LeftButton : OsuAction.RightButton;
+        private OsuAction getAction(OsuHitObject h, OsuHitObject last)
+        {
+            double timeDifference = ApplyModsToTime(h.StartTime - last.StartTime);
+            if (timeDifference > 0 && // Sanity checks
+               ((last.StackedPosition - h.StackedPosition).Length > h.Radius * (1.5 + 100.0 / timeDifference) || // Either the distance is big enough
+                timeDifference >= 266)) // ... or the beats are slow enough to tap anyway.
+            {
+                buttonIndex = 0;
+            }
+            else
+            {
+                buttonIndex++;
+            }
+            return buttonIndex % 2 == 0 ? OsuAction.LeftButton : OsuAction.RightButton;
+        }
         private static void calcSpinnerStartPosAndDirection(Vector2 prevPos, out Vector2 startPosition, out float spinnerDirection)
         {
             Vector2 spinCentreOffset = SPINNER_CENTRE - prevPos;
@@ -99,7 +109,6 @@ namespace osu.Game.Rulesets.Osu.Replays
             spinRadiusStart = config.Get<float>(MfSetting.SpinnerRadius);
             spinRadiusEnd = config.Get<float>(MfSetting.SpinnerRadius2);
             mover = GetMover(config.Get<OsuDanceMover>(MfSetting.DanceMover));
-            sliderMover = new SimpleSliderMover();
 
             mover.Beatmap = Beatmap;
 
@@ -123,22 +132,48 @@ namespace osu.Game.Rulesets.Osu.Replays
             mover.ObjectsDuring = objectsDuring;
         }
 
-        private void objectGenerate(OsuHitObject o, int idx)
+        private void objectGenerate(OsuHitObject h, int idx)
         {
             float sDirection = -1;
-            var tap = action();
-            Vector2 startPosition = o.StackedPosition;
-            switch (o)
+            OsuAction action = getAction(h, Beatmap.HitObjects[idx == 0 ? idx : idx - 1]);
+            Vector2 startPosition = h.StackedPosition;
+            switch (h)
             {
-                case Slider s:
-                    sliderMover.Object = s;
-                    sliderMover.OnObjChange();
-                    AddFrameToReplay(new OsuReplayFrame(s.StartTime, s.StackedPosition, tap));
+                case Slider slider:
+                    AddFrameToReplay(new OsuReplayFrame(slider.StartTime, slider.StackedPosition, action));
 
                     if (objectsDuring[idx]) break;
 
-                    for (double t = s.StartTime + frameTime; t < s.EndTime; t += frameTime)
-                        AddFrameToReplay(new OsuReplayFrame(t, sliderMover.Update(t), tap));
+                    for (double t = slider.StartTime + frameTime; t < slider.EndTime; t += frameTime)
+                        if (slider.Distance / slider.RepeatCount <= 34 && slider.RepeatCount >= 1)
+                        {
+                            AddFrameToReplay(new OsuReplayFrame((int)h.StartTime, h.StackedPosition, action));
+                        }
+                        else
+                        {
+                            if (slider.Duration > 300)
+                            {
+                                double speed = slider.Distance / slider.Duration;
+                                for (double j = FrameDelay; j < slider.Duration; j += FrameDelay)
+                                {
+
+                                    Vector2 difference1 = startPosition - SPINNER_CENTRE;
+                                    float radius1 = difference1.Length;
+                                    float angle1 = radius1 == 0 ? 0 : MathF.Atan2(difference1.Y, difference1.X);
+                                    Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
+                                    Vector2 pos2 = pos + CirclePosition(ApplyModsToTime(j) / 12 * speed + angle1, 15);
+                                    AddFrameToReplay(new OsuReplayFrame((int)h.StartTime + j, pos2, action));
+                                }
+                            }
+                            else
+                            {
+                                for (double j = FrameDelay; j < slider.Duration; j += FrameDelay)
+                                {
+                                    Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
+                                    AddFrameToReplay(new OsuReplayFrame(h.StartTime + j, pos, action));
+                                }
+                            }
+                        }
 
                     break;
 
@@ -158,12 +193,12 @@ namespace osu.Game.Rulesets.Osu.Replays
                         t1 = ApplyModsToTime(j - s.StartTime) * sDirection;
                         r1 = j > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(j, r, spinRadiusEnd, s.StartTime, rEndTime, Easing.In);
                         Vector2 pos = SPINNER_CENTRE + CirclePosition(t1 / 20 + angle, r1);
-                        AddFrameToReplay(new OsuReplayFrame((int)j, new Vector2(pos.X, pos.Y), tap));
+                        AddFrameToReplay(new OsuReplayFrame((int)j, new Vector2(pos.X, pos.Y), action));
                     }
                     break;
 
                 case HitCircle c:
-                    AddFrameToReplay(new OsuReplayFrame(c.StartTime, c.StackedPosition, tap));
+                    AddFrameToReplay(new OsuReplayFrame(c.StartTime, c.StackedPosition, action));
                     break;
 
                 default: return;

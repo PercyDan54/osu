@@ -179,7 +179,7 @@ namespace osu.Game.Rulesets.Osu
                     {
                         new OsuModTransform(),
                         new OsuModWiggle(),
-                        new OsuModAR(),
+                        //new OsuModAR(),
                         new OsuModSpinIn(),
                         new MultiMod(new OsuModGrow(), new OsuModDeflate()),
                         new MultiMod(new ModWindUp(), new ModWindDown()),
