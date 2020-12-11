@@ -11,10 +11,10 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 {
     public class MomentumMover : BaseDanceMover
     {
-        private readonly float jmult;
-        private readonly float nmult;
+        private readonly float jumpMult;
+        private readonly float nextMult;
         private readonly float offsetMult;
-        private readonly bool skipstacks;
+        private readonly bool skipStacks;
         private float offset => MathF.PI * offsetMult;
 
         private Vector2 p1;
@@ -23,27 +23,27 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public MomentumMover()
         {
-            var c = MfConfigManager.Instance;
-            jmult = c.Get<float>(MfSetting.JumpMulti);
-            nmult = c.Get<float>(MfSetting.NextJumpMulti);
-            offsetMult = c.Get<float>(MfSetting.AngleOffset);
-            skipstacks = c.Get<bool>(MfSetting.SkipStackAngles);
+            var config = MfConfigManager.Instance;
+            jumpMult = config.Get<float>(MfSetting.JumpMulti);
+            nextMult = config.Get<float>(MfSetting.NextJumpMulti);
+            offsetMult = config.Get<float>(MfSetting.AngleOffset);
+            skipStacks = config.Get<bool>(MfSetting.SkipStackAngles);
         }
 
-        private bool same(OsuHitObject o1, OsuHitObject o2) => o1.StackedPosition == o2.StackedPosition || (skipstacks && o1.Position == o2.Position);
+        private bool isSame(OsuHitObject o1, OsuHitObject o2) => o1.StackedPosition == o2.StackedPosition || (skipStacks && o1.Position == o2.Position);
 
         private (float, bool) nextAngle()
         {
-            var obj = Beatmap.HitObjects;
+            var h = Beatmap.HitObjects;
 
-            for (var i = ObjectIndex + 1; i < obj.Count - 1; ++i)
+            for (int i = ObjectIndex + 1; i < h.Count - 1; ++i)
             {
-                var o = obj[i];
+                var o = h[i];
                 if (o is Slider s) return (s.GetStartAngle(), true);
-                if (!same(o, obj[i + 1])) return (o.StackedPosition.AngleRV(obj[i + 1].StackedPosition), false);
+                if (!isSame(o, h[i + 1])) return (o.StackedPosition.AngleRV(h[i + 1].StackedPosition), false);
             }
 
-            return ((obj[^1] as Slider)?.GetEndAngle()
+            return ((h[^1] as Slider)?.GetEndAngle()
                  ?? ((Start as Slider)?.GetEndAngle() ?? StartPos.AngleRV(last)) + MathF.PI, false);
         }
 
@@ -55,13 +55,13 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             var (a2, afs) = nextAngle();
             var a1 = (ObjectsDuring[ObjectIndex] ? s?.GetStartAngle() + MathF.PI : s?.GetEndAngle()) ?? (ObjectIndex == 0 ? a2 + MathF.PI : StartPos.AngleRV(last));
 
-            p1 = V2FromRad(a1, dst * jmult) + StartPos;
+            p1 = V2FromRad(a1, dst * jumpMult) + StartPos;
 
             var a = EndPos.AngleRV(StartPos);
             if (!afs && MathF.Abs(a2 - a) < offset) a2 = a2 - a < offset ? a - offset : a + offset;
-            p2 = V2FromRad(a2, dst * nmult) + EndPos;
+            p2 = V2FromRad(a2, dst * nextMult) + EndPos;
 
-            if (!(End is Slider) && !same(Start, End)) last = p2;
+            if (!(End is Slider) && !isSame(Start, End)) last = p2;
         }
 
         public override Vector2 Update(double time)

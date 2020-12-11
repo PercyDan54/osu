@@ -12,7 +12,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
     public class FlowerMover : BaseDanceMover
     {
         private readonly float mult;
-        private readonly float nmult;
+        private readonly float nextMult;
         private readonly float offsetMult;
         private float offset => MathF.PI * offsetMult;
 
@@ -25,22 +25,22 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public FlowerMover()
         {
-            var c = MfConfigManager.Instance;
-            mult = c.Get<float>(MfSetting.JumpMulti);
-            nmult = c.Get<float>(MfSetting.JumpMulti);
-            offsetMult = c.Get<float>(MfSetting.AngleOffset);
+            var config = MfConfigManager.Instance;
+            mult = config.Get<float>(MfSetting.JumpMulti);
+            nextMult = config.Get<float>(MfSetting.JumpMulti);
+            offsetMult = config.Get<float>(MfSetting.AngleOffset);
         }
 
         public override void OnObjChange()
         {
-            var dst = Vector2.Distance(StartPos, EndPos);
-            var scaled = mult * dst;
-            var next = nmult * dst;
+            float dist = Vector2.Distance(StartPos, EndPos);
+            float scaled = mult * dist;
+            float next = nextMult * dist;
 
-            var s1 = Start as Slider;
-            var s2 = End as Slider;
+            Slider s1 = Start as Slider;
+            Slider s2 = End as Slider;
 
-            var newAngle = offset * invert;
+            float newAngle = offset * invert;
 
             if (s1 != null && s2 != null)
             {

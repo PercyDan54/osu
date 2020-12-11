@@ -37,7 +37,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         private readonly MfConfigManager config;
 
         private int buttonIndex;
-        private readonly double frameTime;
+        private readonly double frameDelay;
 
         private OsuAction getAction(OsuHitObject h, OsuHitObject last)
         {
@@ -54,18 +54,18 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
             return buttonIndex % 2 == 0 ? OsuAction.LeftButton : OsuAction.RightButton;
         }
-        private static void calcSpinnerStartPosAndDirection(Vector2 prevPos, out Vector2 startPosition, out float spinnerDirection)
+        private static void calcSpinnerStartPosAndDirection(Vector2 prevPos, out Vector2 startPosition, out float spinnerDirection, float radius)
         {
             Vector2 spinCentreOffset = SPINNER_CENTRE - prevPos;
             float distFromCentre = spinCentreOffset.Length;
-            float distToTangentPoint = MathF.Sqrt(distFromCentre * distFromCentre - SPIN_RADIUS * SPIN_RADIUS);
+            float distToTangentPoint = MathF.Sqrt(distFromCentre * distFromCentre - radius * radius);
 
-            if (distFromCentre > SPIN_RADIUS)
+            if (distFromCentre > radius)
             {
                 // Previous cursor position was outside spin circle, set startPosition to the tangent point.
 
                 // Angle between centre offset and tangent point offset.
-                float angle = MathF.Asin(SPIN_RADIUS / distFromCentre);
+                float angle = MathF.Asin(radius / distFromCentre);
 
                 if (angle > 0)
                 {
@@ -90,13 +90,13 @@ namespace osu.Game.Rulesets.Osu.Replays
             else if (spinCentreOffset.Length > 0)
             {
                 // Previous cursor position was inside spin circle, set startPosition to the nearest point on spin circle.
-                startPosition = SPINNER_CENTRE - spinCentreOffset * (SPIN_RADIUS / spinCentreOffset.Length);
+                startPosition = SPINNER_CENTRE - spinCentreOffset * (radius / spinCentreOffset.Length);
                 spinnerDirection = 1;
             }
             else
             {
                 // Degenerate case where cursor position is exactly at the centre of the spin circle.
-                startPosition = SPINNER_CENTRE + new Vector2(0, -SPIN_RADIUS);
+                startPosition = SPINNER_CENTRE + new Vector2(0, -radius);
                 spinnerDirection = 1;
             }
         }
@@ -105,7 +105,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             : base(beatmap)
         {
             config = MfConfigManager.Instance;
-            frameTime = 1000.0 / config.Get<float>(MfSetting.ReplayFramerate);
+            frameDelay = 1000.0 / config.Get<float>(MfSetting.ReplayFramerate);
             spinRadiusStart = config.Get<float>(MfSetting.SpinnerRadius);
             spinRadiusEnd = config.Get<float>(MfSetting.SpinnerRadius2);
             mover = GetMover(config.Get<OsuDanceMover>(MfSetting.DanceMover));
@@ -132,11 +132,15 @@ namespace osu.Game.Rulesets.Osu.Replays
             mover.ObjectsDuring = objectsDuring;
         }
 
-        private void objectGenerate(OsuHitObject h, int idx)
+        private void movetoHitObject(OsuHitObject h, int idx)
         {
-            float sDirection = -1;
+            float spinDirection = -1;
             OsuAction action = getAction(h, Beatmap.HitObjects[idx == 0 ? idx : idx - 1]);
             Vector2 startPosition = h.StackedPosition;
+            Vector2 difference = startPosition - SPINNER_CENTRE;
+            float radius = difference.Length;
+            float angle = radius == 0 ? 0 : MathF.Atan2(difference.Y, difference.X);
+            double t;
             switch (h)
             {
                 case Slider slider:
@@ -144,10 +148,11 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                     if (objectsDuring[idx]) break;
 
-                    for (double t = slider.StartTime + frameTime; t < slider.EndTime; t += frameTime)
-                        if (slider.Distance / slider.RepeatCount <= 34 && slider.RepeatCount >= 1)
+                    for (double time = slider.StartTime + frameDelay; time < slider.EndTime; time += frameDelay)
+                        if (slider.Distance / slider.RepeatCount <= 38 && slider.RepeatCount >= 1)
                         {
-                            AddFrameToReplay(new OsuReplayFrame((int)h.StartTime, h.StackedPosition, action));
+                            AddFrameToReplay(new OsuReplayFrame(h.StartTime, h.StackedPosition, action));
+                            AddFrameToReplay(new OsuReplayFrame(h.StartTime + slider.Duration * 0.6, h.StackedPosition, action));
                         }
                         else
                         {
@@ -156,12 +161,8 @@ namespace osu.Game.Rulesets.Osu.Replays
                                 double speed = slider.Distance / slider.Duration;
                                 for (double j = FrameDelay; j < slider.Duration; j += FrameDelay)
                                 {
-
-                                    Vector2 difference1 = startPosition - SPINNER_CENTRE;
-                                    float radius1 = difference1.Length;
-                                    float angle1 = radius1 == 0 ? 0 : MathF.Atan2(difference1.Y, difference1.X);
                                     Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
-                                    Vector2 pos2 = pos + CirclePosition(ApplyModsToTime(j) / 12 * speed + angle1, 15);
+                                    Vector2 pos2 = pos + CirclePosition(ApplyModsToTime(j) / 12 * speed + angle, 15);
                                     AddFrameToReplay(new OsuReplayFrame((int)h.StartTime + j, pos2, action));
                                 }
                             }
@@ -177,28 +178,22 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                     break;
 
-                case Spinner s:
-                    calcSpinnerStartPosAndDirection(((OsuReplayFrame)Frames[^1]).Position, out startPosition, out sDirection);
-                    Vector2 difference = s.StackedPosition - SPINNER_CENTRE;
-
-                    float radius = difference.Length;
-                    float angle = radius == 0 ? 0 : MathF.Atan2(difference.Y, difference.X);
-
-                    double t1;
-                    double r = s.SpinsRequired > 3 ? spinRadiusStart : spinRadiusEnd;
+                case Spinner spinner:
+                    double r = spinner.SpinsRequired > 3 ? spinRadiusStart : spinRadiusEnd;
                     double r1;
-                    double rEndTime = s.StartTime + (s.Duration * 0.6);
-                    for (double j = s.StartTime + FrameDelay; j < s.EndTime; j += FrameDelay)
+                    double rEndTime = spinner.StartTime + (spinner.Duration * 0.6);
+                    calcSpinnerStartPosAndDirection(((OsuReplayFrame)Frames[^1]).Position, out startPosition, out spinDirection, (float)r);
+                    for (double j = spinner.StartTime + FrameDelay; j < spinner.EndTime; j += FrameDelay)
                     {
-                        t1 = ApplyModsToTime(j - s.StartTime) * sDirection;
-                        r1 = j > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(j, r, spinRadiusEnd, s.StartTime, rEndTime, Easing.In);
-                        Vector2 pos = SPINNER_CENTRE + CirclePosition(t1 / 20 + angle, r1);
+                        t = ApplyModsToTime(j - spinner.StartTime) * spinDirection;
+                        r1 = j > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(j, r, spinRadiusEnd, spinner.StartTime, rEndTime, Easing.In);
+                        Vector2 pos = SPINNER_CENTRE + CirclePosition(t / 20 + angle, r1);
                         AddFrameToReplay(new OsuReplayFrame((int)j, new Vector2(pos.X, pos.Y), action));
                     }
                     break;
 
-                case HitCircle c:
-                    AddFrameToReplay(new OsuReplayFrame(c.StartTime, c.StackedPosition, action));
+                case HitCircle circle:
+                    AddFrameToReplay(new OsuReplayFrame(circle.StartTime, circle.StackedPosition, action));
                     break;
 
                 default: return;
@@ -207,61 +202,61 @@ namespace osu.Game.Rulesets.Osu.Replays
 
         public override Replay Generate()
         {
-            var o = Beatmap.HitObjects[0];
-            AddFrameToReplay(new OsuReplayFrame(-100000, new Vector2(256, 500)));
-            AddFrameToReplay(new OsuReplayFrame(Beatmap.HitObjects[0].StartTime - 1500, new Vector2(256, 500)));
+            OsuHitObject hitObject = Beatmap.HitObjects[0];
+            AddFrameToReplay(new OsuReplayFrame(-1000, hitObject.StackedPosition));
+            AddFrameToReplay(new OsuReplayFrame(Beatmap.HitObjects[0].StartTime, hitObject.StackedPosition));
 
-            var bs = OsuPlayfield.BASE_SIZE;
+            Vector2 base_size = OsuPlayfield.BASE_SIZE;
 
-            var xf = bs.X / 0.8f * (4f / 3f);
-            var x0 = (bs.X - xf) / 2f;
-            var x1 = xf + x0;
+            float xf = base_size.X / 0.8f * (4f / 3f);
+            float x0 = (base_size.X - xf) / 2f;
+            float x1 = xf + x0;
 
-            var yf = bs.Y / 0.8f;
-            var y0 = (bs.Y - yf) / 2f;
-            var y1 = yf + y0;
+            float yf = base_size.Y / 0.8f;
+            float y0 = (base_size.Y - yf) / 2f;
+            float y1 = yf + y0;
 
             for (int i = 0; i < Beatmap.HitObjects.Count - 1; i++)
             {
-                o = Beatmap.HitObjects[i];
-                objectGenerate(o, i);
+                hitObject = Beatmap.HitObjects[i];
+                movetoHitObject(hitObject, i);
 
                 mover.ObjectIndex = i;
                 mover.OnObjChange();
 
-                for (double t = (objectsDuring[i] ? o.StartTime : o.GetEndTime()) + frameTime; t < mover.End.StartTime; t += frameTime)
+                for (double time = (objectsDuring[i] ? hitObject.StartTime : hitObject.GetEndTime()) + frameDelay; time < mover.End.StartTime; time += frameDelay)
                 {
-                    var v = mover.Update(t);
+                    Vector2 currentPosition = mover.Update(time);
 
                     if (config.Get<bool>(MfSetting.BorderBounce))
                     {
-                        if (v.X < x0) v.X = x0 - (v.X - x0);
-                        if (v.Y < y0) v.Y = y0 - (v.Y - y0);
+                        if (currentPosition.X < x0) currentPosition.X = x0 - (currentPosition.X - x0);
+                        if (currentPosition.Y < y0) currentPosition.Y = y0 - (currentPosition.Y - y0);
 
-                        if (v.X > x1)
+                        if (currentPosition.X > x1)
                         {
-                            var x = v.X - x0;
-                            var m = (int)(x / xf);
+                            float x = currentPosition.X - x0;
+                            int m = (int)(x / xf);
                             x %= xf;
                             x = m % 2 == 0 ? x : xf - x;
-                            v.X = x + x0;
+                            currentPosition.X = x + x0;
                         }
 
-                        if (v.Y > y1)
+                        if (currentPosition.Y > y1)
                         {
-                            var y = v.Y - y0;
-                            var m = (int)(y / yf);
+                            float y = currentPosition.Y - y0;
+                            float m = (int)(y / yf);
                             y %= yf;
                             y = m % 2 == 0 ? y : yf - y;
-                            v.Y = y + y0;
+                            currentPosition.Y = y + y0;
                         }
                     }
 
-                    AddFrameToReplay(new OsuReplayFrame(t, v));
+                    AddFrameToReplay(new OsuReplayFrame(time, currentPosition));
                 }
             }
 
-            objectGenerate(Beatmap.HitObjects[^1], Beatmap.HitObjects.Count - 1);
+            movetoHitObject(Beatmap.HitObjects[^1], Beatmap.HitObjects.Count - 1);
 
             return Replay;
         }
