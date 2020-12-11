@@ -135,7 +135,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "c53a455a0438d9e9c09056845bcd57a6";
+            VersionHash = "d3b1299b20f278ddfa4d716e1104763d";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
