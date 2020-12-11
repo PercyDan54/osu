@@ -132,7 +132,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             mover.ObjectsDuring = objectsDuring;
         }
 
-        private void movetoHitObject(OsuHitObject h, int idx)
+        private void moveToHitObject(OsuHitObject h, int idx)
         {
             float spinDirection = -1;
             OsuAction action = getAction(h, Beatmap.HitObjects[idx == 0 ? idx : idx - 1]);
@@ -219,7 +219,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             for (int i = 0; i < Beatmap.HitObjects.Count - 1; i++)
             {
                 hitObject = Beatmap.HitObjects[i];
-                movetoHitObject(hitObject, i);
+                moveToHitObject(hitObject, i);
 
                 mover.ObjectIndex = i;
                 mover.OnObjChange();
@@ -256,7 +256,7 @@ namespace osu.Game.Rulesets.Osu.Replays
                 }
             }
 
-            movetoHitObject(Beatmap.HitObjects[^1], Beatmap.HitObjects.Count - 1);
+            moveToHitObject(Beatmap.HitObjects[^1], Beatmap.HitObjects.Count - 1);
 
             return Replay;
         }
