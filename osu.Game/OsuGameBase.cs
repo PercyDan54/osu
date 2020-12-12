@@ -116,7 +116,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2020.1204.0";
+        public virtual string Version => "2020.1212.0";
 
         public OsuGameBase()
         {
@@ -374,6 +374,17 @@ namespace osu.Game
             {
                 if (importer.HandledExtensions.Contains(extension))
                     await importer.Import(paths);
+            }
+        }
+
+        public async Task Import(Stream stream, string filename)
+        {
+            var extension = Path.GetExtension(filename)?.ToLowerInvariant();
+
+            foreach (var importer in fileImporters)
+            {
+                if (importer.HandledExtensions.Contains(extension))
+                    await importer.Import(stream, Path.GetFileNameWithoutExtension(filename));
             }
         }
 
