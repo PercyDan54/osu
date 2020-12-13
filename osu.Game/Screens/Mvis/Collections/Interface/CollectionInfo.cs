@@ -111,14 +111,14 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
                                             {
                                                 Font = OsuFont.GetFont(size: 50),
                                                 RelativeSizeAxes = Axes.X,
-                                                Text = "未选择收藏夹",
+                                                Text = "No collection selected",
                                                 Truncate = true,
                                             },
                                             collectionBeatmapCount = new OsuSpriteText
                                             {
                                                 Font = OsuFont.GetFont(size: 38),
                                                 RelativeSizeAxes = Axes.X,
-                                                Text = "请先选择一个收藏夹!"
+                                                Text = "Select a collection first!"
                                             }
                                         }
                                     }

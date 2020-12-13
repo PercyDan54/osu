@@ -80,14 +80,14 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
         {
             base.LoadComplete();
 
-            collectionHelper.CurrentCollection.BindValueChanged(OnCurrentCollectionChanged);
+            collectionHelper.CurrentCollection.BindValueChanged(onCurrentCollectionChanged);
             selectedCollection.BindValueChanged(updateSelection);
             selectedPanel.BindValueChanged(updateSelectedPanel);
 
             RefreshCollectionList();
         }
 
-        private void OnCurrentCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
+        private void onCurrentCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
         {
             if (v.NewValue == null) return;
 

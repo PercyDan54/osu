@@ -100,7 +100,7 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
             };
 
             addBeatmapSets();
-            working.BindValueChanged(OnBeatmapChanged);
+            working.BindValueChanged(onBeatmapChanged);
             IsCurrent.BindValueChanged(v =>
             {
                 foreach (var d in fillFlow)
@@ -145,7 +145,7 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
             if (!scrollCache.IsValid) scrollToCurrent();
         }
 
-        private void OnBeatmapChanged(ValueChangedEvent<WorkingBeatmap> v)
+        private void onBeatmapChanged(ValueChangedEvent<WorkingBeatmap> v)
         {
             currentPiece?.InActive();
             currentPiece = null;

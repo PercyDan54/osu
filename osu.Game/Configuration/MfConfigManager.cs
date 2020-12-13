@@ -63,7 +63,7 @@ namespace osu.Game.Configuration
             Set(MfSetting.MvisBlue, 0, 0, 255);
 
             //Dance settings
-            Set(MfSetting.DanceMover, OsuDanceMover.Momentum);
+            Set(MfSetting.DanceMover, OsuDanceMover.Flower);
             Set(MfSetting.AngleOffset, 8f / 18f, 0f, 2f, 0.01f);
             Set(MfSetting.JumpMulti, 2f / 3f, 0f, 2f, 0.01f);
             Set(MfSetting.ReplayFramerate, 60f, 15f, 240f, 1f);
