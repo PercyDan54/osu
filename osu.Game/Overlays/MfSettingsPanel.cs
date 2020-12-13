@@ -10,7 +10,7 @@ namespace osu.Game.Overlays
 {
     public class MfSettingsPanel : SettingsSubPanel
     {
-        protected override Drawable CreateHeader() => new SettingsHeader("Mvis settings", "");
+        protected override Drawable CreateHeader() => new SettingsHeader("Custom osu! settings", "some extra cusom settings");
 
         [BackgroundDependencyLoader(permitNulls: true)]
         private void load()

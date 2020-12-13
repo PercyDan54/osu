@@ -9,16 +9,18 @@ using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterface;
 using osuTK;
 
-namespace osu.Game.Screens.Mvis.Modules.v2
+namespace osu.Game.Screens.Mvis.Collections.Interface
 {
-    public class CollectionPanel : OsuClickableContainer
+    public class CollectionPanel : CompositeDrawable
     {
         ///<summary>
         ///判断该panel所显示的BeatmapCollection
@@ -59,7 +61,7 @@ namespace osu.Game.Screens.Mvis.Modules.v2
             RelativeSizeAxes = Axes.X;
             AutoSizeAxes = Axes.Y;
             Masking = true;
-            CornerRadius = 12.5f;
+            CornerRadius = 10f;
             Alpha = 0;
 
             Collection = c;
@@ -129,7 +131,8 @@ namespace osu.Game.Screens.Mvis.Modules.v2
                                         {
                                             Font = OsuFont.GetFont(size: 30),
                                             RelativeSizeAxes = Axes.X,
-                                            Text = "???"
+                                            Text = "???",
+                                            Truncate = true,
                                         },
                                         collectionBeatmapCount = new OsuSpriteText
                                         {
@@ -148,7 +151,8 @@ namespace osu.Game.Screens.Mvis.Modules.v2
                             Child = new BeatmapThumbnailFlow(beatmapSets)
                         }
                     }
-                }
+                },
+                new HoverClickSounds()
             });
 
             thumbnailScroll.ScrollContent.RelativeSizeAxes = Axes.None;
@@ -159,9 +163,9 @@ namespace osu.Game.Screens.Mvis.Modules.v2
                 : ActiveState.Disabled;
 
             collectionName.Text = Collection.Name.Value;
-            collectionBeatmapCount.Text = $"{beatmapSets.Count}songs";
+            collectionBeatmapCount.Text = new LocalisedString("{0}首歌曲", beatmapSets.Count);
 
-            State.BindValueChanged(OnStateChanged, true);
+            State.BindValueChanged(onStateChanged, true);
 
             if (State.Value != ActiveState.Disabled)
                 colourProvider.HueColour.BindValueChanged(_ => State.TriggerChange());
@@ -174,7 +178,7 @@ namespace osu.Game.Screens.Mvis.Modules.v2
             this.FadeIn(300);
         }
 
-        private void OnStateChanged(ValueChangedEvent<ActiveState> v)
+        private void onStateChanged(ValueChangedEvent<ActiveState> v)
         {
             if (v.NewValue >= ActiveState.Selected)
             {
@@ -332,7 +336,6 @@ namespace osu.Game.Screens.Mvis.Modules.v2
                     TooltipContainer t = Children.Last() as TooltipContainer;
                     int remaining = beatmapSetList.Count - limit;
 
-                    t.TooltipText += $"and {remaining}songs";
                     t.AddRange(new Drawable[]
                     {
                         new Box

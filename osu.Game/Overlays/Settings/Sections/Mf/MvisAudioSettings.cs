@@ -26,7 +26,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 },
                 new SettingsCheckbox
                 {
-                    LabelText = "Adjust audio while adjusting playback rate",
+                    LabelText = "Adjust pitch with playback rate",
                     Current = config.GetBindable<bool>(MfSetting.MvisAdjustMusicWithFreq),
                     TooltipText = ""
                 },

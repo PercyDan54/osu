@@ -1,18 +1,18 @@
-using osu.Framework.Allocation;
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Game.Beatmaps;
 using System.Threading;
-using osu.Framework.Graphics.Shapes;
-using osu.Framework.Graphics.Colour;
+using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
+using osu.Game.Beatmaps;
 using osu.Game.Screens.Mvis.Objects;
 
-namespace osu.Game.Screens.Mvis.Modules.v2
+namespace osu.Game.Screens.Mvis.Collections.Interface
 {
-    public class BeatmapCover : Container
+    public class BeatmapCover : CompositeDrawable
     {
         private readonly WorkingBeatmap b;
 
@@ -55,6 +55,8 @@ namespace osu.Game.Screens.Mvis.Modules.v2
         public void UpdateBackground(WorkingBeatmap beatmap)
         {
             changeCoverTask?.Cancel();
+            if (IsDisposed) return;
+
             changeCoverTask = new CancellationTokenSource();
 
             if (beatmap == null)
@@ -77,14 +79,18 @@ namespace osu.Game.Screens.Mvis.Modules.v2
                     c.OnLoadComplete += d => d.FadeIn(300);
 
                     return c;
-                }, TimeBeforeWrapperLoad), newCover =>
+                }, TimeBeforeWrapperLoad)
+                {
+                    Anchor = Anchor,
+                    Origin = Origin
+                }, newCover =>
                 {
                     var oldCover = cover;
                     oldCover?.FadeOut(300);
                     oldCover?.Expire();
 
                     cover = newCover;
-                    Add(cover);
+                    AddInternal(cover);
                 }, changeCoverTask.Token);
             }
             else
@@ -101,14 +107,14 @@ namespace osu.Game.Screens.Mvis.Modules.v2
                     oldCover?.Expire();
 
                     cover = newCover;
-                    Add(cover);
+                    AddInternal(cover);
 
                     Schedule(() => cover?.FadeIn(300));
                 }, changeCoverTask.Token);
             }
         }
 
-        private class Cover : Sprite
+        public class Cover : Sprite
         {
             private readonly WorkingBeatmap b;
 

@@ -1,3 +1,4 @@
+using System.Collections.Specialized;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -5,12 +6,12 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Collections;
 using osu.Game.Graphics.Containers;
-using osu.Game.Screens.Mvis.BottomBar.Buttons;
+using osu.Game.Screens.Mvis.SideBar;
 using osuTK;
 
-namespace osu.Game.Screens.Mvis.Modules.v2
+namespace osu.Game.Screens.Mvis.Collections.Interface
 {
-    public class CollectionSelectPanel : Container, ISidebarContent
+    public class CollectionSelectPanel : CompositeDrawable, ISidebarContent
     {
         [Resolved]
         private CollectionManager collectionManager { get; set; }
@@ -27,17 +28,18 @@ namespace osu.Game.Screens.Mvis.Modules.v2
         private readonly OsuScrollContainer collectionScroll;
         private readonly CollectionInfo info;
 
-        public float ResizeWidth => 0.85f;
+        public float ResizeWidth => 0.8f;
+        public string Title => "Collections";
 
         public CollectionSelectPanel()
         {
             RelativeSizeAxes = Axes.Both;
 
-            Children = new Drawable[]
+            InternalChildren = new Drawable[]
             {
                 new Container
                 {
-                    Name = "Collection Select Screen",
+                    Name = "Collection select panel",
                     RelativeSizeAxes = Axes.Both,
                     Width = 0.3f,
                     Anchor = Anchor.TopLeft,
@@ -52,25 +54,14 @@ namespace osu.Game.Screens.Mvis.Modules.v2
                                 AutoSizeAxes = Axes.Y,
                                 RelativeSizeAxes = Axes.X,
                                 Spacing = new Vector2(10),
-                                Padding = new MarginPadding(25),
-                                Margin = new MarginPadding { Bottom = 40 }
+                                Padding = new MarginPadding(25)
                             }
-                        },
-                        new RefreshCollectionButton
-                        {
-                            Anchor = Anchor.BottomCentre,
-                            Origin = Anchor.BottomCentre,
-                            Size = new Vector2(90, 30),
-                            Text = "Refresh",
-                            NoIcon = true,
-                            Action = RefreshCollectionList,
-                            Margin = new MarginPadding(5),
                         }
                     }
                 },
                 info = new CollectionInfo
                 {
-                    Name = "Collection Info Page",
+                    Name = "收藏夹信息界面",
                     RelativeSizeAxes = Axes.Both,
                     Width = 0.7f,
                     Anchor = Anchor.TopRight,
@@ -79,18 +70,24 @@ namespace osu.Game.Screens.Mvis.Modules.v2
             };
         }
 
+        [BackgroundDependencyLoader]
+        private void load()
+        {
+            collectionManager.Collections.CollectionChanged += triggerRefresh;
+        }
+
         protected override void LoadComplete()
         {
             base.LoadComplete();
 
-            collectionHelper.CurrentCollection.BindValueChanged(onCurrentCollectionChanged);
+            collectionHelper.CurrentCollection.BindValueChanged(OnCurrentCollectionChanged);
             selectedCollection.BindValueChanged(updateSelection);
             selectedPanel.BindValueChanged(updateSelectedPanel);
 
             RefreshCollectionList();
         }
 
-        private void onCurrentCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
+        private void OnCurrentCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
         {
             if (v.NewValue == null) return;
 
@@ -133,8 +130,13 @@ namespace osu.Game.Screens.Mvis.Modules.v2
                 selectedpanel.State.Value = ActiveState.Active;
         }
 
+        private void triggerRefresh(object sender, NotifyCollectionChangedEventArgs e)
+            => RefreshCollectionList();
+
         public void RefreshCollectionList()
         {
+            if (collectionHelper == null) return;
+
             var oldCollection = collectionHelper.CurrentCollection.Value;
 
             //清空界面
@@ -176,9 +178,13 @@ namespace osu.Game.Screens.Mvis.Modules.v2
             collectionHelper.CurrentCollection.Value = selectedCollection.Value;
         }
 
-        private class RefreshCollectionButton : BottomBarButton
+        protected override void Dispose(bool isDisposing)
         {
-            protected override string BackgroundTextureName => "MButtonRefreshCollection-background";
+            //单线程下会有概率在这里报System.NullReferenceException
+            if (collectionManager != null)
+                collectionManager.Collections.CollectionChanged -= triggerRefresh;
+
+            base.Dispose(isDisposing);
         }
     }
 }

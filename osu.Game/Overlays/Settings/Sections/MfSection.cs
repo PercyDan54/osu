@@ -9,7 +9,7 @@ namespace osu.Game.Overlays.Settings.Sections
 {
     public class MfSection : SettingsSection
     {
-        public override string Header => "Custom osu";
+        public override string Header => "Custom";
         public override Drawable CreateIcon() => new SpriteIcon
         {
             Icon = FontAwesome.Solid.Lemon

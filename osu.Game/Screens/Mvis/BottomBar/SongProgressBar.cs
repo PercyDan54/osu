@@ -3,7 +3,6 @@ using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Screens.Mvis.Modules;
 
 namespace osu.Game.Screens.Mvis.BottomBar
 {
@@ -23,14 +22,11 @@ namespace osu.Game.Screens.Mvis.BottomBar
             Height = 5;
             Alpha = idle_alpha;
 
-            FillColour = colourProvider.Highlight1;
-            BackgroundColour = colourProvider.Light4.Opacity(0.5f);
-
             colourProvider.HueColour.BindValueChanged(_ =>
             {
                 FillColour = colourProvider.Highlight1;
                 BackgroundColour = colourProvider.Light4.Opacity(0.5f);
-            });
+            }, true);
         }
 
         protected override bool OnHover(HoverEvent e)
@@ -46,6 +42,6 @@ namespace osu.Game.Screens.Mvis.BottomBar
         }
 
         protected override void UpdateValue(float value) =>
-            Fill.ResizeWidthTo(value * UsableWidth, 300, Easing.OutQuint);
+            Fill.Width = value * UsableWidth;
     }
 }

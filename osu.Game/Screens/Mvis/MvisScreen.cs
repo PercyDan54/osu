@@ -5,7 +5,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
@@ -17,12 +16,12 @@ using osu.Game.Overlays;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Framework.Bindables;
+using osu.Framework.Configuration;
 using osu.Framework.Input.Events;
 using osu.Game.Input.Bindings;
 using osu.Framework.Input.Bindings;
 using osu.Game.Configuration;
 using osu.Game.Screens.Mvis.BottomBar;
-using osu.Game.Screens.Mvis.SideBar;
 using osu.Game.Screens.Mvis.Storyboard;
 using osu.Game.Input;
 using osu.Framework.Audio;
@@ -33,13 +32,14 @@ using osu.Game.Overlays.Settings;
 using osuTK.Input;
 using osu.Game.Screens.Backgrounds;
 using osu.Game.Graphics;
-using osu.Framework;
+using osu.Game.Screens.Mvis.Collections;
+using osu.Game.Screens.Mvis.Collections.Interface;
 using osu.Game.Users;
-using osu.Game.Screens.Mvis.Modules;
-using osu.Game.Screens.Mvis.Modules.v2;
-using osu.Framework.Graphics.Effects;
 using osu.Game.Screens.Mvis.Objects;
+using osu.Game.Screens.Mvis.SideBar;
+using osu.Game.Screens.Mvis.Skinning;
 using osu.Game.Skinning;
+using Sidebar = osu.Game.Screens.Mvis.SideBar.Sidebar;
 
 namespace osu.Game.Screens.Mvis
 {
@@ -50,9 +50,9 @@ namespace osu.Game.Screens.Mvis
     {
         private const float duration = 750;
 
-        protected override UserActivity InitialActivity => new UserActivity.InMvis();
         public override bool HideOverlaysOnEnter => true;
         private bool allowCursor;
+        private Bindable<bool> useUnicode;
         public override bool AllowBackButton => false;
         public override bool CursorVisible => allowCursor;
         public override bool AllowRateAdjustments => true;
@@ -76,7 +76,7 @@ namespace osu.Game.Screens.Mvis
         private InputManager inputManager { get; set; }
         private BottomBarContainer bottomBar;
         private Container gameplayContent;
-        private SidebarContainer sidebar;
+        private Sidebar sidebar;
         private BeatmapLogo beatmapLogo;
         private SongProgressBar progressBar;
         private BottomBarButton soloButton;
@@ -112,27 +112,29 @@ namespace osu.Game.Screens.Mvis
         private CollectionSelectPanel collectionPanel;
         private SidebarSettingsScrollContainer settingsScroll;
         private CustomColourProvider colourProvider;
-        private SidebarContentState oldSidebarState;
         private DependencyContainer dependencies;
-        private Box sidebarBg;
-        private Box sidebarBottomBox;
-        private SkinnableSprite skinnableForeground;
-        private SkinnableSprite skinnableBbBackground;
+        private FullScreenSkinnableComponent skinnableForeground;
+        private FullScreenSkinnableComponent skinnableBbBackground;
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
             dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
 
+        private readonly Bindable<UserActivity> activity = new Bindable<UserActivity>();
+
         public MvisScreen()
         {
             Padding = new MarginPadding { Horizontal = -HORIZONTAL_OVERFLOW_PADDING };
+
+            Activity.BindTo(activity);
         }
 
         [BackgroundDependencyLoader]
-        private void load(MfConfigManager config, IdleTracker idleTracker)
+        private void load(FrameworkConfigManager frameworkConfig, MfConfigManager config, IdleTracker idleTracker)
         {
             var iR = config.Get<float>(MfSetting.MvisInterfaceRed);
             var iG = config.Get<float>(MfSetting.MvisInterfaceGreen);
             var iB = config.Get<float>(MfSetting.MvisInterfaceBlue);
+            useUnicode = frameworkConfig.GetBindable<bool>(FrameworkSetting.ShowUnicode);
             dependencies.Cache(colourProvider = new CustomColourProvider(iR, iG, iB));
             dependencies.Cache(collectionHelper = new CollectionHelper());
 
@@ -158,8 +160,7 @@ namespace osu.Game.Screens.Mvis
                             Name = "Gameplay Background Elements Container",
                             Children = new Drawable[]
                             {
-                                bgTriangles = new BgTrianglesContainer(),
-                                sbLoader = new BackgroundStoryBoardLoader()
+                                bgTriangles = new BgTrianglesContainer()
                             }
                         },
                         gameplayContent = new Container
@@ -186,7 +187,7 @@ namespace osu.Game.Screens.Mvis
                         }
                     }
                 },
-                skinnableForeground = new ModifiedSkinnableSprite("MPlayer-foreground", confineMode: ConfineMode.ScaleToFill)
+                skinnableForeground = new FullScreenSkinnableComponent("MPlayer-foreground", confineMode: ConfineMode.ScaleToFill, defaultImplementation: _ => new PlaceHolder())
                 {
                     Name = "前景图",
                     RelativeSizeAxes = Axes.Both,
@@ -207,101 +208,15 @@ namespace osu.Game.Screens.Mvis
                             Origin = Anchor.BottomCentre,
                             Margin = new MarginPadding(115)
                         },
-                        sidebar = new SidebarContainer
+                        sidebar = new Sidebar
                         {
                             Name = "Sidebar Container",
-                            Padding = new MarginPadding { Right = HORIZONTAL_OVERFLOW_PADDING },
-                            Children = new Drawable[]
-                            {
-                                new Container
-                                {
-                                    Padding = new MarginPadding { Bottom = 50 },
-                                    RelativeSizeAxes = Axes.Both,
-                                    Children = new Drawable[]
-                                    {
-                                        sidebarBg = new Box
-                                        {
-                                            RelativeSizeAxes = Axes.Both,
-                                            Colour = colourProvider.Background5,
-                                            Alpha = 0.5f,
-                                        },
-                                        new Container
-                                        {
-                                            RelativeSizeAxes = Axes.Both,
-                                            Masking = true,
-                                            Child = new SkinnableSprite("MSidebar-background", confineMode: ConfineMode.ScaleToFill)
-                                            {
-                                                Name = "侧边栏背景图",
-                                                Anchor = Anchor.BottomRight,
-                                                Origin = Anchor.BottomRight,
-                                                ChildAnchor = Anchor.BottomRight,
-                                                ChildOrigin = Anchor.BottomRight,
-                                                RelativeSizeAxes = Axes.Both,
-                                                CentreComponent = false,
-                                                OverrideChildAnchor = true,
-                                            }
-                                        },
-                                        settingsScroll = new SidebarSettingsScrollContainer
-                                        {
-                                            RelativeSizeAxes = Axes.Both,
-                                            Child = new FillFlowContainer
-                                            {
-                                                AutoSizeAxes = Axes.Y,
-                                                RelativeSizeAxes = Axes.X,
-                                                Spacing = new Vector2(20),
-                                                Padding = new MarginPadding { Top = 10, Left = 5, Right = 5 },
-                                                Margin = new MarginPadding { Bottom = 10 },
-                                                Direction = FillDirection.Vertical,
-                                                Children = new Drawable[]
-                                                {
-                                                    new MfMvisSection(),
-                                                    new SettingsButton
-                                                    {
-                                                        Text = "Song Select",
-                                                        Action = () => this.Push(new MvisSongSelect())
-                                                    }
-                                                }
-                                            },
-                                        },
-                                        collectionPanel = new CollectionSelectPanel()
-                                    }
-                                },
-                                new Container
-                                {
-                                    RelativeSizeAxes = Axes.X,
-                                    Masking = true,
-                                    Height = 50,
-                                    Anchor = Anchor.BottomCentre,
-                                    Origin = Anchor.BottomCentre,
-                                    EdgeEffect = new EdgeEffectParameters
-                                    {
-                                        Type = EdgeEffectType.Shadow,
-                                        Colour = Colour4.Black.Opacity(0.6f),
-                                        Radius = 10,
-                                    },
-                                    Children = new Drawable[]
-                                    {
-                                        sidebarBottomBox = new Box
-                                        {
-                                            RelativeSizeAxes = Axes.Both,
-                                            Colour = colourProvider.Background4,
-                                        },
-                                        new SkinnableSprite("MSidebar-BottomBox", confineMode: ConfineMode.ScaleToFill)
-                                        {
-                                            Name = "侧边栏底部横条",
-                                            Anchor = Anchor.BottomRight,
-                                            Origin = Anchor.BottomRight,
-                                            ChildAnchor = Anchor.BottomRight,
-                                            ChildOrigin = Anchor.BottomRight,
-                                            RelativeSizeAxes = Axes.Both,
-                                            CentreComponent = false,
-                                            OverrideChildAnchor = true,
-                                        }
-                                    }
-                                },
-                            }
+                            Padding = new MarginPadding { Right = HORIZONTAL_OVERFLOW_PADDING }
                         },
-                        skinnableBbBackground = new ModifiedSkinnableSprite("MBottomBar-background", confineMode: ConfineMode.ScaleToFill)
+                        skinnableBbBackground = new FullScreenSkinnableComponent("MBottomBar-background",
+                            confineMode: ConfineMode.ScaleToFill,
+                            masking: true,
+                            defaultImplementation: _ => new PlaceHolder())
                         {
                             Name = "底栏背景图",
                             Anchor = Anchor.BottomCentre,
@@ -312,7 +227,7 @@ namespace osu.Game.Screens.Mvis
                             ChildOrigin = Anchor.BottomCentre,
                             Alpha = 0,
                             CentreComponent = false,
-                            OverrideChildAnchor = true,
+                            OverrideChildAnchor = true
                         },
                         bottomFillFlow = new FillFlowContainer
                         {
@@ -362,13 +277,7 @@ namespace osu.Game.Screens.Mvis
                                                                     ButtonIcon = FontAwesome.Solid.ArrowLeft,
                                                                     Action = this.Exit,
                                                                     TooltipText = "Exit",
-                                                                },
-                                                                new BottomBarButton
-                                                                {
-                                                                    ButtonIcon = FontAwesome.Regular.QuestionCircle,
-                                                                    Action = () => game?.OpenUrlExternally("https://matrix-feather.github.io/%E6%97%A5%E5%B8%B8/mfosu_mp_manual/"),
-                                                                    TooltipText = "Open help document (Chinese)"
-                                                                },
+                                                                }
                                                             }
                                                         },
                                                         new FillFlowContainer
@@ -391,12 +300,10 @@ namespace osu.Game.Screens.Mvis
                                                                 },
                                                                 songProgressButton = new SongProgressButton
                                                                 {
-                                                                    TooltipText = "Pause",
-                                                                    AutoSizeAxes = Axes.X,
+                                                                    TooltipText = "Toggle pause",
                                                                     Action = togglePause,
                                                                     Anchor = Anchor.Centre,
-                                                                    Origin = Anchor.Centre,
-                                                                    NoIcon = true,
+                                                                    Origin = Anchor.Centre
                                                                 },
                                                                 nextButton = new NextPrevButton
                                                                 {
@@ -423,7 +330,7 @@ namespace osu.Game.Screens.Mvis
                                                                 {
                                                                     ButtonIcon = FontAwesome.Solid.List,
                                                                     TooltipText = "Select collection",
-                                                                    Action = () => updateSidebarState(SidebarContentState.Collection)
+                                                                    Action = () => updateSidebarState(collectionPanel)
                                                                 },
                                                                 loopToggleButton = new ToggleLoopButton
                                                                 {
@@ -440,7 +347,7 @@ namespace osu.Game.Screens.Mvis
                                                                 sidebarToggleButton = new BottomBarButton
                                                                 {
                                                                     ButtonIcon = FontAwesome.Solid.Cog,
-                                                                    Action = () => updateSidebarState(SidebarContentState.Settings),
+                                                                    Action = () => updateSidebarState(settingsScroll),
                                                                     TooltipText = "Player settings",
                                                                 },
                                                             }
@@ -476,8 +383,33 @@ namespace osu.Game.Screens.Mvis
                 },
             };
 
-            sidebar.AddDrawableToList(settingsScroll);
-            sidebar.AddDrawableToList(collectionPanel);
+            sidebar.Add(settingsScroll = new SidebarSettingsScrollContainer
+            {
+                RelativeSizeAxes = Axes.Both,
+                Child = new FillFlowContainer
+                {
+                    AutoSizeAxes = Axes.Y,
+                    RelativeSizeAxes = Axes.X,
+                    Spacing = new Vector2(20),
+                    Padding = new MarginPadding { Top = 10, Left = 5, Right = 5 },
+                    Margin = new MarginPadding { Bottom = 10 },
+                    Direction = FillDirection.Vertical,
+                    Children = new Drawable[]
+                    {
+                        new MfMvisSection
+                        {
+                            Margin = new MarginPadding { Top = -15 },
+                            Padding = new MarginPadding(0)
+                        },
+                        new SettingsButton
+                        {
+                            Text = "Select song",
+                            Action = () => this.Push(new MvisSongSelect())
+                        }
+                    }
+                },
+            });
+            sidebar.Add(collectionPanel = new CollectionSelectPanel());
 
             isIdle.BindTo(idleTracker.IsIdle);
             config.BindWith(MfSetting.MvisBgBlur, bgBlur);
@@ -492,11 +424,6 @@ namespace osu.Game.Screens.Mvis
 
         protected override void LoadComplete()
         {
-            colourProvider.HueColour.BindValueChanged(v =>
-            {
-                sidebarBg.Colour = colourProvider.Background5;
-                sidebarBottomBox.Colour = colourProvider.Background4;
-            }, true);
             bgBlur.BindValueChanged(v => updateBackground(Beatmap.Value));
             contentAlpha.BindValueChanged(_ => updateIdleVisuals());
             idleBgDim.BindValueChanged(_ => updateIdleVisuals());
@@ -508,6 +435,7 @@ namespace osu.Game.Screens.Mvis
             });
 
             Beatmap.BindValueChanged(onBeatmapChanged, true);
+            useUnicode.BindValueChanged(onTitleChanged, true);
 
             musicSpeed.BindValueChanged(_ => applyTrackAdjustments());
             adjustFreq.BindValueChanged(_ => applyTrackAdjustments());
@@ -528,13 +456,6 @@ namespace osu.Game.Screens.Mvis
                 }
             }, true);
 
-            //collectionHelper.CurrentCollection.BindValueChanged(_ =>
-            //{
-            //    if (PlayFromCollection.Value
-            //            && !collectionHelper.currentCollectionContains(Beatmap.Value))
-            //        collectionHelper.PlayFirstBeatmap();
-            //});
-
             isIdle.BindValueChanged(v =>
             {
                 if (v.NewValue) tryHideOverlays();
@@ -553,22 +474,6 @@ namespace osu.Game.Screens.Mvis
                 }
             }, true);
 
-            sbLoader.NeedToHideTriangles.BindValueChanged(updateBgTriangles, true);
-            sbLoader.IsReady.BindValueChanged(v =>
-            {
-                switch (v.NewValue)
-                {
-                    case true:
-                        loadingSpinner.Hide();
-                        break;
-
-                    case false:
-                        loadingSpinner.Show();
-                        break;
-                }
-            }, true);
-
-            sbLoader.StoryboardReplacesBackground.BindValueChanged(_ => applyBackgroundBrightness());
             inputManager = GetContainingInputManager();
 
             progressBar.OnSeek = seekTo;
@@ -597,33 +502,27 @@ namespace osu.Game.Screens.Mvis
             }
         }
 
-        private void updateSidebarState(SidebarContentState state)
+        private void updateSidebarState(Drawable d)
         {
-            if (state == oldSidebarState || state == SidebarContentState.None)
+            if (d == null) sidebar.Hide();
+            if (!(d is ISidebarContent)) return;
+
+            var sc = (ISidebarContent)d;
+
+            //如果sc是上一个显示(mvis)或sc是侧边栏的当前显示并且侧边栏未隐藏
+            if (sc == sidebar.CurrentDisplay.Value && !sidebar.Hiding)
             {
-                oldSidebarState = SidebarContentState.None;
                 sidebar.Hide();
                 return;
             }
 
-            oldSidebarState = state;
-
-            switch (state)
-            {
-                case SidebarContentState.Settings:
-                    sidebar.ResizeFor(settingsScroll);
-                    break;
-
-                case SidebarContentState.Collection:
-                    sidebar.ResizeFor(collectionPanel);
-                    break;
-            }
+            sidebar.ShowComponent(d);
         }
 
         private void seekTo(double position)
         {
             musicController.SeekTo(position);
-            sbLoader.Seek(position);
+            sbLoader?.Seek(position);
         }
 
         protected override void Update()
@@ -659,7 +558,6 @@ namespace osu.Game.Screens.Mvis
 
             //停止beatmapLogo，取消故事版家在任务以及锁定变更
             beatmapLogo.StopResponseOnBeatmapChanges();
-            sbLoader.CancelAllTasks();
             lockChanges.Value = true;
 
             //背景层的动画
@@ -933,7 +831,7 @@ namespace osu.Game.Screens.Mvis
             if (auto)
             {
                 Background?.FadeColour(
-                    sbLoader.StoryboardReplacesBackground.Value ? Color4.Black : OsuColour.Gray(overlaysHidden ? idleBgDim.Value : 0.6f),
+                    (sbLoader?.StoryboardReplacesBackground.Value ?? false) ? Color4.Black : OsuColour.Gray(overlaysHidden ? idleBgDim.Value : 0.6f),
                     duration,
                     Easing.OutQuint);
             }
@@ -942,6 +840,8 @@ namespace osu.Game.Screens.Mvis
 
             sbLoader?.FadeColour(OsuColour.Gray(auto ? (overlaysHidden ? idleBgDim.Value : 0.6f) : brightness), duration, Easing.OutQuint);
         }
+
+        private WorkingBeatmap prevBeatmap;
 
         private void onBeatmapChanged(ValueChangedEvent<WorkingBeatmap> v)
         {
@@ -954,14 +854,43 @@ namespace osu.Game.Screens.Mvis
                 updateBackground(beatmap);
             });
 
-            sbLoader.UpdateStoryBoardAsync();
+            if (beatmap != prevBeatmap)
+            {
+                sbLoader?.FadeOut(BackgroundStoryBoardLoader.STORYBOARD_FADEOUT_DURATION, Easing.OutQuint).Expire();
+                sbLoader = null;
+                gameplayBackground.Add(sbLoader = new BackgroundStoryBoardLoader(beatmap));
+                reBind();
+            }
+
+            activity.Value = new UserActivity.InMvis(beatmap.BeatmapInfo, useUnicode.Value);
+            prevBeatmap = beatmap;
         }
 
-        private enum SidebarContentState
+        private void onTitleChanged(ValueChangedEvent<bool> v)
         {
-            None,
-            Settings,
-            Collection
+            activity.Value = new UserActivity.InMvis(Beatmap.Value.BeatmapInfo, v.NewValue);
+        }
+
+        private void reBind()
+        {
+            sbLoader.NeedToHideTriangles.BindValueChanged(updateBgTriangles, true);
+            sbLoader.State.BindValueChanged(v =>
+            {
+                switch (v.NewValue)
+                {
+                    case StoryboardState.Success:
+                    case StoryboardState.NotLoaded:
+                        loadingSpinner.Hide();
+                        break;
+
+                    case StoryboardState.Loading:
+                        loadingSpinner.Show();
+                        loadingSpinner.FadeColour(Color4.White, 300);
+                        break;
+                }
+            }, true);
+
+            sbLoader.StoryboardReplacesBackground.BindValueChanged(_ => applyBackgroundBrightness());
         }
     }
 }

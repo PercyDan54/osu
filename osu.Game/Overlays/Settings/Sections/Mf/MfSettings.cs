@@ -24,7 +24,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 },
                 new SettingsSlider<float>
                 {
-                    LabelText = "Blur song selection background",
+                    LabelText = "Song selection background blur",
                     Current = config.GetBindable<float>(MfSetting.SongSelectBgBlur),
                     DisplayAsPercentage = true,
                     KeyboardStep = 0.01f,

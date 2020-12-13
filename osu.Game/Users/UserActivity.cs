@@ -5,6 +5,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Rulesets;
+using osu.Game.Configuration;
 using osuTK.Graphics;
 
 namespace osu.Game.Users
@@ -80,7 +81,15 @@ namespace osu.Game.Users
         }
         public class InMvis : UserActivity
         {
-            public override string Status => "Listening to song";
+            public BeatmapInfo Beatmap { get; }
+            public bool Unicode { get; }
+
+            public InMvis(BeatmapInfo info, bool useUnicode)
+            {
+                Beatmap = info;
+                Unicode = useUnicode;
+            }
+            public override string Status => $@"Listening to {(Unicode ? Beatmap.BeatmapSet.Metadata.TitleUnicode : Beatmap.BeatmapSet.Metadata.Title)} - {(Unicode ? Beatmap.BeatmapSet.Metadata.ArtistUnicode : Beatmap.BeatmapSet.Metadata.Artist)}";
         }
     }
 }
