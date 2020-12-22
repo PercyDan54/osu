@@ -18,7 +18,6 @@ using osu.Framework.Input.Events;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Threading;
-using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Input;
@@ -40,11 +39,12 @@ namespace osu.Game.Screens.Menu
 
         public Action OnEdit;
         public Action OnExit;
+        public Action OnBeatmapListing;
         public Action OnSolo;
         public Action OnSettings;
-        public Action OnMulti;
-        public Action OnChart;
-        public Action OnBeatmapListing;
+        public Action OnMultiplayer;
+        public Action OnTimeshift;
+
         public Action OnMvisButton;
         public Action OnImportButton;
         public Action OnMfMenuButton;
@@ -82,11 +82,8 @@ namespace osu.Game.Screens.Menu
 
         private readonly Button backButton;
 
-        private readonly Bindable<bool> optui = new Bindable<bool>();
         private readonly List<Button> buttonsTopLevel = new List<Button>();
         private readonly List<Button> buttonsPlay = new List<Button>();
-        private readonly List<Button> buttonsP2C = new List<Button>();
-        private readonly List<Button> buttonsCustom = new List<Button>();
 
         private SampleChannel sampleBack;
 
@@ -128,29 +125,21 @@ namespace osu.Game.Screens.Menu
         private LoginOverlay loginOverlay { get; set; }
 
         [BackgroundDependencyLoader(true)]
-        private void load(AudioManager audio, IdleTracker idleTracker, GameHost host, MfConfigManager config)
+        private void load(AudioManager audio, IdleTracker idleTracker, GameHost host)
         {
-
             buttonsPlay.Add(new Button(@"solo", @"button-solo-select", FontAwesome.Solid.User, new Color4(102, 68, 204, 255), () => OnSolo?.Invoke(), WEDGE_WIDTH, Key.P));
-            buttonsPlay.Add(new Button(@"multi", @"button-generic-select", FontAwesome.Solid.Users, new Color4(94, 63, 186, 255), onMulti, 0, Key.M));
-            buttonsPlay.Add(new Button(@"chart", @"button-generic-select", OsuIcon.Charts, new Color4(80, 53, 160, 255), () => OnChart?.Invoke()));
-            buttonsPlay.Add(new Button(@"Mvis player", @"button-generic-select", FontAwesome.Solid.Play, new Color4(0, 86, 73, 255), () => OnMvisButton?.Invoke()));
-
+            buttonsPlay.Add(new Button(@"multi", @"button-generic-select", FontAwesome.Solid.Users, new Color4(94, 63, 186, 255), onMultiplayer, 0, Key.M));
+            buttonsPlay.Add(new Button(@"timeshift", @"button-generic-select", OsuIcon.Charts, new Color4(94, 63, 186, 255), onTimeshift, 0, Key.L));
             buttonsPlay.ForEach(b => b.VisibleState = ButtonSystemState.Play);
-
-            buttonsP2C.ForEach(b => b.VisibleState = ButtonSystemState.Play);
 
             buttonsTopLevel.Add(new Button(@"play", @"button-play-select", OsuIcon.Logo, new Color4(102, 68, 204, 255), () => State = ButtonSystemState.Play, WEDGE_WIDTH, Key.P));
             buttonsTopLevel.Add(new Button(@"osu!editor", @"button-generic-select", OsuIcon.EditCircle, new Color4(238, 170, 0, 255), () => OnEdit?.Invoke(), 0, Key.E));
             buttonsTopLevel.Add(new Button(@"osu!direct", @"button-direct-select", OsuIcon.ChevronDownCircle, new Color4(165, 204, 0, 255), () => OnBeatmapListing?.Invoke(), 0, Key.D));
 
-
             if (host.CanExit)
                 buttonsTopLevel.Add(new Button(@"exit", string.Empty, OsuIcon.CrossCircle, new Color4(238, 51, 153, 255), () => OnExit?.Invoke(), 0, Key.Q));
 
-            buttonArea.AddRange(buttonsCustom);
             buttonArea.AddRange(buttonsPlay);
-            buttonArea.AddRange(buttonsP2C);
             buttonArea.AddRange(buttonsTopLevel);
 
             buttonArea.ForEach(b =>
@@ -167,26 +156,9 @@ namespace osu.Game.Screens.Menu
             if (idleTracker != null) isIdle.BindTo(idleTracker.IsIdle);
 
             sampleBack = audio.Samples.Get(@"Menu/button-back-select");
-
-            config.BindWith(MfSetting.OptUI, optui);
-
-            optui.ValueChanged += _ => updateButtons();
-            StateChanged += _ => updateButtons();
-            updateButtons();
         }
 
-        private void updateButtons()
-        {
-            switch (optui.Value)
-            {
-                case true:
-                    if (state == ButtonSystemState.Play)
-                        buttonsP2C.ForEach(b => b.FadeIn(250));
-                    break;
-            }
-        }
-
-        private void onMulti()
+        private void onMultiplayer()
         {
             if (!api.IsLoggedIn)
             {
@@ -204,7 +176,28 @@ namespace osu.Game.Screens.Menu
                 return;
             }
 
-            OnMulti?.Invoke();
+            OnMultiplayer?.Invoke();
+        }
+
+        private void onTimeshift()
+        {
+            if (!api.IsLoggedIn)
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = "You gotta be logged in to multi 'yo!",
+                    Icon = FontAwesome.Solid.Globe,
+                    Activated = () =>
+                    {
+                        loginOverlay?.Show();
+                        return true;
+                    }
+                });
+
+                return;
+            }
+
+            OnTimeshift?.Invoke();
         }
 
         private void updateIdleState(bool isIdle)
