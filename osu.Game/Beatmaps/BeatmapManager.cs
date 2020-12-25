@@ -101,8 +101,8 @@ namespace osu.Game.Beatmaps
             trackStore = audioManager.GetTrackStore(Files.Store);
         }
 
-        protected override ArchiveDownloadRequest<BeatmapSetInfo> CreateDownloadRequest(BeatmapSetInfo set, bool minimiseDownloadSize) =>
-            new DownloadBeatmapSetRequest(set, minimiseDownloadSize);
+        protected override ArchiveDownloadRequest<BeatmapSetInfo> CreateDownloadRequest(BeatmapSetInfo set, bool UseSayobot, bool minimiseDownloadSize) =>
+            new DownloadBeatmapSetRequest(set, UseSayobot, minimiseDownloadSize);
 
         protected override bool ShouldDeleteArchive(string path) => Path.GetExtension(path)?.ToLowerInvariant() == ".osz";
 

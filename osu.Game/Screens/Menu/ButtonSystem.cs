@@ -45,6 +45,10 @@ namespace osu.Game.Screens.Menu
         public Action OnMultiplayer;
         public Action OnTimeshift;
 
+        public Action OnMvisButton;
+        public Action OnImportButton;
+        public Action OnMfMenuButton;
+
         public const float BUTTON_WIDTH = 140f;
         public const float WEDGE_WIDTH = 20;
 

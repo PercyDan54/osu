@@ -78,7 +78,7 @@ namespace osu.Game.Overlays.Settings
             public BuildDisplay(string version, bool isDebug)
             {
                 this.version = version;
-                this.isDebug = isDebug;
+                this.isDebug = false;
 
                 Content.RelativeSizeAxes = Axes.Y;
                 Content.AutoSizeAxes = AutoSizeAxes = Axes.X;

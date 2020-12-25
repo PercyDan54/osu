@@ -13,12 +13,12 @@ namespace osu.Game.Graphics.UserInterface
     {
         public Action<double> OnSeek;
 
-        private readonly Box fill;
+        protected readonly Box Fill;
         private readonly Box background;
 
         public Color4 FillColour
         {
-            set => fill.FadeColour(value, 150, Easing.OutQuint);
+            set => Fill.FadeColour(value, 150, Easing.OutQuint);
         }
 
         public Color4 BackgroundColour
@@ -53,13 +53,13 @@ namespace osu.Game.Graphics.UserInterface
                     Alpha = 0,
                     RelativeSizeAxes = Axes.Both
                 },
-                fill = new Box { RelativeSizeAxes = Axes.Y }
+                Fill = new Box { RelativeSizeAxes = Axes.Y }
             };
         }
 
         protected override void UpdateValue(float value)
         {
-            fill.Width = value * UsableWidth;
+            Fill.Width = value * UsableWidth;
         }
 
         protected override void OnUserChange(double value) => OnSeek?.Invoke(value);

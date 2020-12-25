@@ -14,7 +14,7 @@ namespace osu.Game.Rulesets.Osu.Mods
 {
     public class OsuModCinema : ModCinema<OsuHitObject>
     {
-        public override Type[] IncompatibleMods => base.IncompatibleMods.Append(typeof(OsuModAutopilot)).Append(typeof(OsuModSpunOut)).ToArray();
+        public override Type[] IncompatibleMods => base.IncompatibleMods.Append(typeof(OsuModAutopilotDance)).Append(typeof(OsuModSpunOut)).ToArray();
 
         public override Score CreateReplayScore(IBeatmap beatmap) => new Score
         {

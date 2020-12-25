@@ -14,11 +14,12 @@ namespace osu.Game.Rulesets.Osu.Mods
 {
     public class OsuModAutoplay : ModAutoplay<OsuHitObject>
     {
-        public override Type[] IncompatibleMods => base.IncompatibleMods.Append(typeof(OsuModAutopilot)).Append(typeof(OsuModSpunOut)).ToArray();
+        public override Type[] IncompatibleMods => base.IncompatibleMods.Append(typeof(OsuModAutopilotDance)).Append(typeof(OsuModAutopilot)).Append(typeof(OsuModSpunOut)).ToArray();
 
+        public override string Name => "Autoplay";
         public override Score CreateReplayScore(IBeatmap beatmap) => new Score
         {
-            ScoreInfo = new ScoreInfo { User = new User { Username = "Autoplay" } },
+            ScoreInfo = new ScoreInfo { User = new User { Username = "AutoPlay" } },
             Replay = new OsuAutoGenerator(beatmap).Generate()
         };
     }

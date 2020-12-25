@@ -41,7 +41,6 @@ using osu.Game.Scoring;
 using osu.Game.Skinning;
 using osuTK.Input;
 using RuntimeInfo = osu.Framework.RuntimeInfo;
-
 namespace osu.Game
 {
     /// <summary>
@@ -58,6 +57,7 @@ namespace osu.Game
         public bool UseDevelopmentServer { get; }
 
         protected OsuConfigManager LocalConfig;
+        protected MfConfigManager MfConfig;
 
         protected BeatmapManager BeatmapManager;
 
@@ -121,17 +121,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version
-        {
-            get
-            {
-                if (!IsDeployedBuild)
-                    return @"local " + (DebugUtils.IsDebugBuild ? @"debug" : @"release");
-
-                var version = AssemblyVersion;
-                return $@"{version.Major}.{version.Minor}.{version.Build}";
-            }
-        }
+        public virtual string Version => "2020.1212.0";
 
         public OsuGameBase()
         {
@@ -151,17 +141,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            try
-            {
-                using (var str = File.OpenRead(typeof(OsuGameBase).Assembly.Location))
-                    VersionHash = str.ComputeMD5Hash();
-            }
-            catch
-            {
-                // special case for android builds, which can't read DLLs from a packed apk.
-                // should eventually be handled in a better way.
-                VersionHash = $"{Version}-{RuntimeInfo.OS}".ComputeMD5Hash();
-            }
+            VersionHash = "d3b1299b20f278ddfa4d716e1104763d";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -174,10 +154,10 @@ namespace osu.Game
             dependencies.Cache(largeStore);
 
             dependencies.CacheAs(this);
-            dependencies.CacheAs(LocalConfig);
+            dependencies.Cache(LocalConfig);
+            dependencies.Cache(MfConfig);
 
             AddFont(Resources, @"Fonts/osuFont");
-
             AddFont(Resources, @"Fonts/Torus-Regular");
             AddFont(Resources, @"Fonts/Torus-Light");
             AddFont(Resources, @"Fonts/Torus-SemiBold");
@@ -378,6 +358,8 @@ namespace osu.Game
             LocalConfig ??= UseDevelopmentServer
                 ? new DevelopmentOsuConfigManager(Storage)
                 : new OsuConfigManager(Storage);
+
+            MfConfig ??= new MfConfigManager(Storage);
         }
 
         protected override Storage CreateStorage(GameHost host, Storage defaultStorage) => new OsuStorage(host, defaultStorage);

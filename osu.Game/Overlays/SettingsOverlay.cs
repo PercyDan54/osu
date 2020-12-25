@@ -21,6 +21,7 @@ namespace osu.Game.Overlays
 
         protected override IEnumerable<SettingsSection> CreateSections() => new SettingsSection[]
         {
+            new MfSection(createSubPanel(new MfSettingsPanel())),
             new GeneralSection(),
             new GraphicsSection(),
             new AudioSection(),
