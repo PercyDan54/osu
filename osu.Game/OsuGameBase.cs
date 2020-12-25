@@ -121,11 +121,11 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2020.1212.0";
+        public virtual string Version => "2020.1225.0";
 
         public OsuGameBase()
         {
-            UseDevelopmentServer = DebugUtils.IsDebugBuild;
+            UseDevelopmentServer = false;
             Name = @"osu!lazer";
         }
 
@@ -154,7 +154,7 @@ namespace osu.Game
             dependencies.Cache(largeStore);
 
             dependencies.CacheAs(this);
-            dependencies.Cache(LocalConfig);
+            dependencies.CacheAs(LocalConfig);
             dependencies.Cache(MfConfig);
 
             AddFont(Resources, @"Fonts/osuFont");
