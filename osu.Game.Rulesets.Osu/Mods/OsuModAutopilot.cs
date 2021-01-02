@@ -36,7 +36,7 @@ namespace osu.Game.Rulesets.Osu.Mods
 
         private int currentFrame;
 
-        public void Update(Playfield playfield)
+        public virtual void Update(Playfield playfield)
         {
             if (currentFrame == replayFrames.Count - 1) return;
 
@@ -53,7 +53,7 @@ namespace osu.Game.Rulesets.Osu.Mods
             // TODO: Implement the functionality to automatically spin spinners
         }
 
-        public void ApplyToDrawableRuleset(DrawableRuleset<OsuHitObject> drawableRuleset)
+        public virtual void ApplyToDrawableRuleset(DrawableRuleset<OsuHitObject> drawableRuleset)
         {
             gameplayClock = drawableRuleset.FrameStableClock;
 

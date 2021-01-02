@@ -20,6 +20,7 @@ using osu.Game.Screens.Edit;
 using osu.Game.Screens.OnlinePlay.Multiplayer;
 using osu.Game.Screens.OnlinePlay.Playlists;
 using osu.Game.Screens.Select;
+using osu.Game.Screens.Mvis;
 
 namespace osu.Game.Screens.Menu
 {
@@ -38,6 +39,7 @@ namespace osu.Game.Screens.Menu
         public override bool AllowRateAdjustments => false;
 
         private Screen songSelect;
+        private Screen mvisPlayer;
 
         private MenuSideFlashes sideFlashes;
 
@@ -107,6 +109,7 @@ namespace osu.Game.Screens.Menu
                             OnSolo = onSolo,
                             OnMultiplayer = () => this.Push(new Multiplayer()),
                             OnPlaylists = () => this.Push(new Playlists()),
+                            OnMvis = () => this.Push(consumeScreen(true)),
                             OnExit = confirmAndExit,
                         }
                     }
@@ -119,7 +122,7 @@ namespace osu.Game.Screens.Menu
                     Margin = new MarginPadding { Right = 15, Top = 5 }
                 },
                 exitConfirmOverlay?.CreateProxy() ?? Drawable.Empty()
-            });
+            }); ;
 
             buttons.StateChanged += state =>
             {
@@ -158,16 +161,25 @@ namespace osu.Game.Screens.Menu
         {
             if (songSelect == null)
                 LoadComponentAsync(songSelect = new PlaySongSelect());
+            if (mvisPlayer == null)
+                LoadComponentAsync(mvisPlayer = new MvisScreen());
         }
 
         public void LoadToSolo() => Schedule(onSolo);
 
-        private void onSolo() => this.Push(consumeSongSelect());
+        private void onSolo() => this.Push(consumeScreen(false));
 
-        private Screen consumeSongSelect()
+        private Screen consumeScreen(bool mvis)
         {
-            var s = songSelect;
-            songSelect = null;
+            var s = mvis ? mvisPlayer : songSelect;
+            if (mvis)
+            {
+                mvisPlayer = null;
+            }
+            else
+            {
+                songSelect = null;
+            }
             return s;
         }
 

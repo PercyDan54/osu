@@ -1,4 +1,4 @@
-﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
@@ -64,6 +64,12 @@ namespace osu.Game.Overlays
 
                 case OverlayColourScheme.Blue:
                     return 200 / 360f;
+
+                case OverlayColourScheme.Blue1:
+                    return 212 / 360f;
+
+                case OverlayColourScheme.Mvis:
+                    return 212 / 360f;
             }
         }
     }
@@ -75,6 +81,8 @@ namespace osu.Game.Overlays
         Orange,
         Green,
         Purple,
-        Blue
+        Blue,
+        Blue1,
+        Mvis
     }
 }

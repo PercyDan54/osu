@@ -15,11 +15,23 @@ using System.Collections.Generic;
 using osu.Framework.Graphics.Batches;
 using osu.Framework.Graphics.OpenGL.Vertices;
 using osu.Framework.Lists;
+using osu.Framework.Bindables;
+using osu.Game.Configuration;
+using osu.Game.Beatmaps;
+using osu.Framework.Extensions.IEnumerableExtensions;
 
 namespace osu.Game.Graphics.Backgrounds
 {
     public class Triangles : Drawable
     {
+        [Resolved]
+        private Bindable<WorkingBeatmap> b { get; set; }
+
+        private readonly Bindable<bool> trianglesEnabled = new Bindable<bool>();
+        private float extraY;
+        public bool IgnoreSettings;
+        public bool EnableBeatSync;
+        private float alpha_orig = 1;
         private const float triangle_size = 100;
         private const float base_velocity = 50;
 
@@ -106,15 +118,50 @@ namespace osu.Game.Graphics.Backgrounds
         }
 
         [BackgroundDependencyLoader]
-        private void load(ShaderManager shaders)
+        private void load(ShaderManager shaders, MfConfigManager config)
         {
             shader = shaders.Load(VertexShaderDescriptor.TEXTURE_2, FragmentShaderDescriptor.TEXTURE_ROUNDED);
+
+            alpha_orig = Alpha;
+            config.BindWith(MfSetting.TrianglesEnabled, trianglesEnabled);
+
+            trianglesEnabled.ValueChanged += _ => updateIcons();
+        }
+
+        private void updateFreq()
+        {
+            float[] sum = b.Value?.Track.CurrentAmplitudes.FrequencyAmplitudes.ToArray() ?? new float[256];
+            float totalSum = 0.25f;
+            bool IsKiai = b.Value?.Beatmap.ControlPointInfo.EffectPointAt(b.Value?.Track?.CurrentTime ?? 0).KiaiMode ?? false;
+
+            sum.ForEach(a => totalSum += a);
+
+            if (IsKiai) totalSum *= 1.5f;
+
+            extraY = totalSum;
+        }
+
+        private void updateIcons()
+        {
+            if (!IgnoreSettings)
+                switch (trianglesEnabled.Value)
+                {
+                    case true:
+                        this.FadeTo(alpha_orig, 250);
+                        break;
+
+                    case false:
+                        this.FadeOut(250);
+                        break;
+                }
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
             addTriangles(true);
+
+            updateIcons();
         }
 
         public float TriangleScale
@@ -138,6 +185,15 @@ namespace osu.Game.Graphics.Backgrounds
         {
             base.Update();
 
+            if (EnableBeatSync)
+            {
+                updateFreq();
+            }
+            else
+            {
+                extraY = 1;
+            }
+
             Invalidate(Invalidation.DrawNode);
 
             if (CreateNewTriangles)
@@ -152,7 +208,7 @@ namespace osu.Game.Graphics.Backgrounds
             // Since position is relative, the velocity needs to scale inversely with DrawHeight.
             // Since we will later multiply by the scale of individual triangles we normalize by
             // dividing by triangleScale.
-            float movedDistance = -elapsedSeconds * Velocity * base_velocity / (DrawHeight * triangleScale);
+            float movedDistance = (-elapsedSeconds * Velocity * base_velocity * extraY) / (DrawHeight * triangleScale);
 
             for (int i = 0; i < parts.Count; i++)
             {

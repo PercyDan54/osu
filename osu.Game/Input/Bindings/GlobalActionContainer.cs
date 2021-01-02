@@ -51,6 +51,17 @@ namespace osu.Game.Input.Bindings
 
             new KeyBinding(new[] { InputKey.Control, InputKey.Shift, InputKey.R }, GlobalAction.RandomSkin),
         };
+        public IEnumerable<KeyBinding> MvisControlKeyBindings => new[]
+{
+            new KeyBinding(InputKey.Left, GlobalAction.MvisMusicPrev),
+            new KeyBinding(InputKey.Right, GlobalAction.MvisMusicNext),
+            new KeyBinding(InputKey.Space, GlobalAction.MvisTogglePause),
+            new KeyBinding(InputKey.Tab, GlobalAction.MvisToggleOverlayLock),
+            new KeyBinding(InputKey.Menu, GlobalAction.MvisTogglePlayList),
+            new KeyBinding(InputKey.L, GlobalAction.MvisToggleTrackLoop),
+            new KeyBinding(InputKey.Enter, GlobalAction.MvisOpenInSongSelect),
+            new KeyBinding(InputKey.Slash, GlobalAction.MvisSelectCollection),
+        };
 
         public IEnumerable<KeyBinding> EditorKeyBindings => new[]
         {
@@ -68,7 +79,6 @@ namespace osu.Game.Input.Bindings
             new KeyBinding(new[] { InputKey.Control, InputKey.Tilde }, GlobalAction.QuickExit),
             new KeyBinding(new[] { InputKey.Control, InputKey.Plus }, GlobalAction.IncreaseScrollSpeed),
             new KeyBinding(new[] { InputKey.Control, InputKey.Minus }, GlobalAction.DecreaseScrollSpeed),
-            new KeyBinding(new[] { InputKey.Shift, InputKey.Tab }, GlobalAction.ToggleInGameInterface),
             new KeyBinding(InputKey.MouseMiddle, GlobalAction.PauseGameplay),
             new KeyBinding(InputKey.Space, GlobalAction.TogglePauseReplay),
             new KeyBinding(InputKey.Control, GlobalAction.HoldForHUD),
@@ -149,7 +159,7 @@ namespace osu.Game.Input.Bindings
         [Description("Select")]
         Select,
 
-        [Description("Quick exit (hold)")]
+        [Description("Quick exit (Hold)")]
         QuickExit,
 
         // Game-wide beatmap music controller keybindings
@@ -202,6 +212,15 @@ namespace osu.Game.Input.Bindings
         [Description("Pause / resume replay")]
         TogglePauseReplay,
 
+        MvisMusicPrev,
+        MvisMusicNext,
+        MvisSelectCollection,
+        MvisTogglePause,
+        MvisToggleOverlayLock,
+        MvisForceLockOverlayChanges,
+        MvisTogglePlayList,
+        MvisToggleTrackLoop,
+        MvisOpenInSongSelect,
         [Description("Toggle in-game interface")]
         ToggleInGameInterface,
     }

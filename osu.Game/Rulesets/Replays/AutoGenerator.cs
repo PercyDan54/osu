@@ -32,7 +32,7 @@ namespace osu.Game.Rulesets.Replays
         #region Constants
 
         // Shared amongst all modes
-        public const double KEY_UP_DELAY = 50;
+        public const double KEY_UP_DELAY = 15;
 
         #endregion
 

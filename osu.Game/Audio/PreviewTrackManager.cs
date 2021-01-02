@@ -13,6 +13,7 @@ using osu.Framework.Graphics;
 using osu.Framework.IO.Stores;
 using osu.Framework.Logging;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
 
 namespace osu.Game.Audio
 {
@@ -103,14 +104,24 @@ namespace osu.Game.Audio
                 this.beatmapSetInfo = beatmapSetInfo;
                 this.trackManager = trackManager;
             }
+            private string trackURI()
+            {
+                switch (mfConfig.Get<bool>(MfSetting.UseSayobot))
+                {
+                    case true:
+                        return $@"https://a.sayobot.cn/preview/{beatmapSetInfo?.OnlineBeatmapSetID}.mp3";
 
+                    case false:
+                        return $@"https://b.ppy.sh/preview/{beatmapSetInfo?.OnlineBeatmapSetID}.mp3";
+                }
+            }
+
+            protected override Track GetTrack() => trackManager.Get($@"{trackURI()}");
             protected override void LoadComplete()
             {
                 base.LoadComplete();
                 Logger.Log($"A {nameof(PreviewTrack)} was created without a containing {nameof(IPreviewTrackOwner)}. An owner should be added for correct behaviour.");
             }
-
-            protected override Track GetTrack() => trackManager.Get($"https://b.ppy.sh/preview/{beatmapSetInfo?.OnlineBeatmapSetID}.mp3");
         }
 
         private class PreviewTrackStore : AudioCollectionManager<AdjustableAudioComponent>, ITrackStore
