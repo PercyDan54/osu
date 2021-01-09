@@ -1,7 +1,6 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.ComponentModel;
 using osu.Framework.Configuration;
 using osu.Framework.Platform;
 
@@ -27,7 +26,6 @@ namespace osu.Game.Configuration
 
             //UI Settings
             Set(MfSetting.TrianglesEnabled, true);
-            Set(MfSetting.SongSelectBgBlur, 0.2f, 0f, 1f);
 
             //Gameplay Settings
             Set(MfSetting.SamplePlaybackGain, 1f, 0f, 20f);
@@ -65,7 +63,7 @@ namespace osu.Game.Configuration
             Set(MfSetting.DanceMover, OsuDanceMover.Momentum);
             Set(MfSetting.AngleOffset, 8f / 18f, 0f, 2f, 0.01f);
             Set(MfSetting.JumpMulti, 2f / 3f, 0f, 2f, 0.01f);
-            Set(MfSetting.ReplayFramerate, 60f, 15f, 240f, 1f);
+            Set(MfSetting.ReplayFramerate, 45f, 15f, 240f, 1f);
             Set(MfSetting.SpinnerRadiusStart, 235f, 10f, 350f, 1f);
             Set(MfSetting.SpinnerRadiusEnd, 15f, 10f, 250f, 1f);
             Set(MfSetting.NextJumpMulti, 2f / 3f, 0f, 2f, 0.01f);
@@ -105,7 +103,6 @@ namespace osu.Game.Configuration
         MvisInterfaceGreen,
         MvisInterfaceBlue,
         SamplePlaybackGain,
-        SongSelectBgBlur,
         ReplayFramerate,
         SpinnerRadiusStart,
         SpinnerRadiusEnd,

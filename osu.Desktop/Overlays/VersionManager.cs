@@ -26,9 +26,11 @@ namespace osu.Desktop.Overlays
 
             Alpha = 0;
 
+            FillFlowContainer mainFill;
+
             Children = new Drawable[]
             {
-                new FillFlowContainer
+                mainFill = new FillFlowContainer
                 {
                     AutoSizeAxes = Axes.Both,
                     Direction = FillDirection.Vertical,
@@ -54,20 +56,6 @@ namespace osu.Desktop.Overlays
                                     Text = game.Version
                                 },
                             }
-                        },
-                        new OsuSpriteText
-                        {
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre,
-                            Font = OsuFont.Numeric.With(size: 12),
-                            Colour = colours.Yellow,
-                            Text = @"Development Build"
-                        },
-                        new Sprite
-                        {
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre,
-                            Texture = textures.Get(@"Menu/dev-build-footer"),
                         },
                     }
                 }

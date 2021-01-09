@@ -12,7 +12,7 @@ namespace osu.Game.Overlays.Settings.Sections
         public override string Header => "Custom";
         public override Drawable CreateIcon() => new SpriteIcon
         {
-            Icon = FontAwesome.Solid.Lemon
+            Icon = FontAwesome.Solid.Bars
         };
 
         public MfSection(MfSettingsPanel mfpanel)

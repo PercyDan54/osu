@@ -22,13 +22,6 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     TooltipText = "Disable this if you can't download beatmaps",
                     Current = config.GetBindable<bool>(MfSetting.UseSayobot)
                 },
-                new SettingsSlider<float>
-                {
-                    LabelText = "Song selection background blur",
-                    Current = config.GetBindable<float>(MfSetting.SongSelectBgBlur),
-                    DisplayAsPercentage = true,
-                    KeyboardStep = 0.01f,
-                },
             };
         }
     }

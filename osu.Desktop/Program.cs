@@ -19,6 +19,7 @@ namespace osu.Desktop
     {
         [STAThread]
         public static int Main(string[] args)
+
         {
             // Back up the cwd before DesktopGameHost changes it
             var cwd = Environment.CurrentDirectory;
