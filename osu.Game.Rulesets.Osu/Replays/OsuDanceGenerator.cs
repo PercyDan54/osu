@@ -207,7 +207,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         public Replay GenerateReplay(bool sliderDance)
         {
             OsuHitObject hitObject = Beatmap.HitObjects[0];
-            AddFrameToReplay(new OsuReplayFrame(-1000, hitObject.StackedPosition));
+            AddFrameToReplay(new OsuReplayFrame(-10000, hitObject.StackedPosition));
             AddFrameToReplay(new OsuReplayFrame(Beatmap.HitObjects[0].StartTime, hitObject.StackedPosition));
 
             Vector2 base_size = OsuPlayfield.BASE_SIZE;

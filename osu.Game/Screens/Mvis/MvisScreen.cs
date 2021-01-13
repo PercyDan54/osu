@@ -886,11 +886,8 @@ namespace osu.Game.Screens.Mvis
                         break;
 
                     case StoryboardState.Loading:
-                        Schedule(() =>
-                        {
-                            loadingSpinner.Show();
-                            loadingSpinner.FadeColour(Color4.White, 300);
-                        });
+                        loadingSpinner.Show();
+                        loadingSpinner.FadeColour(Color4.White, 300);
                         break;
                 }
             }, true);
