@@ -64,6 +64,7 @@ namespace osu.Game.Screens.Select
                 removeAutoModOnResume = false;
             }
         }
+
         private void openInMvis() => this.Push(new MvisScreen());
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -100,13 +101,11 @@ namespace osu.Game.Screens.Select
 
                 var mods = Mods.Value;
 
-                if (mods.All(m => m.GetType() != autoplayMod.GetType()))
-                {
-                    Mods.Value = mods.Append(autoplayMod).ToArray();
-                    removeAutoModOnResume = true;
-                }
+                if (mods.Any(m => m is ModAutoplay)) goto Play;
+                Mods.Value = mods.Append(autoplayMod).ToArray();
+                removeAutoModOnResume = true;
             }
-
+        Play:
             SampleConfirm?.Play();
 
             this.Push(player = new PlayerLoader(() => new Player()));

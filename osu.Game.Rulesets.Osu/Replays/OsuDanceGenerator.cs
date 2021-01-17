@@ -55,6 +55,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
             return buttonIndex % 2 == 0 ? OsuAction.LeftButton : OsuAction.RightButton;
         }
+
         private static void calcSpinnerStartPosAndDirection(Vector2 prevPos, out Vector2 startPosition, out float spinnerDirection, float radius)
         {
             Vector2 spinCentreOffset = SPINNER_CENTRE - prevPos;
