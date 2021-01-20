@@ -9,7 +9,7 @@ using static osu.Game.Rulesets.Osu.Replays.Movers.MoverUtilExtensions;
 
 namespace osu.Game.Rulesets.Osu.Replays.Movers
 {
-    public class MomentumMover : BaseDanceMover
+    public class MomentumMover : DanceMover
     {
         private readonly float jumpMult;
         private readonly float nextMult;
@@ -44,7 +44,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             }
 
             return ((h[^1] as Slider)?.GetEndAngle()
-                 ?? ((Start as Slider)?.GetEndAngle() ?? StartPos.AngleRV(last)) + MathF.PI, false);
+                    ?? ((Start as Slider)?.GetEndAngle() ?? StartPos.AngleRV(last)) + MathF.PI, false);
         }
 
         public override void OnObjChange()
@@ -72,13 +72,13 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             // cubic bézier curve
             return new Vector2(
                 r * r * r * StartX
-              + r * r * t * p1.X * 3
-              + r * t * t * p2.X * 3
-              + t * t * t * EndX,
+                + r * r * t * p1.X * 3
+                + r * t * t * p2.X * 3
+                + t * t * t * EndX,
                 r * r * r * StartY
-              + r * r * t * p1.Y * 3
-              + r * t * t * p2.Y * 3
-              + t * t * t * EndY
+                + r * r * t * p1.Y * 3
+                + r * t * t * p2.Y * 3
+                + t * t * t * EndY
             );
         }
     }
