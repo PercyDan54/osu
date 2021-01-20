@@ -38,7 +38,6 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 using osu.Game.Skinning;
 using osuTK.Input;
-using RuntimeInfo = osu.Framework.RuntimeInfo;
 
 namespace osu.Game
 {
@@ -120,7 +119,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.109.0";
+        public virtual string Version => "2021.118.1";
 
         public OsuGameBase()
         {
@@ -140,7 +139,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "4adb782fb434a85913b7597239ad7bac";
+            VersionHash = "3230be5cbd81cdae3f11a727d027a2b2";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -400,15 +399,14 @@ namespace osu.Game
             }
         }
 
-        public virtual async Task Import(Stream stream, string filename)
+        public virtual async Task Import(params ImportTask[] tasks)
         {
-            var extension = Path.GetExtension(filename)?.ToLowerInvariant();
-
-            foreach (var importer in fileImporters)
+            var tasksPerExtension = tasks.GroupBy(t => Path.GetExtension(t.Path).ToLowerInvariant());
+            await Task.WhenAll(tasksPerExtension.Select(taskGroup =>
             {
-                if (importer.HandledExtensions.Contains(extension))
-                    await importer.Import(stream, Path.GetFileNameWithoutExtension(filename));
-            }
+                var importer = fileImporters.FirstOrDefault(i => i.HandledExtensions.Contains(taskGroup.Key));
+                return importer?.Import(taskGroup.ToArray()) ?? Task.CompletedTask;
+            }));
         }
 
         public IEnumerable<string> HandledExtensions => fileImporters.SelectMany(i => i.HandledExtensions);

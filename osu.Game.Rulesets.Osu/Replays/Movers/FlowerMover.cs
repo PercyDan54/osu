@@ -9,7 +9,7 @@ using static osu.Game.Rulesets.Osu.Replays.Movers.MoverUtilExtensions;
 
 namespace osu.Game.Rulesets.Osu.Replays.Movers
 {
-    public class FlowerMover : BaseDanceMover
+    public class FlowerMover : DanceMover
     {
         private readonly float mult;
         private readonly float nextMult;
@@ -84,13 +84,13 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
             return new Vector2(
                 r * r * r * StartX
-              + r * r * t * p1.X * 3
-              + r * t * t * p2.X * 3
-              + t * t * t * EndX,
+                + r * r * t * p1.X * 3
+                + r * t * t * p2.X * 3
+                + t * t * t * EndX,
                 r * r * r * StartY
-              + r * r * t * p1.Y * 3
-              + r * t * t * p2.Y * 3
-              + t * t * t * EndY
+                + r * r * t * p1.Y * 3
+                + r * t * t * p2.Y * 3
+                + t * t * t * EndY
             );
         }
     }

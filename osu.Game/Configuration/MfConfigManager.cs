@@ -63,7 +63,7 @@ namespace osu.Game.Configuration
             Set(MfSetting.DanceMover, OsuDanceMover.Momentum);
             Set(MfSetting.AngleOffset, 8f / 18f, 0f, 2f, 0.01f);
             Set(MfSetting.JumpMulti, 2f / 3f, 0f, 2f, 0.01f);
-            Set(MfSetting.ReplayFramerate, 45f, 15f, 240f, 1f);
+            Set(MfSetting.ReplayFramerate, 65f, 15f, 240f, 1f);
             Set(MfSetting.SpinnerRadiusStart, 235f, 10f, 350f, 1f);
             Set(MfSetting.SpinnerRadiusEnd, 15f, 10f, 250f, 1f);
             Set(MfSetting.NextJumpMulti, 2f / 3f, 0f, 2f, 0.01f);

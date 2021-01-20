@@ -1,4 +1,4 @@
-version: 2021.109.{build}
+version: 2021.118.{build}
 pull_requests:
   do_not_increment_build_number: true
 skip_tags: true
@@ -11,7 +11,14 @@ build_script:
     dotnet build osu.Desktop -c Release -r linux-x64
 test: off
 artifacts:
-- path: ./osu.Desktop/bin/Release/netcoreapp3.1/linux-x64
+- path: ./osu.Desktop/bin/Release/net5.0/linux-x64
   name: osu-linux
-- path: ./osu.Desktop/bin/Release/netcoreapp3.1/win-x64
+- path: ./osu.Desktop/bin/Release/net5.0/win-x64
   name: osu-win
+deploy:
+- provider: GitHub
+  tag: 2021.118.1
+  auth_token:
+    secure: wBUeC7f0SGZTu01Bl50RTSas9yizhxdAeqofugDSTpOoZFXOyzvP+X2OOAnaqIWz
+  repository: PercyDan54/osu
+  artifact: osu-linux, osu-win
