@@ -174,6 +174,7 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                 case Spinner spinner:
                     if(spinner.SpinsRequired == 0) return;
+
                     double r = spinner.SpinsRequired > 3 ? spinRadiusStart : spinRadiusEnd;
                     double r1;
                     double rEndTime = spinner.StartTime + spinner.Duration * 0.6;
@@ -301,7 +302,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         {
             get
             {
-                if (Beatmap.HitObjects[ObjectIndex] is Spinner spinner && spinner.SpinsRequired == 0) return Beatmap.HitObjects[ObjectIndex - 1];
+                if (Beatmap.HitObjects[ObjectIndex] is Spinner spinner && spinner.SpinsRequired == 0) return Beatmap.HitObjects[ObjectIndex == 0 ? ObjectIndex : ObjectIndex - 1];
 
                 return Beatmap.HitObjects[ObjectIndex];
             }
@@ -311,7 +312,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         {
             get
             {
-                if (Beatmap.HitObjects[ObjectIndex + 1] is Spinner spinner && spinner.SpinsRequired == 0) return Beatmap.HitObjects[ObjectIndex];
+                if (Beatmap.HitObjects[ObjectIndex + 1] is Spinner spinner && spinner.SpinsRequired == 0) return Beatmap.HitObjects[ObjectIndex == Beatmap.HitObjects.Count ? ObjectIndex - 1 : ObjectIndex];
 
                 return Beatmap.HitObjects[ObjectIndex + 1];
             }
