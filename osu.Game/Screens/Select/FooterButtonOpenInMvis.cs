@@ -3,7 +3,6 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
-using osu.Game.Graphics;
 using osuTK.Graphics;
 
 namespace osu.Game.Screens.Select
@@ -11,9 +10,8 @@ namespace osu.Game.Screens.Select
     public class FooterButtonOpenInMvis : FooterButton
     {
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours)
+        private void load()
         {
-            Alpha = 0;
             SelectedColour = new Color4(0, 86, 73, 255);
             DeselectedColour = SelectedColour.Opacity(0.5f);
             Text = @"Open in Mvis";

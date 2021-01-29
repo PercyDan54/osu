@@ -119,7 +119,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.118.1";
+        public virtual string Version => "2021.129.0";
 
         public OsuGameBase()
         {
@@ -305,6 +305,7 @@ namespace osu.Game
 
             if (!SelectedMods.Disabled)
                 SelectedMods.Value = Array.Empty<Mod>();
+
             AvailableMods.Value = dict;
         }
 

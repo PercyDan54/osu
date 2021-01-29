@@ -39,7 +39,7 @@ namespace osu.Game.Configuration
             Set(MfSetting.MvisIdleBgDim, 0.6f, 0f, 1f);
             Set(MfSetting.MvisEnableBgTriangles, true);
             Set(MfSetting.MvisEnableSBOverlayProxy, true);
-            Set(MfSetting.MvisAdjustMusicWithFreq, true);
+            Set(MfSetting.MvisAdjustMusicWithFreq, false);
             Set(MfSetting.MvisMusicSpeed, 1.0, 0.1, 2.0);
             Set(MfSetting.MvisEnableNightcoreBeat, false);
             Set(MfSetting.MvisPlayFromCollection, false);

@@ -66,6 +66,7 @@ namespace osu.Game.Screens.Select
         }
 
         private void openInMvis() => this.Push(new MvisScreen());
+	
         protected override bool OnKeyDown(KeyDownEvent e)
         {
             switch (e.Key)
