@@ -53,7 +53,6 @@ namespace osu.Game.Screens.Mvis
 
         public override bool HideOverlaysOnEnter => true;
         private bool allowCursor;
-        private Bindable<bool> useUnicode;
         public override bool AllowBackButton => false;
         public override bool CursorVisible => allowCursor;
         public override bool AllowRateAdjustments => true;
@@ -101,6 +100,7 @@ namespace osu.Game.Screens.Mvis
         private readonly BindableBool adjustFreq = new BindableBool();
         private readonly BindableBool nightcoreBeat = new BindableBool();
         private readonly BindableBool playFromCollection = new BindableBool();
+        private readonly BindableBool useUnicode = new BindableBool();
         private bool overlaysHidden;
         private FillFlowContainer bottomFillFlow;
         private readonly BindableBool lockChanges = new BindableBool();
@@ -135,7 +135,6 @@ namespace osu.Game.Screens.Mvis
             var iR = config.Get<float>(MfSetting.MvisInterfaceRed);
             var iG = config.Get<float>(MfSetting.MvisInterfaceGreen);
             var iB = config.Get<float>(MfSetting.MvisInterfaceBlue);
-            useUnicode = frameworkConfig.GetBindable<bool>(FrameworkSetting.ShowUnicode);
             dependencies.Cache(colourProvider = new CustomColourProvider(iR, iG, iB));
             dependencies.Cache(collectionHelper = new CollectionHelper());
 
@@ -413,6 +412,7 @@ namespace osu.Game.Screens.Mvis
             sidebar.Add(collectionPanel = new CollectionSelectPanel());
 
             isIdle.BindTo(idleTracker.IsIdle);
+            frameworkConfig.BindWith(FrameworkSetting.ShowUnicode, useUnicode);
             config.BindWith(MfSetting.MvisBgBlur, bgBlur);
             config.BindWith(MfSetting.MvisIdleBgDim, idleBgDim);
             config.BindWith(MfSetting.MvisContentAlpha, contentAlpha);
@@ -436,7 +436,7 @@ namespace osu.Game.Screens.Mvis
             });
 
             Beatmap.BindValueChanged(onBeatmapChanged, true);
-            useUnicode.BindValueChanged(onTitleChanged, true);
+            useUnicode.BindValueChanged(onUseUnicodeChanged);
 
             musicSpeed.BindValueChanged(_ => applyTrackAdjustments());
             adjustFreq.BindValueChanged(_ => applyTrackAdjustments());
@@ -867,7 +867,7 @@ namespace osu.Game.Screens.Mvis
             prevBeatmap = beatmap;
         }
 
-        private void onTitleChanged(ValueChangedEvent<bool> v)
+        private void onUseUnicodeChanged(ValueChangedEvent<bool> v)
         {
             activity.Value = new UserActivity.InMvis(Beatmap.Value.BeatmapInfo, v.NewValue);
         }
