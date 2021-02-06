@@ -141,9 +141,9 @@ namespace osu.Game.Rulesets.Osu.Replays
             OsuAction action = getAction(h, last);
             Vector2 startPosition = h.StackedPosition;
             Vector2 difference = startPosition - SPINNER_CENTRE;
+            var endFrame = new OsuReplayFrame(h.GetEndTime() + KEY_UP_DELAY, h.StackedEndPosition);
             float radius = difference.Length;
             float angle = radius == 0 ? 0 : MathF.Atan2(difference.Y, difference.X);
-            double t;
 
             switch (h)
             {
@@ -152,22 +152,14 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                     if (objectsDuring[idx]) break;
 
-                    if (slider.Distance / slider.RepeatCount <= 38 && slider.RepeatCount >= 1)
-                    {
-                        AddFrameToReplay(new OsuReplayFrame(h.StartTime, h.StackedPosition, action));
-                        AddFrameToReplay(new OsuReplayFrame(h.StartTime + slider.Duration * 0.6, h.StackedPosition, action));
-                    }
-                    else
-                    {
-                        double speed = slider.Distance / slider.Duration;
+                    double speed = slider.Distance / slider.Duration;
 
-                        for (double j = FrameDelay; j < slider.Duration; j += FrameDelay)
-                        {
-                            bool canDance = sliderDance && slider.Duration > 350;
-                            Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
-                            Vector2 pos2 = pos + CirclePosition(ApplyModsToTime(j) / 12 * speed + angle, 20);
-                            AddFrameToReplay(new OsuReplayFrame((int)h.StartTime + j, canDance ? pos2 : pos, action));
-                        }
+                    for (double j = FrameDelay; j < slider.Duration; j += FrameDelay)
+                    {
+                        bool canDance = sliderDance && slider.Duration > 350;
+                        Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
+                        Vector2 pos2 = pos + CirclePosition(ApplyModsToTime(j) / 12 * speed + angle, 20);
+                        AddFrameToReplay(new OsuReplayFrame((int)h.StartTime + j, canDance ? pos2 : pos, action));
                     }
 
                     break;
@@ -183,7 +175,7 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                     for (double j = spinner.StartTime + FrameDelay; j < spinner.EndTime; j += FrameDelay)
                     {
-                        t = ApplyModsToTime(j - h.StartTime) * spinDirection;
+                        var t = ApplyModsToTime(j - h.StartTime) * spinDirection;
                         r1 = j > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(j, r, spinRadiusEnd, spinner.StartTime, rEndTime, Easing.In);
                         Vector2 pos = SPINNER_CENTRE + CirclePosition(t / 20 + angle, r1);
                         AddFrameToReplay(new OsuReplayFrame((int)j, new Vector2(pos.X, pos.Y), action));
@@ -231,8 +223,8 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                     if (timeToNext > 3000 && lastFrame.Time < mover.End.StartTime - timeToNext * 0.6)
                     {
-                        AddFrameToReplay(new OsuReplayFrame(hitObject.GetEndTime(), lastFrame.Position));
-                        AddFrameToReplay(new OsuReplayFrame(mover.End.StartTime - timeToNext * 0.8, lastFrame.Position));
+                        AddFrameToReplay(new OsuReplayFrame(hitObject.GetEndTime(), hitObject.StackedEndPosition));
+                        AddFrameToReplay(new OsuReplayFrame(mover.End.StartTime - timeToNext * 0.8, hitObject.StackedEndPosition));
                         time = mover.End.StartTime - timeToNext * 0.6;
                         goto Start;
                     }
@@ -268,6 +260,8 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
 
             moveToHitObject(Beatmap.HitObjects[^1], Beatmap.HitObjects.Count - 1, sliderDance);
+
+            AddFrameToReplay(new OsuReplayFrame(Beatmap.HitObjects[^1].GetEndTime(), Beatmap.HitObjects[^1].StackedEndPosition));
 
             return Replay;
         }

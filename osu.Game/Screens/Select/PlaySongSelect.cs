@@ -36,7 +36,7 @@ namespace osu.Game.Screens.Select
         {
             BeatmapOptions.AddButton(@"Edit", @"beatmap", FontAwesome.Solid.PencilAlt, colours.Yellow, () => Edit());
 
-            Footer.AddButton(new FooterButtonOpenInMvis { Action = openInMvis });
+            Footer.AddButton(new FooterButtonOpenInMvis { Action = openInMvis }, null);
 
             ((PlayBeatmapDetailArea)BeatmapDetails).Leaderboard.ScoreSelected += PresentScore;
         }
@@ -66,7 +66,7 @@ namespace osu.Game.Screens.Select
         }
 
         private void openInMvis() => this.Push(new MvisScreen());
-	
+
         protected override bool OnKeyDown(KeyDownEvent e)
         {
             switch (e.Key)
@@ -106,7 +106,8 @@ namespace osu.Game.Screens.Select
                 Mods.Value = mods.Append(autoplayMod).ToArray();
                 removeAutoModOnResume = true;
             }
-        Play:
+
+            Play:
             SampleConfirm?.Play();
 
             this.Push(player = new PlayerLoader(() => new Player()));
