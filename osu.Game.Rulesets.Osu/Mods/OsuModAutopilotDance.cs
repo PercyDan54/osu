@@ -39,6 +39,7 @@ namespace osu.Game.Rulesets.Osu.Mods
 
             // TODO: Implement the functionality to automatically spin spinners
         }
+
         public override void ApplyToDrawableRuleset(DrawableRuleset<OsuHitObject> drawableRuleset)
         {
             gameplayClock = drawableRuleset.FrameStableClock;
@@ -48,7 +49,7 @@ namespace osu.Game.Rulesets.Osu.Mods
             inputManager.AllowUserCursorMovement = false;
 
             // Generate the replay frames the cursor should follow
-            replayFrames = new OsuDanceGenerator(drawableRuleset.Beatmap).GenerateReplay(false).Frames.Cast<OsuReplayFrame>().ToList();
+            replayFrames = new OsuDanceGenerator(drawableRuleset.Beatmap, drawableRuleset.Mods).GenerateReplay(false).Frames.Cast<OsuReplayFrame>().ToList();
         }
     }
 }

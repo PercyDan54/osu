@@ -96,7 +96,14 @@ namespace osu.Game
         [Cached(typeof(IBindable<RulesetInfo>))]
         protected readonly Bindable<RulesetInfo> Ruleset = new Bindable<RulesetInfo>();
 
-        // todo: move this to SongSelect once Screen has the ability to unsuspend.
+        /// <summary>
+        /// The current mod selection for the local user.
+        /// </summary>
+        /// <remarks>
+        /// If a mod select overlay is present, mod instances set to this value are not guaranteed to remain as the provided instance and will be overwritten by a copy.
+        /// In such a case, changes to settings of a mod will *not* propagate after a mod is added to this collection.
+        /// As such, all settings should be finalised before adding a mod to this collection.
+        /// </remarks>
         [Cached]
         [Cached(typeof(IBindable<IReadOnlyList<Mod>>))]
         protected readonly Bindable<IReadOnlyList<Mod>> SelectedMods = new Bindable<IReadOnlyList<Mod>>(Array.Empty<Mod>());
@@ -119,7 +126,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.205.1";
+        public virtual string Version => "2021.212.0";
 
         public OsuGameBase()
         {
@@ -136,10 +143,12 @@ namespace osu.Game
 
         protected override UserInputManager CreateUserInputManager() => new OsuUserInputManager();
 
+        private readonly BindableNumber<double> globalTrackVolumeAdjust = new BindableNumber<double>(0.5f);
+
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "c63c2a4b22c5cfc91bb2063acfad0099";
+            VersionHash = "fa87dfe9f4488df17a37c589534f60ba";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -249,9 +258,10 @@ namespace osu.Game
             RegisterImportHandler(ScoreManager);
             RegisterImportHandler(SkinManager);
 
-            // tracks play so loud our samples can't keep up.
-            // this adds a global reduction of track volume for the time being.
-            Audio.Tracks.AddAdjustment(AdjustableProperty.Volume, new BindableDouble(0.8));
+            // drop track volume game-wide to leave some head-room for UI effects / samples.
+            // this means that for the time being, gameplay sample playback is louder relative to the audio track, compared to stable.
+            // we may want to revisit this if users notice or complain about the difference (consider this a bit of a trial).
+            Audio.Tracks.AddAdjustment(AdjustableProperty.Volume, globalTrackVolumeAdjust);
 
             Beatmap = new NonNullableBindable<WorkingBeatmap>(defaultBeatmap);
 

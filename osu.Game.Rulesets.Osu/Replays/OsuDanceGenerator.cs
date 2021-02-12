@@ -2,11 +2,13 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using osu.Framework.Graphics;
 using osu.Framework.Utils;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Replays;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Objects;
@@ -40,11 +42,9 @@ namespace osu.Game.Rulesets.Osu.Replays
 
         private OsuAction getAction(OsuHitObject h, OsuHitObject last)
         {
-            double timeDifference = ApplyModsToTime(h.StartTime - last.StartTime);
+            double timeDifference = ApplyModsToTimeDelta(last.StartTime, h.StartTime);
 
-            if (timeDifference > 0 && // Sanity checks
-                ((last.StackedPosition - h.StackedPosition).Length > h.Radius * (1.5 + 100.0 / timeDifference) || // Either the distance is big enough
-                 timeDifference >= 266)) // ... or the beats are slow enough to tap anyway.
+            if (timeDifference > 0 && timeDifference >= 300)
             {
                 buttonIndex = 0;
             }
@@ -56,55 +56,8 @@ namespace osu.Game.Rulesets.Osu.Replays
             return buttonIndex % 2 == 0 ? OsuAction.LeftButton : OsuAction.RightButton;
         }
 
-        private static void calcSpinnerStartPosAndDirection(Vector2 prevPos, out Vector2 startPosition, out float spinnerDirection)
-        {
-            Vector2 spinCentreOffset = SPINNER_CENTRE - prevPos;
-            float distFromCentre = spinCentreOffset.Length;
-            float distToTangentPoint = MathF.Sqrt(distFromCentre * distFromCentre - SPIN_RADIUS * SPIN_RADIUS);
-
-            if (distFromCentre > SPIN_RADIUS)
-            {
-                // Previous cursor position was outside spin circle, set startPosition to the tangent point.
-
-                // Angle between centre offset and tangent point offset.
-                float angle = MathF.Asin(SPIN_RADIUS / distFromCentre);
-
-                if (angle > 0)
-                {
-                    spinnerDirection = -1;
-                }
-                else
-                {
-                    spinnerDirection = 1;
-                }
-
-                // Rotate by angle so it's parallel to tangent line
-                spinCentreOffset.X = spinCentreOffset.X * MathF.Cos(angle) - spinCentreOffset.Y * MathF.Sin(angle);
-                spinCentreOffset.Y = spinCentreOffset.X * MathF.Sin(angle) + spinCentreOffset.Y * MathF.Cos(angle);
-
-                // Set length to distToTangentPoint
-                spinCentreOffset.Normalize();
-                spinCentreOffset *= distToTangentPoint;
-
-                // Move along the tangent line, now startPosition is at the tangent point.
-                startPosition = prevPos + spinCentreOffset;
-            }
-            else if (spinCentreOffset.Length > 0)
-            {
-                // Previous cursor position was inside spin circle, set startPosition to the nearest point on spin circle.
-                startPosition = SPINNER_CENTRE - spinCentreOffset * (SPIN_RADIUS / spinCentreOffset.Length);
-                spinnerDirection = 1;
-            }
-            else
-            {
-                // Degenerate case where cursor position is exactly at the centre of the spin circle.
-                startPosition = SPINNER_CENTRE + new Vector2(0, -SPIN_RADIUS);
-                spinnerDirection = 1;
-            }
-        }
-
-        public OsuDanceGenerator(IBeatmap beatmap)
-            : base(beatmap)
+        public OsuDanceGenerator(IBeatmap beatmap, IReadOnlyList<Mod> mods)
+            : base(beatmap, mods)
         {
             config = MfConfigManager.Instance;
             frameDelay = 1000.0 / config.Get<float>(MfSetting.ReplayFramerate);
@@ -141,7 +94,6 @@ namespace osu.Game.Rulesets.Osu.Replays
             OsuAction action = getAction(h, last);
             Vector2 startPosition = h.StackedPosition;
             Vector2 difference = startPosition - SPINNER_CENTRE;
-            var endFrame = new OsuReplayFrame(h.GetEndTime() + KEY_UP_DELAY, h.StackedEndPosition);
             float radius = difference.Length;
             float angle = radius == 0 ? 0 : MathF.Atan2(difference.Y, difference.X);
 
@@ -154,11 +106,11 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                     double speed = slider.Distance / slider.Duration;
 
-                    for (double j = FrameDelay; j < slider.Duration; j += FrameDelay)
+                    for (double j = GetFrameDelay(slider.StartTime); j < slider.Duration; j += GetFrameDelay(slider.StartTime + j))
                     {
                         bool canDance = sliderDance && slider.Duration > 350;
                         Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
-                        Vector2 pos2 = pos + CirclePosition(ApplyModsToTime(j) / 12 * speed + angle, 20);
+                        Vector2 pos2 = pos + CirclePosition(ApplyModsToTimeDelta(last.GetEndTime(), h.StartTime) / 12 * speed + angle, 20);
                         AddFrameToReplay(new OsuReplayFrame((int)h.StartTime + j, canDance ? pos2 : pos, action));
                     }
 
@@ -170,15 +122,17 @@ namespace osu.Game.Rulesets.Osu.Replays
                     double r = spinner.SpinsRequired > 3 ? spinRadiusStart : spinRadiusEnd;
                     double r1;
                     double rEndTime = spinner.StartTime + spinner.Duration * 0.6;
-                    float spinDirection;
-                    calcSpinnerStartPosAndDirection(((OsuReplayFrame)Frames[^1]).Position, out startPosition, out spinDirection);
+                    double previousFrame = h.StartTime;
 
-                    for (double j = spinner.StartTime + FrameDelay; j < spinner.EndTime; j += FrameDelay)
+                    for (double nextFrame = h.StartTime + GetFrameDelay(h.StartTime); nextFrame < spinner.EndTime; nextFrame += GetFrameDelay(nextFrame))
                     {
-                        var t = ApplyModsToTime(j - h.StartTime) * spinDirection;
-                        r1 = j > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(j, r, spinRadiusEnd, spinner.StartTime, rEndTime, Easing.In);
-                        Vector2 pos = SPINNER_CENTRE + CirclePosition(t / 20 + angle, r1);
-                        AddFrameToReplay(new OsuReplayFrame((int)j, new Vector2(pos.X, pos.Y), action));
+                        var t = ApplyModsToTimeDelta(previousFrame, nextFrame) * -1;
+                        angle += (float)t / 20;
+                        r1 = nextFrame > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(nextFrame, r, spinRadiusEnd, spinner.StartTime, rEndTime, Easing.In);
+                        Vector2 pos = SPINNER_CENTRE + CirclePosition(angle, r1);
+                        AddFrameToReplay(new OsuReplayFrame((int)nextFrame, new Vector2(pos.X, pos.Y), action));
+
+                        previousFrame = nextFrame;
                     }
 
                     break;

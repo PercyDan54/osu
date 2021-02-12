@@ -354,7 +354,7 @@ namespace osu.Game.Screens.Mvis
                                                         },
                                                     }
                                                 },
-                                                progressBar = new SongProgressBar
+                                                progressBar = new SongProgressBar(true)
                                                 {
                                                     RelativeSizeAxes = Axes.Both,
                                                 },
