@@ -73,23 +73,27 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
                 new SkinnableComponent(
                     "MbeatmapListMask",
                     _ => topBox = createDefaultMaskBox(),
-                    confineMode: ConfineMode.ScaleToFit)
+                    confineMode: ConfineMode.ScaleToFill)
                 {
                     RelativeSizeAxes = Axes.X,
                     Height = 21,
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
+                    ChildAnchor = Anchor.TopCentre,
+                    ChildOrigin = Anchor.TopCentre,
                     Y = -1
                 }, //高度+1并上移/下移一个像素可以避免一些奇怪的渲染问题
                 new SkinnableComponent(
                     "MbeatmapListMask",
                     _ => bottomBox = createDefaultMaskBox(),
-                    confineMode: ConfineMode.ScaleToFit)
+                    confineMode: ConfineMode.ScaleToFill)
                 {
                     RelativeSizeAxes = Axes.X,
                     Height = 21,
                     Anchor = Anchor.BottomCentre,
                     Origin = Anchor.BottomCentre,
+                    ChildAnchor = Anchor.TopCentre,
+                    ChildOrigin = Anchor.TopCentre,
                     Rotation = 180,
                     Y = -19,
                 }

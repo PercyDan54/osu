@@ -162,14 +162,14 @@ namespace osu.Game.Screens.Mvis.Objects
                             Origin = Anchor.Centre,
                             Font = OsuFont.GetFont(size: 26, weight: FontWeight.SemiBold),
                             Text = new LocalisedString((beatmap.Metadata.ArtistUnicode, beatmap.Metadata.Artist)),
-                            Shadow = false,
+                            Shadow = false
                         },
                         titleText = new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold),
-                            Shadow = false,
+                            Shadow = false
                         }
                     }
                 }.WithEffect(new BlurEffect
@@ -201,12 +201,12 @@ namespace osu.Game.Screens.Mvis.Objects
                 }
 
                 if (newTitle.EndsWith(" ", StringComparison.Ordinal))
-                    newTitle = newTitle.Substring(0, newTitle.Length - 1);
+                    newTitle = newTitle[..^1];
 
                 return newTitle;
             }
 
-            private static readonly char[] title_chars = new[]
+            private static readonly char[] title_chars =
             {
                 '(',
                 '-',

@@ -87,6 +87,16 @@ namespace osu.Game.Screens.Mvis.Collections
             return newBeatmap;
         }
 
+        private void playFirstBeatmap(List<BeatmapSetInfo> list)
+        {
+            if (list.Count == 0) return;
+
+            var newBeatmap = beatmaps.GetWorkingBeatmap(list.FirstOrDefault()?.Beatmaps.First());
+
+            b.Value = newBeatmap;
+            controller.Play();
+        }
+
         ///<summary>
         ///用来更新<see cref="beatmapList"/>
         ///</summary>

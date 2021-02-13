@@ -10,30 +10,32 @@ namespace osu.Game.Screens.Mvis.Storyboard
     public class BackgroundStoryboard : BeatmapSkinProvidingContainer
     {
         public StoryboardClock RunningClock;
-        private readonly DrawableStoryboard drawableStoryboard;
+        private DrawableStoryboard drawableStoryboard;
+
+        private readonly WorkingBeatmap working;
 
         public BackgroundStoryboard(WorkingBeatmap beatmap)
             : base(beatmap.Skin)
         {
-            Child = drawableStoryboard = beatmap.Storyboard.CreateDrawable();
+            working = beatmap;
         }
 
         [BackgroundDependencyLoader]
         private void load()
         {
+            drawableStoryboard = working.Storyboard.CreateDrawable();
             drawableStoryboard.Clock = RunningClock;
+
+            LoadComponent(drawableStoryboard);
+            Add(drawableStoryboard);
         }
+
+        public Drawable StoryboardProxy() => drawableStoryboard.OverlayLayer.CreateProxy();
 
         protected override void Dispose(bool isDisposing)
         {
-            base.Dispose(isDisposing);
-
             drawableStoryboard?.Dispose();
-        }
-
-        public void Cleanup(float duration)
-        {
-            this.FadeOut(duration, Easing.OutQuint).Finally(_ => Expire());
+            base.Dispose(isDisposing);
         }
     }
 }

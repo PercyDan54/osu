@@ -35,17 +35,17 @@ namespace osu.Game.Configuration
             Set(MfSetting.MvisContentAlpha, 1f, 0f, 1f);
             Set(MfSetting.MvisBgBlur, 0.1f, 0f, 1f);
             Set(MfSetting.MvisEnableStoryboard, true);
+            Set(MfSetting.MvisStoryboardProxy, true);
             Set(MfSetting.MvisUseOsuLogoVisualisation, false);
             Set(MfSetting.MvisIdleBgDim, 0.6f, 0f, 1f);
             Set(MfSetting.MvisEnableBgTriangles, true);
-            Set(MfSetting.MvisEnableSBOverlayProxy, true);
             Set(MfSetting.MvisAdjustMusicWithFreq, false);
             Set(MfSetting.MvisMusicSpeed, 1.0, 0.1, 2.0);
             Set(MfSetting.MvisEnableNightcoreBeat, false);
             Set(MfSetting.MvisPlayFromCollection, false);
-            Set(MfSetting.MvisInterfaceRed, value: 0, 0, 255f);
-            Set(MfSetting.MvisInterfaceGreen, value: 119f, 0, 255f);
-            Set(MfSetting.MvisInterfaceBlue, value: 255f, 0, 255f);
+            Set(MfSetting.MvisInterfaceRed, 0, 0, 255f);
+            Set(MfSetting.MvisInterfaceGreen, 119f, 0, 255f);
+            Set(MfSetting.MvisInterfaceBlue, 255f, 0, 255f);
 
             //Mvis Settings(Upstream)
             Set(MfSetting.MvisShowParticles, true);
@@ -84,7 +84,7 @@ namespace osu.Game.Configuration
         MvisIdleBgDim,
         MvisContentAlpha,
         MvisEnableBgTriangles,
-        MvisEnableSBOverlayProxy,
+        MvisStoryboardProxy,
         MvisShowParticles,
         MvisVisualizerAmount,
         MvisBarWidth,
@@ -112,7 +112,7 @@ namespace osu.Game.Configuration
         NextJumpMulti,
         BorderBounce,
         SkipStackAngles,
-        SliderDance,
+        SliderDance
     }
 
     public enum MvisBarType
@@ -121,6 +121,7 @@ namespace osu.Game.Configuration
         Rounded,
         Fall
     }
+
     public enum OsuDanceMover
     {
         HalfCircle,

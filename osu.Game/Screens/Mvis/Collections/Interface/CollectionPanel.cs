@@ -163,7 +163,7 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
                 : ActiveState.Disabled;
 
             collectionName.Text = Collection.Name.Value;
-            collectionBeatmapCount.Text = new LocalisedString("{0}首歌曲", beatmapSets.Count);
+            collectionBeatmapCount.Text = new LocalisedString("{0} Songs", beatmapSets.Count);
 
             State.BindValueChanged(onStateChanged, true);
 

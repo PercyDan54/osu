@@ -65,7 +65,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 },
                 new SettingsSlider<int>
                 {
-                    LabelText = "Rotate",
+                    LabelText = "Rotation",
                     KeyboardStep = 1,
                     Current = config.GetBindable<int>(MfSetting.MvisRotation)
                 },
