@@ -102,21 +102,16 @@ namespace osu.Game.Screens.Backgrounds
                     break;
             }
 
-            if (user.Value?.IsSupporter ?? false)
+            switch (mode.Value)
             {
-                switch (mode.Value)
-                {
-                    case BackgroundSource.Beatmap:
-                        newBackground = new BeatmapBackground(beatmap.Value, backgroundName);
-                        break;
+                case BackgroundSource.Beatmap:
+                    newBackground = new BeatmapBackground(beatmap.Value, backgroundName);
+                    break;
 
-                    default:
-                        newBackground = new SkinnedBackground(skin.Value, backgroundName);
-                        break;
-                }
+                default:
+                    newBackground = new SkinnedBackground(skin.Value, backgroundName);
+                    break;
             }
-            else
-                newBackground = new Background(backgroundName);
 
             newBackground.Depth = currentDisplay;
 

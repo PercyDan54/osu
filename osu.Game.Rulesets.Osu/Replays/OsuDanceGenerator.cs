@@ -117,10 +117,9 @@ namespace osu.Game.Rulesets.Osu.Replays
                     break;
 
                 case Spinner spinner:
-                    if(spinner.SpinsRequired == 0) return;
+                    if (spinner.SpinsRequired == 0) return;
 
                     double r = spinner.SpinsRequired > 3 ? spinRadiusStart : spinRadiusEnd;
-                    double r1;
                     double rEndTime = spinner.StartTime + spinner.Duration * 0.6;
                     double previousFrame = h.StartTime;
 
@@ -128,7 +127,7 @@ namespace osu.Game.Rulesets.Osu.Replays
                     {
                         var t = ApplyModsToTimeDelta(previousFrame, nextFrame) * -1;
                         angle += (float)t / 20;
-                        r1 = nextFrame > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(nextFrame, r, spinRadiusEnd, spinner.StartTime, rEndTime, Easing.In);
+                        var r1 = nextFrame > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(nextFrame, r, spinRadiusEnd, spinner.StartTime, rEndTime, Easing.In);
                         Vector2 pos = SPINNER_CENTRE + CirclePosition(angle, r1);
                         AddFrameToReplay(new OsuReplayFrame((int)nextFrame, new Vector2(pos.X, pos.Y), action));
 

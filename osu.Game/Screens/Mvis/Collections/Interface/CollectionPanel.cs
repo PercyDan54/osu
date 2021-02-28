@@ -9,7 +9,6 @@ using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
-using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
 using osu.Game.Graphics;
@@ -163,7 +162,7 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
                 : ActiveState.Disabled;
 
             collectionName.Text = Collection.Name.Value;
-            collectionBeatmapCount.Text = new LocalisedString("{0} Songs", beatmapSets.Count);
+            collectionBeatmapCount.Text = $"{beatmapSets.Count} songs";
 
             State.BindValueChanged(onStateChanged, true);
 

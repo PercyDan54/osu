@@ -7,7 +7,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
 using osu.Game.Graphics;
@@ -110,14 +109,11 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
                                             collectionName = new OsuSpriteText
                                             {
                                                 Font = OsuFont.GetFont(size: 50),
-                                                RelativeSizeAxes = Axes.X,
                                                 Text = "No collection selected",
-                                                Truncate = true,
                                             },
                                             collectionBeatmapCount = new OsuSpriteText
                                             {
                                                 Font = OsuFont.GetFont(size: 38),
-                                                RelativeSizeAxes = Axes.X,
                                                 Text = "Select a collection first!"
                                             }
                                         }
@@ -183,7 +179,6 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
 
             beatmapSets.Clear();
 
-            //From CollectionHelper.cs
             foreach (var item in c.Beatmaps)
             {
                 //获取当前BeatmapSet
@@ -195,7 +190,7 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
             }
 
             collectionName.Text = c.Name.Value;
-            collectionBeatmapCount.Text = new LocalisedString("{0}首歌曲", beatmapSets.Count);
+            collectionBeatmapCount.Text = $"{beatmapSets.Count} songs";
 
             refreshBeatmapSetList();
         }
@@ -254,8 +249,8 @@ namespace osu.Game.Screens.Mvis.Collections.Interface
         {
             beatmapSets.Clear();
             beatmapList.ClearList();
-            collectionName.Text = "未选择收藏夹";
-            collectionBeatmapCount.Text = "请先选择一个收藏夹!";
+            collectionName.Text = "No collection selected";
+            collectionBeatmapCount.Text = "Select a collection first!";
         }
     }
 }
