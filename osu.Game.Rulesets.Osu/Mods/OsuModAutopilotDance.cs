@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Input.StateChanges;
+using osu.Game.Configuration;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Replays;
 using osu.Game.Rulesets.UI;
@@ -16,6 +17,7 @@ namespace osu.Game.Rulesets.Osu.Mods
         public override string Name => "Autopilot (With Dance)";
 
         private OsuInputManager inputManager;
+        private readonly MfConfigManager config = MfConfigManager.Instance;
 
         private IFrameStableClock gameplayClock;
 
@@ -49,7 +51,7 @@ namespace osu.Game.Rulesets.Osu.Mods
             inputManager.AllowUserCursorMovement = false;
 
             // Generate the replay frames the cursor should follow
-            replayFrames = new OsuDanceGenerator(drawableRuleset.Beatmap, drawableRuleset.Mods).GenerateReplay(false).Frames.Cast<OsuReplayFrame>().ToList();
+            replayFrames = new OsuDanceGenerator(drawableRuleset.Beatmap, drawableRuleset.Mods).GenerateReplay(config.Get<bool>(MfSetting.SliderDance)).Frames.Cast<OsuReplayFrame>().ToList();
         }
     }
 }

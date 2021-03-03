@@ -9,12 +9,14 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Platform;
 using osu.Framework.Screens;
+using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.IO;
 using osu.Game.Online.API;
 using osu.Game.Overlays;
+using osu.Game.Rulesets;
 using osu.Game.Screens.Backgrounds;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.OnlinePlay.Multiplayer;
@@ -24,7 +26,7 @@ using osu.Game.Screens.Mvis;
 
 namespace osu.Game.Screens.Menu
 {
-    public class MainMenu : OsuScreen
+    public class MainMenu : OsuScreen, IHandlePresentBeatmap
     {
         public const float FADE_IN_DURATION = 300;
 
@@ -106,7 +108,7 @@ namespace osu.Game.Screens.Menu
                                 Beatmap.SetDefault();
                                 this.Push(new Editor());
                             },
-                            OnSolo = onSolo,
+                            OnSolo = loadSoloSongSelect,
                             OnMultiplayer = () => this.Push(new Multiplayer()),
                             OnPlaylists = () => this.Push(new Playlists()),
                             OnMvis = () => this.Push(consumeScreen(true)),
@@ -165,21 +167,15 @@ namespace osu.Game.Screens.Menu
                 LoadComponentAsync(mvisPlayer = new MvisScreen());
         }
 
-        public void LoadToSolo() => Schedule(onSolo);
-
-        private void onSolo() => this.Push(consumeScreen(false));
+        private void loadSoloSongSelect() => this.Push(consumeScreen(false));
 
         private Screen consumeScreen(bool mvis)
         {
             var s = mvis ? mvisPlayer : songSelect;
-            if (mvis)
-            {
-                mvisPlayer = null;
-            }
-            else
-            {
-                songSelect = null;
-            }
+
+            if (mvis) mvisPlayer = null;
+            else songSelect = null;
+
             return s;
         }
 
@@ -300,6 +296,14 @@ namespace osu.Game.Screens.Menu
 
             this.FadeOut(3000);
             return base.OnExiting(next);
+        }
+
+        public void PresentBeatmap(WorkingBeatmap beatmap, RulesetInfo ruleset)
+        {
+            Beatmap.Value = beatmap;
+            Ruleset.Value = ruleset;
+
+            Schedule(loadSoloSongSelect);
         }
     }
 }
