@@ -123,6 +123,8 @@ namespace osu.Game.Overlays.Settings
 
         protected internal class RestoreDefaultValueButton : Container, IHasTooltip
         {
+            public override bool IsPresent => base.IsPresent || Scheduler.HasPendingTasks;
+
             private Bindable<T> bindable;
 
             public Bindable<T> Bindable

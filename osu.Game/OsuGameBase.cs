@@ -127,7 +127,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.302.0";
+        public virtual string Version => "2021.312.0";
 
         public OsuGameBase()
         {
@@ -154,7 +154,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "c7bc84f556757a0471024bca10dd06a6";
+            VersionHash = "8296913bbea3cac3997e574d66adafce";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -414,7 +414,7 @@ namespace osu.Game
             foreach (var importer in fileImporters)
             {
                 if (importer.HandledExtensions.Contains(extension))
-                    await importer.Import(paths);
+                    await importer.Import(paths).ConfigureAwait(false);
             }
         }
 
@@ -425,7 +425,7 @@ namespace osu.Game
             {
                 var importer = fileImporters.FirstOrDefault(i => i.HandledExtensions.Contains(taskGroup.Key));
                 return importer?.Import(taskGroup.ToArray()) ?? Task.CompletedTask;
-            }));
+            })).ConfigureAwait(false);
         }
 
         public IEnumerable<string> HandledExtensions => fileImporters.SelectMany(i => i.HandledExtensions);
