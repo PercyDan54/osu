@@ -23,11 +23,11 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public MomentumMover()
         {
-            var config = MfConfigManager.Instance;
-            jumpMult = config.Get<float>(MfSetting.JumpMulti);
-            nextMult = config.Get<float>(MfSetting.NextJumpMulti);
-            offsetMult = config.Get<float>(MfSetting.AngleOffset);
-            skipStacks = config.Get<bool>(MfSetting.SkipStackAngles);
+            var config = MConfigManager.Instance;
+            jumpMult = config.Get<float>(MSetting.JumpMulti);
+            nextMult = config.Get<float>(MSetting.NextJumpMulti);
+            offsetMult = config.Get<float>(MSetting.AngleOffset);
+            skipStacks = config.Get<bool>(MSetting.SkipStackAngles);
         }
 
         private bool isSame(OsuHitObject o1, OsuHitObject o2) => o1.StackedPosition == o2.StackedPosition || (skipStacks && o1.Position == o2.Position);

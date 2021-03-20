@@ -12,7 +12,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
         protected override string Header => "Custom osu settings";
 
         [BackgroundDependencyLoader]
-        private void load(MfConfigManager config)
+        private void load(MConfigManager config)
         {
             Children = new Drawable[]
             {
@@ -20,7 +20,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 {
                     LabelText = "Use Sayobot as beatmap source",
                     TooltipText = "Disable this if you can't download beatmaps",
-                    Current = config.GetBindable<bool>(MfSetting.UseSayobot)
+                    Current = config.GetBindable<bool>(MSetting.UseSayobot)
                 },
             };
         }

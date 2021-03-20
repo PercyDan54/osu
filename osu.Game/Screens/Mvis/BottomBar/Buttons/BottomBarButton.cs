@@ -77,7 +77,7 @@ namespace osu.Game.Screens.Mvis.BottomBar.Buttons
         }
 
         [BackgroundDependencyLoader]
-        private void load(MfConfigManager config)
+        private void load(MConfigManager config)
         {
             InternalChildren = new Drawable[]
             {

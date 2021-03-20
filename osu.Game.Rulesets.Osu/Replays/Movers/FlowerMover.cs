@@ -25,10 +25,10 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public FlowerMover()
         {
-            var config = MfConfigManager.Instance;
-            mult = config.Get<float>(MfSetting.JumpMulti);
-            nextMult = config.Get<float>(MfSetting.JumpMulti);
-            offsetMult = config.Get<float>(MfSetting.AngleOffset);
+            var config = MConfigManager.Instance;
+            mult = config.Get<float>(MSetting.JumpMulti);
+            nextMult = config.Get<float>(MSetting.JumpMulti);
+            offsetMult = config.Get<float>(MSetting.AngleOffset);
         }
 
         public override void OnObjChange()

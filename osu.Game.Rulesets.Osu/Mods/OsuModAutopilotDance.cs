@@ -17,7 +17,7 @@ namespace osu.Game.Rulesets.Osu.Mods
         public override string Name => "Autopilot (With Dance)";
 
         private OsuInputManager inputManager;
-        private readonly MfConfigManager config = MfConfigManager.Instance;
+        private readonly MConfigManager config = MConfigManager.Instance;
 
         private IFrameStableClock gameplayClock;
 
@@ -51,7 +51,7 @@ namespace osu.Game.Rulesets.Osu.Mods
             inputManager.AllowUserCursorMovement = false;
 
             // Generate the replay frames the cursor should follow
-            replayFrames = new OsuDanceGenerator(drawableRuleset.Beatmap, drawableRuleset.Mods).GenerateReplay(config.Get<bool>(MfSetting.SliderDance)).Frames.Cast<OsuReplayFrame>().ToList();
+            replayFrames = new OsuDanceGenerator(drawableRuleset.Beatmap, drawableRuleset.Mods).Generate().Frames.Cast<OsuReplayFrame>().ToList();
         }
     }
 }

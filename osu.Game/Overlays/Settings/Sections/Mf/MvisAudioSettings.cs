@@ -12,14 +12,14 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
         protected override string Header => "Audio";
 
         [BackgroundDependencyLoader]
-        private void load(MfConfigManager config)
+        private void load(MConfigManager config)
         {
             Children = new Drawable[]
             {
                 new SettingsSlider<double>
                 {
                     LabelText = "Playback rate",
-                    Current = config.GetBindable<double>(MfSetting.MvisMusicSpeed),
+                    Current = config.GetBindable<double>(MSetting.MvisMusicSpeed),
                     KeyboardStep = 0.01f,
                     DisplayAsPercentage = true,
                     TransferValueOnCommit = true
@@ -27,19 +27,19 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 new SettingsCheckbox
                 {
                     LabelText = "Adjust pitch with playback rate",
-                    Current = config.GetBindable<bool>(MfSetting.MvisAdjustMusicWithFreq),
+                    Current = config.GetBindable<bool>(MSetting.MvisAdjustMusicWithFreq),
                     TooltipText = ""
                 },
                 new SettingsCheckbox
                 {
                     LabelText = "Nightcore beat",
-                    Current = config.GetBindable<bool>(MfSetting.MvisEnableNightcoreBeat),
+                    Current = config.GetBindable<bool>(MSetting.MvisEnableNightcoreBeat),
                     TooltipText = ""
                 },
                 new SettingsCheckbox
                 {
                     LabelText = "Play music from collection",
-                    Current = config.GetBindable<bool>(MfSetting.MvisPlayFromCollection),
+                    Current = config.GetBindable<bool>(MSetting.MvisPlayFromCollection),
                     TooltipText = ""
                 }
             };

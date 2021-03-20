@@ -109,7 +109,7 @@ namespace osu.Game.Audio
             }
             private string trackURI()
             {
-                switch (mfConfig.Get<bool>(MfSetting.UseSayobot))
+                switch (MConfig.Get<bool>(MSetting.UseSayobot))
                 {
                     case true:
                         return $@"https://a.sayobot.cn/preview/{beatmapSetInfo?.OnlineBeatmapSetID}.mp3";

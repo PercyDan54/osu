@@ -56,7 +56,7 @@ namespace osu.Game
         public bool UseDevelopmentServer { get; }
 
         protected OsuConfigManager LocalConfig;
-        protected MfConfigManager MfConfig;
+        protected MConfigManager MConfig;
 
         protected BeatmapManager BeatmapManager;
 
@@ -127,7 +127,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.312.0";
+        public virtual string Version => "2021.323.0";
 
         public OsuGameBase()
         {
@@ -154,7 +154,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "8296913bbea3cac3997e574d66adafce";
+            VersionHash = "f278a5d3e835f2b10bd57b1f95b52b8a";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -168,7 +168,7 @@ namespace osu.Game
 
             dependencies.CacheAs(this);
             dependencies.CacheAs(LocalConfig);
-            dependencies.Cache(MfConfig);
+            dependencies.Cache(MConfig);
 
             AddFont(Resources, @"Fonts/osuFont");
             AddFont(Resources, @"Fonts/Torus-Regular");
@@ -376,7 +376,7 @@ namespace osu.Game
                 ? new DevelopmentOsuConfigManager(Storage)
                 : new OsuConfigManager(Storage);
 
-            MfConfig ??= new MfConfigManager(Storage);
+            MConfig ??= new MConfigManager(Storage);
         }
 
         /// <summary>

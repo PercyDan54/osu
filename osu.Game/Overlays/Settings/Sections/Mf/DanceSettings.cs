@@ -13,66 +13,61 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
         protected override string Header => "Osu cursor dance settings";
 
         [BackgroundDependencyLoader]
-        private void load(MfConfigManager config)
+        private void load(MConfigManager config)
         {
             Children = new Drawable[]
             {
                new SettingsSlider<float, FramerateSlider>
                 {
                     LabelText = "Autoplay framerate",
-                    Current = config.GetBindable<float>(MfSetting.ReplayFramerate),
+                    Current = config.GetBindable<float>(MSetting.ReplayFramerate),
                     KeyboardStep = 30f
                 },
                 new SettingsSlider<float>
                 {
                     LabelText = "Spinner start radius",
-                    Current = config.GetBindable<float>(MfSetting.SpinnerRadiusStart),
+                    Current = config.GetBindable<float>(MSetting.SpinnerRadiusStart),
                     KeyboardStep = 5f,
                 },
                 new SettingsSlider<float>
                 {
                     LabelText = "Spinner end radius",
-                    Current = config.GetBindable<float>(MfSetting.SpinnerRadiusEnd),
+                    Current = config.GetBindable<float>(MSetting.SpinnerRadiusEnd),
                     KeyboardStep = 5f,
                 },
                 new SettingsEnumDropdown<OsuDanceMover>
                 {
                     LabelText = "Dance mover",
-                    Current = config.GetBindable<OsuDanceMover>(MfSetting.DanceMover)
+                    Current = config.GetBindable<OsuDanceMover>(MSetting.DanceMover)
                 },
                 new SettingsSlider<float, AngleSlider>
                 {
                     LabelText = "Angle offset",
-                    Current = config.GetBindable<float>(MfSetting.AngleOffset),
+                    Current = config.GetBindable<float>(MSetting.AngleOffset),
                     KeyboardStep = 1f / 18f
                 },
                 new SettingsSlider<float, MultiplierSlider>
                 {
                     LabelText = "Jump multiplier",
-                    Current = config.GetBindable<float>(MfSetting.JumpMulti),
-                    KeyboardStep = 1f / 12f
+                    Current = config.GetBindable<float>(MSetting.JumpMulti),
+                    KeyboardStep = 0.01f
                 },
                 new SettingsSlider<float, MultiplierSlider>
                 {
                     LabelText = "Next jump multiplier",
-                    Current = config.GetBindable<float>(MfSetting.NextJumpMulti),
-                    KeyboardStep = 1f / 12f
-                },
-                new SettingsCheckbox
-                {
-                    LabelText = "Slider dance",
-                    Current = config.GetBindable<bool>(MfSetting.SliderDance)
+                    Current = config.GetBindable<float>(MSetting.NextJumpMulti),
+                    KeyboardStep = 0.01f
                 },
                 new SettingsCheckbox
                 {
                     LabelText = "Skip stack angles",
-                    Current = config.GetBindable<bool>(MfSetting.SkipStackAngles)
+                    Current = config.GetBindable<bool>(MSetting.SkipStackAngles)
                 },
                 new SettingsCheckbox
                 {
                     LabelText = "Bounce on edges",
-                    Current = config.GetBindable<bool>(MfSetting.BorderBounce)
-                },
+                    Current = config.GetBindable<bool>(MSetting.BorderBounce)
+                }
             };
         }
         private class MultiplierSlider : OsuSliderBar<float>

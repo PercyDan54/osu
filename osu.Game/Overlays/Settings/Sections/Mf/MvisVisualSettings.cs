@@ -17,49 +17,49 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
         private Container resizableContainer;
 
         [BackgroundDependencyLoader]
-        private void load(MfConfigManager config)
+        private void load(MConfigManager config)
         {
             Children = new Drawable[]
             {
                 new SettingsCheckbox
                 {
                     LabelText = "Show triangles when storyboard is unavaliable",
-                    Current = config.GetBindable<bool>(MfSetting.MvisEnableBgTriangles),
+                    Current = config.GetBindable<bool>(MSetting.MvisEnableBgTriangles),
                 },
                 new SettingsCheckbox
                 {
                     LabelText = "Show particles",
-                    Current = config.GetBindable<bool>(MfSetting.MvisShowParticles)
+                    Current = config.GetBindable<bool>(MSetting.MvisShowParticles)
                 },
                 new SettingsSlider<int>
                 {
                     LabelText = "Particles count",
                     TransferValueOnCommit = true,
-                    Current = config.GetBindable<int>(MfSetting.MvisParticleAmount),
+                    Current = config.GetBindable<int>(MSetting.MvisParticleAmount),
                     KeyboardStep = 1,
                 },
                 new SettingsEnumDropdown<MvisBarType>
                 {
                     LabelText = "Bar type",
-                    Current = config.GetBindable<MvisBarType>(MfSetting.MvisBarType)
+                    Current = config.GetBindable<MvisBarType>(MSetting.MvisBarType)
                 },
                 new SettingsSlider<int>
                 {
                     LabelText = "Bar count",
-                    Current = config.GetBindable<int>(MfSetting.MvisVisualizerAmount),
+                    Current = config.GetBindable<int>(MSetting.MvisVisualizerAmount),
                     KeyboardStep = 1,
                     TransferValueOnCommit = true
                 },
                 new SettingsSlider<double>
                 {
                     LabelText = "Bar width",
-                    Current = config.GetBindable<double>(MfSetting.MvisBarWidth),
+                    Current = config.GetBindable<double>(MSetting.MvisBarWidth),
                     KeyboardStep = 0.1f
                 },
                 new SettingsSlider<int>
                 {
                     LabelText = "Bars per visual",
-                    Current = config.GetBindable<int>(MfSetting.MvisBarsPerVisual),
+                    Current = config.GetBindable<int>(MSetting.MvisBarsPerVisual),
                     KeyboardStep = 1,
                     TransferValueOnCommit = true
                 },
@@ -67,12 +67,12 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 {
                     LabelText = "Rotation",
                     KeyboardStep = 1,
-                    Current = config.GetBindable<int>(MfSetting.MvisRotation)
+                    Current = config.GetBindable<int>(MSetting.MvisRotation)
                 },
                 customColourCheckbox = new SettingsCheckbox
                 {
                     LabelText = "Use custom color",
-                    Current = config.GetBindable<bool>(MfSetting.MvisUseCustomColour)
+                    Current = config.GetBindable<bool>(MSetting.MvisUseCustomColour)
                 },
                 resizableContainer = new Container
                 {
@@ -92,19 +92,19 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                             {
                                 LabelText = "Red",
                                 KeyboardStep = 1,
-                                Current = config.GetBindable<int>(MfSetting.MvisRed)
+                                Current = config.GetBindable<int>(MSetting.MvisRed)
                             },
                             new SettingsSlider<int>
                             {
                                 LabelText = "Green",
                                 KeyboardStep = 1,
-                                Current = config.GetBindable<int>(MfSetting.MvisGreen)
+                                Current = config.GetBindable<int>(MSetting.MvisGreen)
                             },
                             new SettingsSlider<int>
                             {
                                 KeyboardStep = 1,
                                 LabelText = "Blue",
-                                Current = config.GetBindable<int>(MfSetting.MvisBlue)
+                                Current = config.GetBindable<int>(MSetting.MvisBlue)
                             }
                         }
                     }
@@ -112,7 +112,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 new SettingsCheckbox
                 {
                     LabelText = "Use osu logo visualization",
-                    Current = config.GetBindable<bool>(MfSetting.MvisUseOsuLogoVisualisation),
+                    Current = config.GetBindable<bool>(MSetting.MvisUseOsuLogoVisualisation),
                 },
             };
         }

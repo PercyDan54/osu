@@ -21,32 +21,32 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
         private ColourPreviewer preview;
 
         [BackgroundDependencyLoader]
-        private void load(MfConfigManager config)
+        private void load(MConfigManager config)
         {
-            config.BindWith(MfSetting.MvisInterfaceRed, iR);
-            config.BindWith(MfSetting.MvisInterfaceGreen, iG);
-            config.BindWith(MfSetting.MvisInterfaceBlue, iB);
+            config.BindWith(MSetting.MvisInterfaceRed, iR);
+            config.BindWith(MSetting.MvisInterfaceGreen, iG);
+            config.BindWith(MSetting.MvisInterfaceBlue, iB);
 
             Children = new Drawable[]
             {
                 new SettingsSlider<float>
                 {
                     LabelText = "Background blur",
-                    Current = config.GetBindable<float>(MfSetting.MvisBgBlur),
+                    Current = config.GetBindable<float>(MSetting.MvisBgBlur),
                     DisplayAsPercentage = true,
                     KeyboardStep = 0.01f,
                 },
                 new SettingsSlider<float>
                 {
                     LabelText = "Background Dim",
-                    Current = config.GetBindable<float>(MfSetting.MvisIdleBgDim),
+                    Current = config.GetBindable<float>(MSetting.MvisIdleBgDim),
                     DisplayAsPercentage = true,
                     KeyboardStep = 0.01f,
                 },
                 new SettingsSlider<float>
                 {
                     LabelText = "Opacity",
-                    Current = config.GetBindable<float>(MfSetting.MvisContentAlpha),
+                    Current = config.GetBindable<float>(MSetting.MvisContentAlpha),
                     DisplayAsPercentage = true,
                     KeyboardStep = 0.01f,
                 },
