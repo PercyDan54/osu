@@ -1,15 +1,12 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
-using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Timing;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets.Edit;
@@ -18,19 +15,15 @@ using osu.Game.Screens.Edit.Compose.Components.Timeline;
 using osuTK;
 using osuTK.Graphics;
 
-namespace osu.Game.Tests.Visual.Editor
+namespace osu.Game.Tests.Visual.Editing
 {
     public abstract class TimelineTestScene : EditorClockTestScene
     {
-        public override IReadOnlyList<Type> RequiredTypes => new[]
-        {
-            typeof(TimelineArea),
-            typeof(Timeline),
-            typeof(TimelineButton),
-            typeof(CentreMarker)
-        };
-
         protected TimelineArea TimelineArea { get; private set; }
+
+        protected HitObjectComposer Composer { get; private set; }
+
+        protected EditorBeatmap EditorBeatmap { get; private set; }
 
         [BackgroundDependencyLoader]
         private void load(AudioManager audio)
@@ -38,15 +31,17 @@ namespace osu.Game.Tests.Visual.Editor
             Beatmap.Value = new WaveformTestBeatmap(audio);
 
             var playable = Beatmap.Value.GetPlayableBeatmap(Beatmap.Value.BeatmapInfo.Ruleset);
+            EditorBeatmap = new EditorBeatmap(playable);
 
-            var editorBeatmap = new EditorBeatmap(playable);
+            Dependencies.Cache(EditorBeatmap);
+            Dependencies.CacheAs<IBeatSnapProvider>(EditorBeatmap);
 
-            Dependencies.Cache(editorBeatmap);
-            Dependencies.CacheAs<IBeatSnapProvider>(editorBeatmap);
+            Composer = playable.BeatmapInfo.Ruleset.CreateInstance().CreateHitObjectComposer().With(d => d.Alpha = 0);
 
             AddRange(new Drawable[]
             {
-                editorBeatmap,
+                EditorBeatmap,
+                Composer,
                 new FillFlowContainer
                 {
                     AutoSizeAxes = Axes.Both,
@@ -79,7 +74,7 @@ namespace osu.Game.Tests.Visual.Editor
             private IBindable<WorkingBeatmap> beatmap { get; set; }
 
             [Resolved]
-            private IAdjustableClock adjustableClock { get; set; }
+            private EditorClock editorClock { get; set; }
 
             public AudioVisualiser()
             {
@@ -106,13 +101,14 @@ namespace osu.Game.Tests.Visual.Editor
                 base.Update();
 
                 if (beatmap.Value.Track.IsLoaded)
-                    marker.X = (float)(adjustableClock.CurrentTime / beatmap.Value.Track.Length);
+                    marker.X = (float)(editorClock.CurrentTime / beatmap.Value.Track.Length);
             }
         }
 
         private class StartStopButton : OsuButton
         {
-            private IAdjustableClock adjustableClock;
+            [Resolved]
+            private EditorClock editorClock { get; set; }
 
             public StartStopButton()
             {
@@ -123,25 +119,19 @@ namespace osu.Game.Tests.Visual.Editor
                 Action = onClick;
             }
 
-            [BackgroundDependencyLoader]
-            private void load(IAdjustableClock adjustableClock)
-            {
-                this.adjustableClock = adjustableClock;
-            }
-
             private void onClick()
             {
-                if (adjustableClock.IsRunning)
-                    adjustableClock.Stop();
+                if (editorClock.IsRunning)
+                    editorClock.Stop();
                 else
-                    adjustableClock.Start();
+                    editorClock.Start();
             }
 
             protected override void Update()
             {
                 base.Update();
 
-                Text = adjustableClock.IsRunning ? "Stop" : "Start";
+                Text = editorClock.IsRunning ? "Stop" : "Start";
             }
         }
     }
