@@ -491,7 +491,7 @@ namespace osu.Game.Screens.Mvis
             });
 
             Beatmap.BindValueChanged(onBeatmapChanged, true);
-            useUnicode.BindValueChanged(onUseUnicodeChanged);
+            useUnicode.BindValueChanged(v => activity.Value = new UserActivity.InMvis(Beatmap.Value.BeatmapInfo, v.NewValue));
 
             musicSpeed.BindValueChanged(_ => applyTrackAdjustments());
             adjustFreq.BindValueChanged(_ => applyTrackAdjustments());
@@ -927,11 +927,6 @@ namespace osu.Game.Screens.Mvis
 
             activity.Value = new UserActivity.InMvis(beatmap.BeatmapInfo, useUnicode.Value);
             prevBeatmap = beatmap;
-        }
-
-        private void onUseUnicodeChanged(ValueChangedEvent<bool> v)
-        {
-            activity.Value = new UserActivity.InMvis(Beatmap.Value.BeatmapInfo, v.NewValue);
         }
 
         private void reBind()
