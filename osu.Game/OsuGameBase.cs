@@ -127,7 +127,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.331.0";
+        public virtual string Version => "2021.407.1";
 
         public OsuGameBase()
         {
@@ -154,7 +154,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "27ab11345f67f3e639a3c9b4d5a17431";
+            VersionHash = "a605270d9ef78ec82af1b721aa2f2794";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -286,17 +286,18 @@ namespace osu.Game
 
             AddInternal(RulesetConfigCache);
 
-            MenuCursorContainer = new MenuCursorContainer { RelativeSizeAxes = Axes.Both };
-
             GlobalActionContainer globalBindings;
 
-            MenuCursorContainer.Child = globalBindings = new GlobalActionContainer(this)
+            var mainContent = new Drawable[]
             {
-                RelativeSizeAxes = Axes.Both,
-                Child = content = new OsuTooltipContainer(MenuCursorContainer.Cursor) { RelativeSizeAxes = Axes.Both }
+                MenuCursorContainer = new MenuCursorContainer { RelativeSizeAxes = Axes.Both },
+                // to avoid positional input being blocked by children, ensure the GlobalActionContainer is above everything.
+                globalBindings = new GlobalActionContainer(this)
             };
 
-            base.Content.Add(CreateScalingContainer().WithChild(MenuCursorContainer));
+            MenuCursorContainer.Child = content = new OsuTooltipContainer(MenuCursorContainer.Cursor) { RelativeSizeAxes = Axes.Both };
+
+            base.Content.Add(CreateScalingContainer().WithChildren(mainContent));
 
             KeyBindingStore.Register(globalBindings);
             dependencies.Cache(globalBindings);
