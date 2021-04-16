@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using osu.Framework.Bindables;
+using System.IO;
 
 namespace osu.Game.Database
 {
@@ -83,6 +84,12 @@ namespace osu.Game.Database
             {
                 Task.Factory.StartNew(async () =>
                 {
+                    if (filename.EndsWith(".osr"))
+                    {
+                        var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "osu\\replay");
+                        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+                        File.Copy(filename, Path.Combine(path, Path.GetFileName(model.ToString() + ".osr")));
+                    }
                     // This gets scheduled back to the update thread, but we want the import to run in the background.
                     var imported = await Import(notification, new ImportTask(filename)).ConfigureAwait(false);
 
