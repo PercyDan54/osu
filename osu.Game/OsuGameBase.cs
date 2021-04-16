@@ -38,6 +38,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 using osu.Game.Skinning;
+using osu.Game.Utils;
 using osuTK.Input;
 
 namespace osu.Game
@@ -127,7 +128,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.410.0";
+        public virtual string Version => "2021.416.0";
 
         public OsuGameBase()
         {
@@ -144,6 +145,8 @@ namespace osu.Game
 
         protected override UserInputManager CreateUserInputManager() => new OsuUserInputManager();
 
+        protected virtual BatteryInfo CreateBatteryInfo() => null;
+
         /// <summary>
         /// The maximum volume at which audio tracks should playback. This can be set lower than 1 to create some head-room for sound effects.
         /// </summary>
@@ -154,7 +157,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "0ec11b26df84df14f636b3129a7f7f45";
+            VersionHash = "133c1e675ad8e0dadb20aa6f31f5f7b7";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -259,6 +262,11 @@ namespace osu.Game
             dependencies.Cache(KeyBindingStore = new KeyBindingStore(contextFactory, RulesetStore));
             dependencies.Cache(SettingsStore = new SettingsStore(contextFactory));
             dependencies.Cache(RulesetConfigCache = new RulesetConfigCache(SettingsStore));
+
+            var powerStatus = CreateBatteryInfo();
+            if (powerStatus != null)
+                dependencies.CacheAs(powerStatus);
+
             dependencies.Cache(new SessionStatics());
             dependencies.Cache(new OsuColour());
 
@@ -413,12 +421,15 @@ namespace osu.Game
             if (paths.Length == 0)
                 return;
 
-            var extension = Path.GetExtension(paths.First())?.ToLowerInvariant();
+            var filesPerExtension = paths.GroupBy(p => Path.GetExtension(p).ToLowerInvariant());
 
-            foreach (var importer in fileImporters)
+            foreach (var groups in filesPerExtension)
             {
-                if (importer.HandledExtensions.Contains(extension))
-                    await importer.Import(paths).ConfigureAwait(false);
+                foreach (var importer in fileImporters)
+                {
+                    if (importer.HandledExtensions.Contains(groups.Key))
+                        await importer.Import(groups.ToArray()).ConfigureAwait(false);
+                }
             }
         }
 
