@@ -3,24 +3,94 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
+using osu.Game.IO.Archives;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Replays;
+using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
+using osu.Game.Scoring.Legacy;
+using osu.Game.Screens.Play;
 using osu.Game.Users;
 
 namespace osu.Game.Rulesets.Osu.Mods
 {
-    public class OsuModAutoplay : ModAutoplay<OsuHitObject>
+    public class OsuModAutoplay : ModAutoplay<OsuHitObject>, IApplicableToHUD, IApplicableToPlayer, IApplicableToScoreProcessor
     {
         public override Type[] IncompatibleMods => base.IncompatibleMods.Append(typeof(OsuModAutopilot)).Append(typeof(OsuModSpunOut)).ToArray();
 
-        public override Score CreateReplayScore(IBeatmap beatmap, IReadOnlyList<Mod> mods) => new Score
+        [SettingSource("Cursor Dance", "Enable cursor dance")]
+        public Bindable<bool> CursorDance { get; } = new BindableBool();
+
+        [SettingSource("Save score")]
+        public Bindable<bool> SaveScore { get; } = new BindableBool();
+
+        [SettingSource("Hide replay interface")]
+        public Bindable<bool> HideInterface { get; } = new BindableBool();
+
+        private Score score;
+        private IBeatmap beatmap;
+        private ScoreProcessor scoreProcessor;
+
+        public override Score CreateReplayScore(IBeatmap beatmap, IReadOnlyList<Mod> mods)
         {
-            ScoreInfo = new ScoreInfo { User = new User { Username = "Autoplay" } },
-            Replay = new OsuAutoGenerator(beatmap, mods).Generate()
-        };
+            this.beatmap = beatmap;
+            score = new Score
+            {
+                ScoreInfo = new ScoreInfo
+                {
+                    User = new User { Username = CursorDance.Value ? "danser" : "Autoplay"},
+                    Beatmap = beatmap.BeatmapInfo,
+                    BeatmapInfoID = beatmap.BeatmapInfo.Metadata.ID,
+                    Date = DateTime.UtcNow
+                },
+                Replay = CursorDance.Value ? new OsuDanceGenerator(beatmap, mods).Generate() : new OsuAutoGenerator(beatmap, mods).Generate()
+            };
+
+            return score;
+        }
+
+        public void ApplyToHUD(HUDOverlay overlay)
+        {
+            if (HideInterface.Value)
+            {
+                var replayOverlay = overlay.PlayerSettingsOverlay;
+
+                foreach (var child in replayOverlay.Children)
+                {
+                    child.Hide();
+                }
+            }
+        }
+
+        public void ApplyToScoreProcessor(ScoreProcessor scoreProcessor)
+        {
+            this.scoreProcessor = scoreProcessor;
+        }
+
+        public ScoreRank AdjustRank(ScoreRank rank, double accuracy) => rank;
+
+        public void ApplyToPlayer(Player player)
+        {
+            if (SaveScore.Value)
+            {
+                score.ScoreInfo.Ruleset = player.Ruleset.Value;
+                if (player.Ruleset.Value.ID != null) score.ScoreInfo.RulesetID = player.Ruleset.Value.ID ?? 0;
+                LegacyByteArrayReader replayReader;
+
+                using (var stream = new MemoryStream())
+                {
+                    new LegacyScoreEncoder(score, beatmap).Encode(stream);
+                    replayReader = new LegacyByteArrayReader(stream.ToArray(), "replay.osr");
+                }
+
+                ScoreManager.Instance.Import(score.ScoreInfo, replayReader).ConfigureAwait(false);
+            }
+        }
     }
 }

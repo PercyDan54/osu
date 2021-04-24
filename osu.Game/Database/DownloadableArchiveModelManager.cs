@@ -38,6 +38,7 @@ namespace osu.Game.Database
         private readonly List<ArchiveDownloadRequest<TModel>> currentDownloads = new List<ArchiveDownloadRequest<TModel>>();
 
         private readonly MutableDatabaseBackedStoreWithFileIncludes<TModel, TFileModel> modelStore;
+        private readonly Storage storage;
 
         protected DownloadableArchiveModelManager(Storage storage, IDatabaseContextFactory contextFactory, IAPIProvider api, MutableDatabaseBackedStoreWithFileIncludes<TModel, TFileModel> modelStore,
                                                   IIpcHost importHost = null)
@@ -45,6 +46,7 @@ namespace osu.Game.Database
         {
             this.api = api;
             this.modelStore = modelStore;
+            this.storage = storage;
         }
 
         /// <summary>
@@ -84,12 +86,13 @@ namespace osu.Game.Database
             {
                 Task.Factory.StartNew(async () =>
                 {
-                    if (filename.EndsWith(".osr"))
+                    if (filename.EndsWith(".osr", StringComparison.Ordinal))
                     {
-                        var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "osu\\replay");
+                        var path = storage.GetFullPath("replay");
                         if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-                        File.Copy(filename, Path.Combine(path, Path.GetFileName(model.ToString() + ".osr")));
+                        File.Copy(filename, Path.Combine(path, Path.GetFileName(model + ".osr")));
                     }
+
                     // This gets scheduled back to the update thread, but we want the import to run in the background.
                     var imported = await Import(notification, new ImportTask(filename)).ConfigureAwait(false);
 

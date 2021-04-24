@@ -17,7 +17,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
         {
             Children = new Drawable[]
             {
-               new SettingsSlider<float, FramerateSlider>
+                new SettingsSlider<float, FramerateSlider>
                 {
                     LabelText = "Autoplay framerate",
                     Current = config.GetBindable<float>(MSetting.ReplayFramerate),
@@ -70,19 +70,20 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 }
             };
         }
-        private class MultiplierSlider : OsuSliderBar<float>
+
+        public class MultiplierSlider : OsuSliderBar<float>
         {
-            public override string TooltipText => Current.Value.ToString("N3") + "x";
+            public override string TooltipText => Current.Value.ToString("g2") + "x";
         }
 
         private class AngleSlider : OsuSliderBar<float>
         {
-            public override string TooltipText => (Current.Value * 180).ToString("N2") + "deg";
+            public override string TooltipText => (Current.Value * 180).ToString("g2") + "deg";
         }
 
         private class FramerateSlider : OsuSliderBar<float>
         {
-            public override string TooltipText => Current.Value.ToString("N0") + "fps";
+            public override string TooltipText => Current.Value.ToString("g0") + "fps";
         }
     }
 }

@@ -61,7 +61,7 @@ namespace osu.Game.Configuration
 
             //Dance settings
             SetDefault(MSetting.DanceMover, OsuDanceMover.Momentum);
-            SetDefault(MSetting.AngleOffset, 8f / 18f, 0f, 2f, 0.01f);
+            SetDefault(MSetting.AngleOffset, 0.45f, 0f, 2f, 0.01f);
             SetDefault(MSetting.JumpMulti, 0.5f, 0f, 2f, 0.01f);
             SetDefault(MSetting.NextJumpMulti, 0.25f, 0f, 2f, 0.01f);
             SetDefault(MSetting.ReplayFramerate, 120f, 15f, 240f, 1f);
@@ -69,6 +69,15 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.SpinnerRadiusEnd, 15f, 10f, 250f, 1f);
             SetDefault(MSetting.SkipStackAngles, true);
             SetDefault(MSetting.BorderBounce, true);
+
+            //Cursor settings
+            SetDefault(MSetting.CursorTrailHueOverride, false);
+            SetDefault(MSetting.CursorTrailHueShift, false);
+            SetDefault(MSetting.CursorTrailHue, .5f, 0.1f, 1.0f, 0.05f);
+            SetDefault(MSetting.CursorTrailHueSpeed, 10f, 5f, 50.0f, 1f);
+            SetDefault(MSetting.CursorTrailFadeDuration, 300, 100, 5000, 50);
+            SetDefault(MSetting.CursorTrailSize, 1f, 1f, 15.0f, 0.5f);
+            SetDefault(MSetting.CursorTrailDensity, 1f, 0.5f, 10.0f, 0.5f);
         }
     }
 
@@ -110,7 +119,14 @@ namespace osu.Game.Configuration
         JumpMulti,
         NextJumpMulti,
         BorderBounce,
-        SkipStackAngles
+        SkipStackAngles,
+        CursorTrailDensity,
+        CursorTrailHueShift,
+        CursorTrailHueSpeed,
+        CursorTrailFadeDuration,
+        CursorTrailSize,
+        CursorTrailHue,
+        CursorTrailHueOverride
     }
 
     public enum MvisBarType

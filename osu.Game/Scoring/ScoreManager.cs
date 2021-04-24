@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -47,11 +48,14 @@ namespace osu.Game.Scoring
                             Func<BeatmapDifficultyCache> difficulties = null, OsuConfigManager configManager = null)
             : base(storage, contextFactory, api, new ScoreStore(contextFactory, storage), importHost)
         {
+            Instance = this;
             this.rulesets = rulesets;
             this.beatmaps = beatmaps;
             this.difficulties = difficulties;
             this.configManager = configManager;
         }
+
+        public static ScoreManager Instance;
 
         protected override ScoreInfo CreateModel(ArchiveReader archive)
         {

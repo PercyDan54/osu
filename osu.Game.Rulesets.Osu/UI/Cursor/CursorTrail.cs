@@ -5,9 +5,11 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.EnumExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Batches;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.OpenGL.Vertices;
 using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Shaders;
@@ -16,6 +18,7 @@ using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.Layout;
 using osu.Framework.Timing;
+using osu.Game.Configuration;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Graphics.ES30;
@@ -25,6 +28,14 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
     public class CursorTrail : Drawable, IRequireHighFrequencyMousePosition
     {
         private const int max_sprites = 2048;
+
+        private readonly Bindable<bool> hueOverride = new BindableBool();
+        private readonly Bindable<bool> hueShift = new BindableBool();
+        private readonly Bindable<float> hue = new Bindable<float>();
+        private readonly Bindable<float> hueSpeed = new Bindable<float>();
+        private readonly Bindable<float> size = new Bindable<float>();
+        private readonly Bindable<float> fadeDuration = new Bindable<float>();
+        private readonly Bindable<float> density = new Bindable<float>();
 
         private readonly TrailPart[] parts = new TrailPart[max_sprites];
         private int currentIndex;
@@ -61,9 +72,18 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
         }
 
         [BackgroundDependencyLoader]
-        private void load(ShaderManager shaders)
+        private void load(ShaderManager shaders, MConfigManager config)
         {
+            config.BindWith(MSetting.CursorTrailHue, hue);
+            config.BindWith(MSetting.CursorTrailHueShift, hueShift);
+            config.BindWith(MSetting.CursorTrailHueSpeed, hueSpeed);
+            config.BindWith(MSetting.CursorTrailHueOverride, hueOverride);
+            config.BindWith(MSetting.CursorTrailSize, size);
+            config.BindWith(MSetting.CursorTrailDensity, density);
+            config.BindWith(MSetting.CursorTrailFadeDuration, fadeDuration);
+
             shader = shaders.Load(@"CursorTrail", FragmentShaderDescriptor.TEXTURE);
+            size.BindValueChanged(_ => partSizeCache.Invalidate());
         }
 
         protected override void LoadComplete()
@@ -89,14 +109,16 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
         private readonly LayoutValue<Vector2> partSizeCache = new LayoutValue<Vector2>(Invalidation.DrawInfo | Invalidation.RequiredParentSizeToFit | Invalidation.Presence);
 
-        private Vector2 partSize => partSizeCache.IsValid
-            ? partSizeCache.Value
-            : (partSizeCache.Value = new Vector2(Texture.DisplayWidth, Texture.DisplayHeight) * DrawInfo.Matrix.ExtractScale().Xy);
+        private Vector2 defaultSize => new Vector2(Texture.DisplayWidth, Texture.DisplayHeight) * DrawInfo.Matrix.ExtractScale().Xy;
+
+        private Vector2 partSize => partSizeCache.IsValid ? partSizeCache.Value : partSizeCache.Value = new Vector2(size.Value) * defaultSize;
 
         /// <summary>
         /// The amount of time to fade the cursor trail pieces.
         /// </summary>
         protected virtual double FadeDuration => 300;
+
+        protected float FadeDurationMult => fadeDuration.Value / (float)FadeDuration;
 
         public override bool IsPresent => true;
 
@@ -106,11 +128,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
             Invalidate(Invalidation.DrawNode);
 
-            const int fade_clock_reset_threshold = 1000000;
-
             time = (float)((Time.Current - timeOffset) / FadeDuration);
-            if (time > fade_clock_reset_threshold)
-                resetTime();
         }
 
         private void resetTime()
@@ -156,13 +174,12 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
                 if (InterpolateMovements)
                 {
-                    // ReSharper disable once PossibleInvalidOperationException
                     Vector2 pos1 = lastPosition.Value;
                     Vector2 diff = pos2 - pos1;
                     float distance = diff.Length;
                     Vector2 direction = diff / distance;
 
-                    float interval = partSize.X / 2.5f * IntervalMultiplier;
+                    float interval = defaultSize.X / 2.5f * IntervalMultiplier / density.Value;
 
                     for (float d = interval; d < distance; d += interval)
                     {
@@ -183,7 +200,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
         private void addPart(Vector2 screenSpacePosition)
         {
             parts[currentIndex].Position = screenSpacePosition;
-            parts[currentIndex].Time = time + 1;
+            parts[currentIndex].Time = time + FadeDurationMult;
             ++parts[currentIndex].InvalidationID;
 
             currentIndex = (currentIndex + 1) % max_sprites;
@@ -207,12 +224,15 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
             private float time;
 
+            //private float color;
+
             private readonly TrailPart[] parts = new TrailPart[max_sprites];
             private Vector2 size;
 
             private Vector2 originPosition;
 
             private readonly QuadBatch<TexturedTrailVertex> vertexBatch = new QuadBatch<TexturedTrailVertex>(max_sprites, 1);
+            private bool hueOverride;
 
             public TrailDrawNode(CursorTrail source)
                 : base(source)
@@ -227,6 +247,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
                 texture = Source.texture;
                 size = Source.partSize;
                 time = Source.time;
+                hueOverride = Source.hueOverride.Value;
 
                 originPosition = Vector2.Zero;
 
@@ -262,12 +283,14 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
                     if (time - part.Time >= 1)
                         continue;
 
+                    var colour = hueOverride ? (ColourInfo)Colour4.FromHSV(Source.hue.Value + (Source.hueShift.Value ? time / (150 / Source.hueSpeed.Value) % 1 : 0), 1, 1) : DrawColourInfo.Colour;
+
                     vertexBatch.Add(new TexturedTrailVertex
                     {
                         Position = new Vector2(part.Position.X - size.X * originPosition.X, part.Position.Y + size.Y * (1 - originPosition.Y)),
                         TexturePosition = textureRect.BottomLeft,
                         TextureRect = new Vector4(0, 0, 1, 1),
-                        Colour = DrawColourInfo.Colour.BottomLeft.Linear,
+                        Colour = colour.BottomLeft.Linear,
                         Time = part.Time
                     });
 
@@ -276,7 +299,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
                         Position = new Vector2(part.Position.X + size.X * (1 - originPosition.X), part.Position.Y + size.Y * (1 - originPosition.Y)),
                         TexturePosition = textureRect.BottomRight,
                         TextureRect = new Vector4(0, 0, 1, 1),
-                        Colour = DrawColourInfo.Colour.BottomRight.Linear,
+                        Colour = colour.BottomRight.Linear,
                         Time = part.Time
                     });
 
@@ -285,7 +308,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
                         Position = new Vector2(part.Position.X + size.X * (1 - originPosition.X), part.Position.Y - size.Y * originPosition.Y),
                         TexturePosition = textureRect.TopRight,
                         TextureRect = new Vector4(0, 0, 1, 1),
-                        Colour = DrawColourInfo.Colour.TopRight.Linear,
+                        Colour = colour.TopRight.Linear,
                         Time = part.Time
                     });
 
@@ -294,7 +317,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
                         Position = new Vector2(part.Position.X - size.X * originPosition.X, part.Position.Y - size.Y * originPosition.Y),
                         TexturePosition = textureRect.TopLeft,
                         TextureRect = new Vector4(0, 0, 1, 1),
-                        Colour = DrawColourInfo.Colour.TopLeft.Linear,
+                        Colour = colour.TopLeft.Linear,
                         Time = part.Time
                     });
                 }

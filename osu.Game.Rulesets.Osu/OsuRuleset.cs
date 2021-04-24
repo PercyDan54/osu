@@ -170,7 +170,7 @@ namespace osu.Game.Rulesets.Osu
                 case ModType.Automation:
                     return new Mod[]
                     {
-                        new MultiMod(new OsuModAutoplay(), new OsuModDance(), new OsuModCinema()),
+                        new MultiMod(new OsuModAutoplay(), new OsuModCinema()),
                         new OsuModRelax(),
                         new MultiMod(new OsuModAutopilot(), new OsuModAutopilotDance()),
                         new OsuModSpunOut(),
