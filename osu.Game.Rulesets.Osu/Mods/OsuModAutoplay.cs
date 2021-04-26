@@ -12,7 +12,6 @@ using osu.Game.IO.Archives;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Replays;
-using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
 using osu.Game.Screens.Play;
@@ -20,7 +19,7 @@ using osu.Game.Users;
 
 namespace osu.Game.Rulesets.Osu.Mods
 {
-    public class OsuModAutoplay : ModAutoplay<OsuHitObject>, IApplicableToHUD, IApplicableToPlayer, IApplicableToScoreProcessor
+    public class OsuModAutoplay : ModAutoplay<OsuHitObject>, IApplicableToHUD, IApplicableToPlayer
     {
         public override Type[] IncompatibleMods => base.IncompatibleMods.Append(typeof(OsuModAutopilot)).Append(typeof(OsuModSpunOut)).ToArray();
 
@@ -35,7 +34,6 @@ namespace osu.Game.Rulesets.Osu.Mods
 
         private Score score;
         private IBeatmap beatmap;
-        private ScoreProcessor scoreProcessor;
 
         public override Score CreateReplayScore(IBeatmap beatmap, IReadOnlyList<Mod> mods)
         {
@@ -44,10 +42,11 @@ namespace osu.Game.Rulesets.Osu.Mods
             {
                 ScoreInfo = new ScoreInfo
                 {
-                    User = new User { Username = CursorDance.Value ? "danser" : "Autoplay"},
+                    User = new User { Username = CursorDance.Value ? "danser" : "Autoplay" },
                     Beatmap = beatmap.BeatmapInfo,
                     BeatmapInfoID = beatmap.BeatmapInfo.Metadata.ID,
-                    Date = DateTime.UtcNow
+                    Date = DateTime.UtcNow,
+                    Mods = mods.ToArray()
                 },
                 Replay = CursorDance.Value ? new OsuDanceGenerator(beatmap, mods).Generate() : new OsuAutoGenerator(beatmap, mods).Generate()
             };
@@ -68,19 +67,11 @@ namespace osu.Game.Rulesets.Osu.Mods
             }
         }
 
-        public void ApplyToScoreProcessor(ScoreProcessor scoreProcessor)
-        {
-            this.scoreProcessor = scoreProcessor;
-        }
-
-        public ScoreRank AdjustRank(ScoreRank rank, double accuracy) => rank;
-
         public void ApplyToPlayer(Player player)
         {
             if (SaveScore.Value)
             {
                 score.ScoreInfo.Ruleset = player.Ruleset.Value;
-                if (player.Ruleset.Value.ID != null) score.ScoreInfo.RulesetID = player.Ruleset.Value.ID ?? 0;
                 LegacyByteArrayReader replayReader;
 
                 using (var stream = new MemoryStream())

@@ -118,8 +118,6 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
         /// </summary>
         protected virtual double FadeDuration => 300;
 
-        protected float FadeDurationMult => fadeDuration.Value / (float)FadeDuration;
-
         public override bool IsPresent => true;
 
         protected override void Update()
@@ -200,7 +198,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
         private void addPart(Vector2 screenSpacePosition)
         {
             parts[currentIndex].Position = screenSpacePosition;
-            parts[currentIndex].Time = time + FadeDurationMult;
+            parts[currentIndex].Time = time + fadeDuration.Value / (float)FadeDuration;
             ++parts[currentIndex].InvalidationID;
 
             currentIndex = (currentIndex + 1) % max_sprites;

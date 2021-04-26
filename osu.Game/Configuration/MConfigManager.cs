@@ -75,7 +75,7 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.CursorTrailHueShift, false);
             SetDefault(MSetting.CursorTrailHue, .5f, 0.1f, 1.0f, 0.05f);
             SetDefault(MSetting.CursorTrailHueSpeed, 10f, 5f, 50.0f, 1f);
-            SetDefault(MSetting.CursorTrailFadeDuration, 300, 100, 5000, 50);
+            SetDefault(MSetting.CursorTrailFadeDuration, 500, 100, 5000, 50);
             SetDefault(MSetting.CursorTrailSize, 1f, 1f, 15.0f, 0.5f);
             SetDefault(MSetting.CursorTrailDensity, 1f, 0.5f, 10.0f, 0.5f);
         }
