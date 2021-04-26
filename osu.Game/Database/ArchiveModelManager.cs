@@ -21,7 +21,6 @@ using osu.Game.IO;
 using osu.Game.IO.Archives;
 using osu.Game.IPC;
 using osu.Game.Overlays.Notifications;
-using osu.Game.Scoring;
 using SharpCompress.Archives.Zip;
 
 namespace osu.Game.Database
@@ -422,15 +421,6 @@ namespace osu.Game.Database
 
             if (retrievedItem == null)
                 throw new ArgumentException("Specified model could not be found", nameof(item));
-
-            if (retrievedItem is ScoreInfo)
-            {
-                var dest = exportStorage.GetFullPath("") + $"{item}{HandledExtensions.First()}";
-                if(File.Exists(dest)) File.Delete(dest);
-                File.Copy(Files.Storage.GetFullPath(retrievedItem.Files.First().FileInfo.StoragePath), dest);
-                exportStorage.OpenInNativeExplorer();
-                return;
-            }
 
             using (var archive = ZipArchive.Create())
             {
