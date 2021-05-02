@@ -33,7 +33,8 @@ namespace osu.Game.Input.Bindings
                                                                        .Concat(EditorKeyBindings)
                                                                        .Concat(InGameKeyBindings)
                                                                        .Concat(SongSelectKeyBindings)
-                                                                       .Concat(AudioControlKeyBindings);
+                                                                       .Concat(AudioControlKeyBindings)
+                                                                       .Concat(MvisControlKeyBindings);
 
         public IEnumerable<KeyBinding> GlobalKeyBindings => new[]
         {
@@ -63,8 +64,9 @@ namespace osu.Game.Input.Bindings
 
             new KeyBinding(new[] { InputKey.Control, InputKey.Shift, InputKey.R }, GlobalAction.RandomSkin),
         };
+
         public IEnumerable<KeyBinding> MvisControlKeyBindings => new[]
-{
+        {
             new KeyBinding(InputKey.Left, GlobalAction.MvisMusicPrev),
             new KeyBinding(InputKey.Right, GlobalAction.MvisMusicNext),
             new KeyBinding(InputKey.Space, GlobalAction.MvisTogglePause),
@@ -73,6 +75,7 @@ namespace osu.Game.Input.Bindings
             new KeyBinding(InputKey.L, GlobalAction.MvisToggleTrackLoop),
             new KeyBinding(InputKey.Enter, GlobalAction.MvisOpenInSongSelect),
             new KeyBinding(InputKey.Slash, GlobalAction.MvisSelectCollection),
+            new KeyBinding(InputKey.Comma, GlobalAction.MvisTogglePluginPage)
         };
 
         public IEnumerable<KeyBinding> EditorKeyBindings => new[]
@@ -245,15 +248,6 @@ namespace osu.Game.Input.Bindings
         [Description("Pause / resume replay")]
         TogglePauseReplay,
 
-        MvisMusicPrev,
-        MvisMusicNext,
-        MvisSelectCollection,
-        MvisTogglePause,
-        MvisToggleOverlayLock,
-        MvisForceLockOverlayChanges,
-        MvisTogglePlayList,
-        MvisToggleTrackLoop,
-        MvisOpenInSongSelect,
         [Description("Toggle in-game interface")]
         ToggleInGameInterface,
 
@@ -277,6 +271,18 @@ namespace osu.Game.Input.Bindings
         EditorNudgeLeft,
 
         [Description("Nudge selection right")]
-        EditorNudgeRight
+        EditorNudgeRight,
+
+        // Mvis
+        MvisMusicPrev,
+        MvisMusicNext,
+        MvisSelectCollection,
+        MvisTogglePause,
+        MvisForceLockOverlayChanges,
+        MvisTogglePlayList,
+        MvisToggleTrackLoop,
+        MvisOpenInSongSelect,
+        MvisTogglePluginPage,
+        MvisToggleOverlayLock
     }
 }

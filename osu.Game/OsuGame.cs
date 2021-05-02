@@ -27,6 +27,7 @@ using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
+using osu.Framework.Platform;
 using osu.Framework.Threading;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
@@ -51,6 +52,7 @@ using osu.Game.Utils;
 using LogLevel = osu.Framework.Logging.LogLevel;
 using osu.Game.Database;
 using osu.Game.IO;
+using osu.Game.Screens.Mvis.Plugins;
 
 namespace osu.Game
 {
@@ -139,6 +141,9 @@ namespace osu.Game
 
             SentryLogger = new SentryLogger(this);
         }
+
+        [Resolved]
+        private GameHost host { get; set; }
 
         private void updateBlockingOverlayFade() =>
             screenContainer.FadeColour(visibleBlockingOverlays.Any() ? OsuColour.Gray(0.5f) : Color4.White, 500, Easing.OutQuint);
@@ -576,6 +581,8 @@ namespace osu.Game
             BackButton.Receptor receptor;
 
             dependencies.CacheAs(idleTracker = new GameIdleTracker(6000));
+            dependencies.Cache(mvisPluginManager = new MvisPluginManager());
+            loadComponentSingleFile(mvisPluginManager, AddInternal);
 
             var sessionIdleTracker = new GameIdleTracker(300000);
             sessionIdleTracker.IsIdle.BindValueChanged(idle =>
@@ -941,6 +948,7 @@ namespace osu.Game
         private FrameworkConfigManager frameworkConfig { get; set; }
 
         private ScalingContainer screenContainer;
+        private MvisPluginManager mvisPluginManager;
 
         protected override bool OnExiting()
         {

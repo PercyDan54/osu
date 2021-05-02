@@ -18,13 +18,7 @@ namespace osu.Game.Overlays.Settings.Sections.General
             {
                 new SettingsCheckbox
                 {
-                    LabelText = "Enable storyboard",
-                    Current = config.GetBindable<bool>(MSetting.MvisEnableStoryboard),
-                },
-                new SettingsCheckbox
-                {
                     LabelText = "Enable storyboard overlay",
-                    TooltipText = "这会将故事版的Overlay层放置在Mvis面板容器中，随面板的隐藏而隐藏，且不受背景暗化的影响",
                     Current = config.GetBindable<bool>(MSetting.MvisStoryboardProxy)
                 }
             };
