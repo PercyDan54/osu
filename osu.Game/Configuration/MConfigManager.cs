@@ -30,34 +30,19 @@ namespace osu.Game.Configuration
             //Gameplay Settings
             SetDefault(MSetting.SamplePlaybackGain, 1f, 0f, 20f);
 
-            //MvisSettings
-            SetDefault(MSetting.MvisParticleAmount, 350, 0, 350);
+            //Mvis Settings
             SetDefault(MSetting.MvisContentAlpha, 1f, 0f, 1f);
             SetDefault(MSetting.MvisBgBlur, 0.1f, 0f, 1f);
-            SetDefault(MSetting.MvisEnableStoryboard, true);
             SetDefault(MSetting.MvisStoryboardProxy, true);
-            SetDefault(MSetting.MvisUseOsuLogoVisualisation, false);
             SetDefault(MSetting.MvisIdleBgDim, 0.6f, 0f, 1f);
             SetDefault(MSetting.MvisEnableBgTriangles, true);
             SetDefault(MSetting.MvisAdjustMusicWithFreq, false);
             SetDefault(MSetting.MvisMusicSpeed, 1.0, 0.1, 2.0);
             SetDefault(MSetting.MvisEnableNightcoreBeat, false);
-            SetDefault(MSetting.MvisPlayFromCollection, false);
             SetDefault(MSetting.MvisInterfaceRed, 0, 0, 255f);
             SetDefault(MSetting.MvisInterfaceGreen, 119f, 0, 255f);
             SetDefault(MSetting.MvisInterfaceBlue, 255f, 0, 255f);
-
-            //Mvis Settings(Upstream)
-            SetDefault(MSetting.MvisShowParticles, true);
-            SetDefault(MSetting.MvisBarType, MvisBarType.Rounded);
-            SetDefault(MSetting.MvisVisualizerAmount, 3, 1, 5);
-            SetDefault(MSetting.MvisBarWidth, 3.0, 1, 20);
-            SetDefault(MSetting.MvisBarsPerVisual, 120, 1, 200);
-            SetDefault(MSetting.MvisRotation, 0, 0, 359);
-            SetDefault(MSetting.MvisUseCustomColour, false);
-            SetDefault(MSetting.MvisRed, 0, 0, 255);
-            SetDefault(MSetting.MvisGreen, 0, 0, 255);
-            SetDefault(MSetting.MvisBlue, 0, 0, 255);
+            SetDefault(MSetting.MvisCurrentAudioProvider, "osu.Game.Screens.Mvis.Plugins+OsuMusicControllerWrapper");
 
             //Dance settings
             SetDefault(MSetting.DanceMover, OsuDanceMover.Momentum);
@@ -85,28 +70,15 @@ namespace osu.Game.Configuration
     {
         TrianglesEnabled,
         UseSayobot,
-        MvisParticleAmount,
         MvisBgBlur,
         MvisUseOsuLogoVisualisation,
-        MvisEnableStoryboard,
         MvisIdleBgDim,
         MvisContentAlpha,
         MvisEnableBgTriangles,
         MvisStoryboardProxy,
-        MvisShowParticles,
-        MvisVisualizerAmount,
-        MvisBarWidth,
-        MvisBarsPerVisual,
-        MvisBarType,
-        MvisRotation,
-        MvisUseCustomColour,
-        MvisRed,
-        MvisGreen,
-        MvisBlue,
         MvisMusicSpeed,
         MvisAdjustMusicWithFreq,
         MvisEnableNightcoreBeat,
-        MvisPlayFromCollection,
         MvisInterfaceRed,
         MvisInterfaceGreen,
         MvisInterfaceBlue,
@@ -126,14 +98,8 @@ namespace osu.Game.Configuration
         CursorTrailFadeDuration,
         CursorTrailSize,
         CursorTrailHue,
-        CursorTrailHueOverride
-    }
-
-    public enum MvisBarType
-    {
-        Basic,
-        Rounded,
-        Fall
+        CursorTrailHueOverride,
+        MvisCurrentAudioProvider
     }
 
     public enum OsuDanceMover

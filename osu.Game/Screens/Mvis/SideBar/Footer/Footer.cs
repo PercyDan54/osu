@@ -1,3 +1,4 @@
+using System;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
@@ -19,6 +20,9 @@ namespace osu.Game.Screens.Mvis.SideBar.Footer
         [Resolved]
         private CustomColourProvider colourProvider { get; set; }
 
+        [Resolved(CanBeNull = true)]
+        private MvisScreen mvisScreen { get; set; }
+
         [BackgroundDependencyLoader]
         private void load()
         {
@@ -33,7 +37,6 @@ namespace osu.Game.Screens.Mvis.SideBar.Footer
                 new SkinnableComponent(
                     "MSidebar-BottomBox",
                     confineMode: ConfineMode.ScaleToFill,
-                    masking: true,
                     defaultImplementation: _ => createDefaultFooter())
                 {
                     Name = "侧边栏底部横条",
@@ -85,6 +88,12 @@ namespace osu.Game.Screens.Mvis.SideBar.Footer
             }, true);
 
             base.LoadComplete();
+        }
+
+        protected override void Update()
+        {
+            Height = Math.Max(mvisScreen?.BottombarHeight ?? 0, 10);
+            base.Update();
         }
     }
 }

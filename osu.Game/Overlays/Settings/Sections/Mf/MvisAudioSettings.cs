@@ -28,19 +28,11 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 {
                     LabelText = "Adjust pitch with playback rate",
                     Current = config.GetBindable<bool>(MSetting.MvisAdjustMusicWithFreq),
-                    TooltipText = ""
                 },
                 new SettingsCheckbox
                 {
                     LabelText = "Nightcore beat",
                     Current = config.GetBindable<bool>(MSetting.MvisEnableNightcoreBeat),
-                    TooltipText = ""
-                },
-                new SettingsCheckbox
-                {
-                    LabelText = "Play music from collection",
-                    Current = config.GetBindable<bool>(MSetting.MvisPlayFromCollection),
-                    TooltipText = ""
                 }
             };
         }

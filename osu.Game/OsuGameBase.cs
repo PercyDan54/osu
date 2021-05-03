@@ -37,6 +37,7 @@ using osu.Game.Resources;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
+using osu.Game.Screens.Mvis;
 using osu.Game.Skinning;
 using osu.Game.Utils;
 using osuTK.Input;
@@ -130,7 +131,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.424.0";
+        public virtual string Version => "2021.502.0";
 
         public OsuGameBase()
         {
@@ -159,7 +160,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "6e4f774032608dfa8c4202feb3e0b73d";
+            VersionHash = "fe0ff1a97e7b08a34d1427d437562dbb";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -190,6 +191,7 @@ namespace osu.Game
             AddFont(Resources, @"Fonts/Venera-Light");
             AddFont(Resources, @"Fonts/Venera-Bold");
             AddFont(Resources, @"Fonts/Venera-Black");
+            dependencies.Cache(new CustomStore(Storage, this));
 
             Audio.Samples.PlaybackConcurrency = SAMPLE_CONCURRENCY;
 

@@ -8,6 +8,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.Containers;
@@ -19,12 +20,15 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.Mvis.SideBar
 {
-    public class Sidebar : VisibilityContainer
+    internal class Sidebar : VisibilityContainer
     {
         [Resolved]
         private CustomColourProvider colourProvider { get; set; }
 
-        private readonly List<ISidebarContent> components = new List<ISidebarContent>();
+        [Resolved]
+        private MvisScreen mvisScreen { get; set; }
+
+        public readonly List<ISidebarContent> Components = new List<ISidebarContent>();
         private readonly TabHeader header;
         private const float duration = 400;
         private HeaderTabItem prevTab;
@@ -38,11 +42,12 @@ namespace osu.Game.Screens.Mvis.SideBar
         private readonly Container<Drawable> contentContainer;
         protected override Container<Drawable> Content => contentContainer;
 
-        private bool startFromHiddenState;
-        private readonly Container content;
         private Sample sampleToggle;
         private Sample samplePopIn;
         private Sample samplePopOut;
+
+        private bool startFromHiddenState;
+        private readonly Container content;
         private bool isFirstHide = true;
 
         public Sidebar()
@@ -54,8 +59,12 @@ namespace osu.Game.Screens.Mvis.SideBar
                 new ClickToCloseBox
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.Black.Opacity(0.6f),
-                    Action = Hide,
+                    Colour = Color4.Black.Opacity(0.7f),
+                    Action = () =>
+                    {
+                        if (!content.IsHovered)
+                            Hide();
+                    }
                 },
                 content = new BlockClickContainer
                 {
@@ -63,6 +72,13 @@ namespace osu.Game.Screens.Mvis.SideBar
                     Origin = Anchor.BottomRight,
                     RelativeSizeAxes = Axes.Both,
                     Size = new Vector2(0.3f, 1f),
+                    Masking = true,
+                    EdgeEffect = new EdgeEffectParameters
+                    {
+                        Type = EdgeEffectType.Shadow,
+                        Radius = 5,
+                        Colour = Color4.Black.Opacity(0.5f)
+                    },
                     Children = new Drawable[]
                     {
                         header = new TabHeader
@@ -93,7 +109,6 @@ namespace osu.Game.Screens.Mvis.SideBar
             content.Add(new SkinnableComponent(
                 "MSidebar-background",
                 confineMode: ConfineMode.ScaleToFill,
-                masking: true,
                 defaultImplementation: _ => sidebarBg = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -146,7 +161,12 @@ namespace osu.Game.Screens.Mvis.SideBar
 
         protected override void UpdateAfterChildren()
         {
-            contentContainer.Padding = new MarginPadding { Top = header.Height + header.DrawPosition.Y, Bottom = 50 };
+            contentContainer.Padding = new MarginPadding
+            {
+                Top = header.Height + header.DrawPosition.Y,
+                Bottom = mvisScreen.BottombarHeight
+            };
+
             base.UpdateAfterChildren();
         }
 
@@ -155,11 +175,11 @@ namespace osu.Game.Screens.Mvis.SideBar
             if (!(d is ISidebarContent c))
                 throw new InvalidOperationException($"{d}不是{typeof(ISidebarContent)}");
 
-            if (!components.Contains(c))
-                throw new InvalidOperationException($"组件不包含{c}");
+            if (!Components.Contains(c))
+                throw new InvalidOperationException($"组成部分中不包含{c}");
 
             if (c.ResizeWidth < 0.3f || c.ResizeHeight < 0.3f)
-                throw new InvalidOperationException("组件过小");
+                throw new InvalidOperationException("组件过小, 缩放大小不能小于30%(0.3)");
 
             startFromHiddenState = State.Value == Visibility.Hidden;
 
@@ -194,7 +214,7 @@ namespace osu.Game.Screens.Mvis.SideBar
             if (d is ISidebarContent s)
             {
                 d.Alpha = 0;
-                components.Add(s);
+                Components.Add(s);
                 header.Tabs.Add(new HeaderTabItem(s)
                 {
                     Action = () => ShowComponent(d)
@@ -219,7 +239,8 @@ namespace osu.Game.Screens.Mvis.SideBar
                     if (t.Value == sc)
                     {
                         header.Tabs.Remove(t);
-                        break;
+                        drawable.Expire();
+                        return true;
                     }
                 }
             }
@@ -268,6 +289,7 @@ namespace osu.Game.Screens.Mvis.SideBar
         private class BlockClickContainer : Container
         {
             protected override bool OnClick(ClickEvent e) => true;
+            protected override bool OnMouseDown(MouseDownEvent e) => true;
         }
     }
 }
