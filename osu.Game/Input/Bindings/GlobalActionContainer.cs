@@ -49,6 +49,7 @@ namespace osu.Game.Input.Bindings
             new KeyBinding(new[] { InputKey.Control, InputKey.O }, GlobalAction.ToggleSettings),
             new KeyBinding(new[] { InputKey.Control, InputKey.D }, GlobalAction.ToggleBeatmapListing),
             new KeyBinding(new[] { InputKey.Control, InputKey.N }, GlobalAction.ToggleNotifications),
+            new KeyBinding(new[] { InputKey.Shift, InputKey.F2 }, GlobalAction.ToggleSkinEditor),
 
             new KeyBinding(InputKey.Escape, GlobalAction.Back),
             new KeyBinding(InputKey.ExtraMouseButton1, GlobalAction.Back),
@@ -143,6 +144,19 @@ namespace osu.Game.Input.Bindings
 
     public enum GlobalAction
     {
+        // Mvis
+        MvisMusicPrev,
+        MvisMusicNext,
+        MvisSelectCollection,
+        MvisTogglePause,
+        MvisForceLockOverlayChanges,
+        MvisTogglePlayList,
+        MvisToggleTrackLoop,
+        MvisOpenInSongSelect,
+        MvisTogglePluginPage,
+        MvisToggleOverlayLock,
+
+        //Vanilla
         [Description("Toggle chat overlay")]
         ToggleChat,
 
@@ -273,16 +287,7 @@ namespace osu.Game.Input.Bindings
         [Description("Nudge selection right")]
         EditorNudgeRight,
 
-        // Mvis
-        MvisMusicPrev,
-        MvisMusicNext,
-        MvisSelectCollection,
-        MvisTogglePause,
-        MvisForceLockOverlayChanges,
-        MvisTogglePlayList,
-        MvisToggleTrackLoop,
-        MvisOpenInSongSelect,
-        MvisTogglePluginPage,
-        MvisToggleOverlayLock
+        [Description("Toggle skin editor")]
+        ToggleSkinEditor,
     }
 }
