@@ -2,11 +2,8 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Game.Configuration;
-using osu.Game.Online.API;
-using osu.Game.Users;
 
 namespace osu.Game.Overlays.Settings.Sections.UserInterface
 {
@@ -14,15 +11,9 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
     {
         protected override string Header => "Main Menu";
 
-        private IBindable<User> user;
-
-        private SettingsEnumDropdown<BackgroundSource> backgroundSourceDropdown;
-
         [BackgroundDependencyLoader]
-        private void load(OsuConfigManager config, IAPIProvider api)
+        private void load(OsuConfigManager config)
         {
-            user = api.LocalUser.GetBoundCopy();
-
             Children = new Drawable[]
             {
                 new SettingsCheckbox
@@ -40,7 +31,7 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
                     LabelText = "Intro sequence",
                     Current = config.GetBindable<IntroSequence>(OsuSetting.IntroSequence),
                 },
-                backgroundSourceDropdown = new SettingsEnumDropdown<BackgroundSource>
+                new SettingsEnumDropdown<BackgroundSource>
                 {
                     LabelText = "Background source",
                     Current = config.GetBindable<BackgroundSource>(OsuSetting.MenuBackgroundSource),
@@ -51,18 +42,6 @@ namespace osu.Game.Overlays.Settings.Sections.UserInterface
                     Current = config.GetBindable<SeasonalBackgroundMode>(OsuSetting.SeasonalBackgroundMode),
                 }
             };
-        }
-
-        protected override void LoadComplete()
-        {
-            base.LoadComplete();
-
-            user.BindValueChanged(u =>
-            {
-                const string not_supporter_note = "Changes to this setting will only apply with an active osu!supporter tag.";
-
-                backgroundSourceDropdown.WarningText = u.NewValue?.IsSupporter != true ? not_supporter_note : string.Empty;
-            }, true);
         }
     }
 }
