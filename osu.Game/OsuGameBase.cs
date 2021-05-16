@@ -131,7 +131,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.514.0";
+        public virtual string Version => "2021.515.0";
 
         public OsuGameBase()
         {
@@ -160,7 +160,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "a97c900ebdcc9afad1ebd449a95057fe";
+            VersionHash = "5c214f021c6db6599c7a9d7416ead646";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 

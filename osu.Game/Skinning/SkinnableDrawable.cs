@@ -96,6 +96,12 @@ namespace osu.Game.Skinning
             {
                 scaling.Invalidate();
 
+                if (CentreComponent)
+                {
+                    Drawable.Origin = Anchor.Centre;
+                    Drawable.Anchor = Anchor.Centre;
+                }
+
                 if (OverrideChildAnchor)
                 {
                     ChildAnchor = CentreComponent ? Anchor.Centre : ChildAnchor;
