@@ -84,8 +84,8 @@ namespace osu.Game
 
         protected IAPIProvider API;
 
-        private SpectatorStreamingClient spectatorStreaming;
-        private StatefulMultiplayerClient multiplayerClient;
+        private SpectatorClient spectatorClient;
+        private MultiplayerClient multiplayerClient;
 
         protected MenuCursorContainer MenuCursorContainer;
 
@@ -131,7 +131,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public virtual string Version => "2021.515.0";
+        public virtual string Version => "2021.523.0";
 
         public OsuGameBase()
         {
@@ -160,7 +160,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "5c214f021c6db6599c7a9d7416ead646";
+            VersionHash = "e06959a0a1e0ac51fcdd100b60f587ba";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -220,8 +220,8 @@ namespace osu.Game
 
             dependencies.CacheAs(API ??= new APIAccess(LocalConfig, endpoints, VersionHash));
 
-            dependencies.CacheAs(spectatorStreaming = new SpectatorStreamingClient(endpoints));
-            dependencies.CacheAs(multiplayerClient = new MultiplayerClient(endpoints));
+            dependencies.CacheAs(spectatorClient = new OnlineSpectatorClient(endpoints));
+            dependencies.CacheAs(multiplayerClient = new OnlineMultiplayerClient(endpoints));
 
             var defaultBeatmap = new DummyWorkingBeatmap(Audio, Textures);
 
@@ -293,7 +293,7 @@ namespace osu.Game
             // add api components to hierarchy.
             if (API is APIAccess apiAccess)
                 AddInternal(apiAccess);
-            AddInternal(spectatorStreaming);
+            AddInternal(spectatorClient);
             AddInternal(multiplayerClient);
 
             AddInternal(RulesetConfigCache);
