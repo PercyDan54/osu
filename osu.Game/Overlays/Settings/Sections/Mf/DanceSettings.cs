@@ -40,9 +40,9 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     Current = config.GetBindable<float>(MSetting.SpinnerRadiusEnd),
                     KeyboardStep = 5f,
                 },
-                new SettingsSlider<float>
+                new SettingsSlider<float, MultiplierSlider>
                 {
-                    LabelText = "Slider5 dance multiplier",
+                    LabelText = "Slider dance multiplier",
                     Current = config.GetBindable<float>(MSetting.SliderDanceMult),
                     KeyboardStep = 0.1f,
                 },

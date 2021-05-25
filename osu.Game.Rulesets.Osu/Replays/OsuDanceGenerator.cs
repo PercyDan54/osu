@@ -90,7 +90,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             mover.ObjectsDuring = objectsDuring;
         }
 
-        private void moveToHitObject(OsuHitObject h, int idx)
+        private void addHitObjectClickFrames(OsuHitObject h, int idx)
         {
             OsuHitObject last = Beatmap.HitObjects[idx == 0 ? idx : idx - 1];
             OsuAction action = getAction(h, last);
@@ -109,13 +109,13 @@ namespace osu.Game.Rulesets.Osu.Replays
                     for (double j = GetFrameDelay(slider.StartTime); j < slider.Duration; j += GetFrameDelay(slider.StartTime + j))
                     {
                         var scaleFactor = j / slider.Duration * sliderMult;
-                        Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
                         var rad = OsuHitObject.OBJECT_RADIUS * 1.2f * h.Scale;
-                        var v = Vector2.Add(slider.StackedPosition, Vector2.Multiply((pos - slider.StackedPosition), (float)scaleFactor));
-                        v.X = Math.Clamp(v.X, pos.X - rad, pos.X + rad);
-                        v.Y = Math.Clamp(v.Y, pos.Y - rad, pos.Y + rad);
-                        AddFrameToReplay(new OsuReplayFrame((int)h.StartTime + j, sliderDance ? v : pos, action));
-                        mover.LastPos = v;
+                        Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
+                        Vector2 pos2 = slider.StackedPosition + (pos - slider.StackedPosition) * (float)scaleFactor;
+                        pos2.X = Math.Clamp(pos2.X, pos.X - rad, pos.X + rad);
+                        pos2.Y = Math.Clamp(pos2.Y, pos.Y - rad, pos.Y + rad);
+                        AddFrameToReplay(new OsuReplayFrame(h.StartTime + j, sliderDance ? pos2 : pos, action));
+                        mover.LastPos = sliderDance ? pos2 : pos;
                     }
 
                     break;
@@ -127,7 +127,7 @@ namespace osu.Game.Rulesets.Osu.Replays
                     double rEndTime = spinner.StartTime + spinner.Duration * 0.7;
                     double previousFrame = h.StartTime;
 
-                    for (double nextFrame = h.StartTime + GetFrameDelay(h.StartTime); nextFrame < spinner.EndTime; nextFrame += GetFrameDelay(nextFrame))
+                    for (double nextFrame = h.StartTime + GetFrameDelay(h.StartTime); nextFrame < spinner.EndTime; nextFrame += ApplyModsToRate(nextFrame, frameDelay))
                     {
                         var t = ApplyModsToTimeDelta(previousFrame, nextFrame) * -1;
                         angle += (float)t / 20;
@@ -154,21 +154,21 @@ namespace osu.Game.Rulesets.Osu.Replays
             AddFrameToReplay(new OsuReplayFrame(-10000, hitObject.StackedPosition));
             AddFrameToReplay(new OsuReplayFrame(Beatmap.HitObjects[0].StartTime, hitObject.StackedPosition));
 
-            Vector2 base_size = OsuPlayfield.BASE_SIZE;
+            Vector2 baseSize = OsuPlayfield.BASE_SIZE;
 
-            float xf = base_size.X / 0.8f * (4f / 3f);
-            float x0 = (base_size.X - xf) / 2f;
+            float xf = baseSize.X / 0.8f * (4f / 3f);
+            float x0 = (baseSize.X - xf) / 2f;
             float x1 = xf + x0;
 
-            float yf = base_size.Y / 0.8f;
-            float y0 = (base_size.Y - yf) / 2f;
+            float yf = baseSize.Y / 0.8f;
+            float y0 = (baseSize.Y - yf) / 2f;
             float y1 = yf + y0;
 
             for (int i = 0; i < Beatmap.HitObjects.Count - 1; i++)
             {
                 OsuReplayFrame lastFrame = (OsuReplayFrame)Frames[^1];
                 hitObject = Beatmap.HitObjects[i];
-                moveToHitObject(hitObject, i);
+                addHitObjectClickFrames(hitObject, i);
 
                 mover.ObjectIndex = i;
                 mover.OnObjChange();
@@ -216,7 +216,7 @@ namespace osu.Game.Rulesets.Osu.Replays
                 }
             }
 
-            moveToHitObject(Beatmap.HitObjects[^1], Beatmap.HitObjects.Count - 1);
+            addHitObjectClickFrames(Beatmap.HitObjects[^1], Beatmap.HitObjects.Count - 1);
 
             AddFrameToReplay(new OsuReplayFrame(Beatmap.HitObjects[^1].GetEndTime(), Beatmap.HitObjects[^1].StackedEndPosition));
 
