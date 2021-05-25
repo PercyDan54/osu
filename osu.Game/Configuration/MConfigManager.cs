@@ -52,7 +52,9 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.ReplayFramerate, 120f, 15f, 240f, 1f);
             SetDefault(MSetting.SpinnerRadiusStart, 235f, 10f, 350f, 1f);
             SetDefault(MSetting.SpinnerRadiusEnd, 15f, 10f, 250f, 1f);
+            SetDefault(MSetting.SliderDanceMult, 1.5f, 1f, 4f, 0.1f);
             SetDefault(MSetting.SkipStackAngles, true);
+            SetDefault(MSetting.SliderDance, true);
             SetDefault(MSetting.BorderBounce, true);
 
             //Cursor settings
@@ -99,7 +101,9 @@ namespace osu.Game.Configuration
         CursorTrailSize,
         CursorTrailHue,
         CursorTrailHueOverride,
-        MvisCurrentAudioProvider
+        MvisCurrentAudioProvider,
+        SliderDanceMult,
+        SliderDance
     }
 
     public enum OsuDanceMover

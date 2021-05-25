@@ -17,6 +17,11 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
         {
             Children = new Drawable[]
             {
+                new SettingsEnumDropdown<OsuDanceMover>
+                {
+                    LabelText = "Dance mover",
+                    Current = config.GetBindable<OsuDanceMover>(MSetting.DanceMover)
+                },
                 new SettingsSlider<float, FramerateSlider>
                 {
                     LabelText = "Autoplay framerate",
@@ -35,10 +40,11 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     Current = config.GetBindable<float>(MSetting.SpinnerRadiusEnd),
                     KeyboardStep = 5f,
                 },
-                new SettingsEnumDropdown<OsuDanceMover>
+                new SettingsSlider<float>
                 {
-                    LabelText = "Dance mover",
-                    Current = config.GetBindable<OsuDanceMover>(MSetting.DanceMover)
+                    LabelText = "Slider5 dance multiplier",
+                    Current = config.GetBindable<float>(MSetting.SliderDanceMult),
+                    KeyboardStep = 0.1f,
                 },
                 new SettingsSlider<float, AngleSlider>
                 {
@@ -57,6 +63,11 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     LabelText = "Next jump multiplier",
                     Current = config.GetBindable<float>(MSetting.NextJumpMulti),
                     KeyboardStep = 0.01f
+                },
+                new SettingsCheckbox
+                {
+                    LabelText = "Slider dance",
+                    Current = config.GetBindable<bool>(MSetting.SliderDance)
                 },
                 new SettingsCheckbox
                 {

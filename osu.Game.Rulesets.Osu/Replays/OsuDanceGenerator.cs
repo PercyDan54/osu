@@ -35,6 +35,8 @@ namespace osu.Game.Rulesets.Osu.Replays
         private readonly DanceMover mover;
         private readonly float spinRadiusStart;
         private readonly float spinRadiusEnd;
+        private readonly bool sliderDance;
+        private readonly float sliderMult;
         private readonly MConfigManager config;
         private readonly double frameDelay;
         private int buttonIndex;
@@ -62,6 +64,8 @@ namespace osu.Game.Rulesets.Osu.Replays
             frameDelay = 1000.0 / config.Get<float>(MSetting.ReplayFramerate);
             spinRadiusStart = config.Get<float>(MSetting.SpinnerRadiusStart);
             spinRadiusEnd = config.Get<float>(MSetting.SpinnerRadiusEnd);
+            sliderDance = config.Get<bool>(MSetting.SliderDance);
+            sliderMult = config.Get<float>(MSetting.SliderDanceMult);
             mover = GetMover(config.Get<OsuDanceMover>(MSetting.DanceMover));
 
             mover.Beatmap = Beatmap;
@@ -104,8 +108,14 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                     for (double j = GetFrameDelay(slider.StartTime); j < slider.Duration; j += GetFrameDelay(slider.StartTime + j))
                     {
+                        var scaleFactor = j / slider.Duration * sliderMult;
                         Vector2 pos = slider.StackedPositionAt(j / slider.Duration);
-                        AddFrameToReplay(new OsuReplayFrame((int)h.StartTime + j, pos, action));
+                        var rad = OsuHitObject.OBJECT_RADIUS * 1.2f * h.Scale;
+                        var v = Vector2.Add(slider.StackedPosition, Vector2.Multiply((pos - slider.StackedPosition), (float)scaleFactor));
+                        v.X = Math.Clamp(v.X, pos.X - rad, pos.X + rad);
+                        v.Y = Math.Clamp(v.Y, pos.Y - rad, pos.Y + rad);
+                        AddFrameToReplay(new OsuReplayFrame((int)h.StartTime + j, sliderDance ? v : pos, action));
+                        mover.LastPos = v;
                     }
 
                     break;
@@ -220,7 +230,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         protected double EndTime => End.StartTime;
         protected double Duration => EndTime - StartTime;
 
-        protected Vector2 StartPos => ObjectsDuring[ObjectIndex] ? Start.StackedPosition : Start.StackedEndPosition;
+        protected Vector2 StartPos => ObjectsDuring[ObjectIndex] ? Start.StackedPosition : Start is Slider ? LastPos : Start.StackedEndPosition;
         protected Vector2 EndPos => End.StackedPosition;
         protected float StartX => StartPos.X;
         protected float StartY => StartPos.Y;
@@ -234,11 +244,13 @@ namespace osu.Game.Rulesets.Osu.Replays
         public int ObjectIndex { set; protected get; }
         public OsuBeatmap Beatmap { set; protected get; }
 
+        public Vector2 LastPos;
+
         public OsuHitObject Start
         {
             get
             {
-                if (Beatmap.HitObjects[ObjectIndex] is Spinner spinner && spinner.SpinsRequired == 0) return Beatmap.HitObjects[ObjectIndex == 0 ? ObjectIndex : ObjectIndex - 1];
+                if (Beatmap.HitObjects[ObjectIndex] is Spinner { SpinsRequired: 0 }) return Beatmap.HitObjects[ObjectIndex == 0 ? ObjectIndex : ObjectIndex - 1];
 
                 return Beatmap.HitObjects[ObjectIndex];
             }
@@ -248,7 +260,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         {
             get
             {
-                if (Beatmap.HitObjects[ObjectIndex + 1] is Spinner spinner && spinner.SpinsRequired == 0) return Beatmap.HitObjects[ObjectIndex == Beatmap.HitObjects.Count ? ObjectIndex - 1 : ObjectIndex];
+                if (Beatmap.HitObjects[ObjectIndex + 1] is Spinner { SpinsRequired: 0 }) return Beatmap.HitObjects[ObjectIndex == Beatmap.HitObjects.Count ? ObjectIndex - 1 : ObjectIndex];
 
                 return Beatmap.HitObjects[ObjectIndex + 1];
             }
