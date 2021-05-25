@@ -53,6 +53,7 @@ using LogLevel = osu.Framework.Logging.LogLevel;
 using osu.Game.Database;
 using osu.Game.IO;
 using osu.Game.Screens.Mvis.Plugins;
+using osu.Game.Localisation;
 using osu.Game.Skinning.Editor;
 
 namespace osu.Game
@@ -566,6 +567,12 @@ namespace osu.Game
         protected override void LoadComplete()
         {
             base.LoadComplete();
+
+            foreach (var language in Enum.GetValues(typeof(Language)).OfType<Language>())
+            {
+                var cultureCode = language.ToString();
+                Localisation.AddLanguage(cultureCode, new ResourceManagerLocalisationStore(cultureCode));
+            }
 
             // The next time this is updated is in UpdateAfterChildren, which occurs too late and results
             // in the cursor being shown for a few frames during the intro.

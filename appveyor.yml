@@ -1,4 +1,4 @@
-version: 2021.523.{build}
+version: 2021.524.{build}
 pull_requests:
   do_not_increment_build_number: true
 skip_tags: true
@@ -6,11 +6,11 @@ clone_depth: 1
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
-  version: 2021.523.0
+  version: 2021.524.0
   version_prefix: '{version}'
   package_version: '{version}'
-  assembly_version: 2021.523.0
-  file_version: 2021.523.0
+  assembly_version: 2021.524.0
+  file_version: 2021.524.0
   informational_version: '{version}'
 build_script:
 - cmd: >-
@@ -25,7 +25,7 @@ artifacts:
   name: osu-linux
 deploy:
 - provider: GitHub
-  tag: 2021.523.0
+  tag: 2021.524.0
   auth_token:
     secure: wBUeC7f0SGZTu01Bl50RTSas9yizhxdAeqofugDSTpOoZFXOyzvP+X2OOAnaqIWz
   repository: PercyDan54/osu
