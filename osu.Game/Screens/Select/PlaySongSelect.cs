@@ -11,7 +11,6 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
-using osu.Game.Screens.Mvis;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Ranking;
 using osu.Game.Users;
@@ -22,7 +21,7 @@ namespace osu.Game.Screens.Select
     public class PlaySongSelect : SongSelect
     {
         private bool removeAutoModOnResume;
-        private OsuScreen player;
+        private OsuScreen playerLoader;
 
         [Resolved(CanBeNull = true)]
         private NotificationOverlay notifications { get; set; }
@@ -35,8 +34,6 @@ namespace osu.Game.Screens.Select
         private void load(OsuColour colours)
         {
             BeatmapOptions.AddButton(@"Edit", @"beatmap", FontAwesome.Solid.PencilAlt, colours.Yellow, () => Edit());
-
-            Footer.AddButton(new FooterButtonOpenInMvis { Action = openInMvis }, null);
 
             ((PlayBeatmapDetailArea)BeatmapDetails).Leaderboard.ScoreSelected += PresentScore;
         }
@@ -52,7 +49,7 @@ namespace osu.Game.Screens.Select
         {
             base.OnResuming(last);
 
-            player = null;
+            playerLoader = null;
 
             if (removeAutoModOnResume)
             {
@@ -64,8 +61,6 @@ namespace osu.Game.Screens.Select
                 removeAutoModOnResume = false;
             }
         }
-
-        private void openInMvis() => this.Push(new MvisScreen());
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -84,14 +79,14 @@ namespace osu.Game.Screens.Select
 
         protected override bool OnStart()
         {
-            if (player != null) return false;
+            if (playerLoader != null) return false;
 
             // Ctrl+Enter should start map with autoplay enabled.
             if (GetContainingInputManager().CurrentState?.Keyboard.ControlPressed == true)
             {
-                var autoplayMod = getAutoplayMod();
+                var autoInstance = getAutoplayMod();
 
-                if (autoplayMod == null)
+                if (autoInstance == null)
                 {
                     notifications?.Post(new SimpleNotification
                     {
@@ -102,18 +97,26 @@ namespace osu.Game.Screens.Select
 
                 var mods = Mods.Value;
 
-                if (!mods.Any(m => m is ModAutoplay))
+                if (mods.All(m => m.GetType() != autoInstance.GetType()))
                 {
-                    Mods.Value = mods.Append(autoplayMod).ToArray();
+                    Mods.Value = mods.Append(autoInstance).ToArray();
                     removeAutoModOnResume = true;
                 }
             }
 
             SampleConfirm?.Play();
 
-            this.Push(player = new PlayerLoader(() => new SoloPlayer()));
-
+            this.Push(playerLoader = new PlayerLoader(createPlayer));
             return true;
+
+            Player createPlayer()
+            {
+                var replayGeneratingMod = Mods.Value.OfType<ICreateReplay>().FirstOrDefault();
+                if (replayGeneratingMod != null)
+                    return new ReplayPlayer((beatmap, mods) => replayGeneratingMod.CreateReplayScore(beatmap, mods));
+
+                return new SoloPlayer();
+            }
         }
     }
 }
