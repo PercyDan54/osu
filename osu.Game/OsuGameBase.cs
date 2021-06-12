@@ -124,7 +124,7 @@ namespace osu.Game
 
         private RulesetConfigCache rulesetConfigCache;
 
-        public virtual string Version => "2021.608.0";
+        public virtual string Version => "2021.612.0";
 
         private SpectatorClient spectatorClient;
 
