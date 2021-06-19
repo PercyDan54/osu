@@ -81,7 +81,7 @@ namespace osu.Game
 
         protected RulesetStore RulesetStore { get; private set; }
 
-        protected KeyBindingStore KeyBindingStore { get; private set; }
+        protected RealmKeyBindingStore KeyBindingStore { get; private set; }
 
         protected MenuCursorContainer MenuCursorContainer { get; private set; }
 
@@ -124,13 +124,15 @@ namespace osu.Game
 
         private RulesetConfigCache rulesetConfigCache;
 
-        public virtual string Version => "2021.612.0";
+        public virtual string Version => "2021.619.1";
 
         private SpectatorClient spectatorClient;
 
         private MultiplayerClient multiplayerClient;
 
         private DatabaseContextFactory contextFactory;
+
+        private RealmContextFactory realmFactory;
 
         protected override Container<Drawable> Content => content;
 
@@ -151,11 +153,14 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "2f4ed86926cd487e1f9ff13ea84a8325";
+            VersionHash = "299536b5139aa81afc931edf29a62a64";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
             dependencies.Cache(contextFactory = new DatabaseContextFactory(Storage));
+
+            dependencies.Cache(realmFactory = new RealmContextFactory(Storage));
+            AddInternal(realmFactory);
 
             dependencies.CacheAs(Storage);
 
@@ -165,24 +170,34 @@ namespace osu.Game
 
             dependencies.CacheAs(this);
             dependencies.CacheAs(LocalConfig);
-            dependencies.Cache(MConfig);
+            dependencies.Cache(MConfig);       
+            dependencies.Cache(new CustomStore(Storage, this));
 
             AddFont(Resources, @"Fonts/osuFont");
-            AddFont(Resources, @"Fonts/Torus-Regular");
-            AddFont(Resources, @"Fonts/Torus-Light");
-            AddFont(Resources, @"Fonts/Torus-SemiBold");
-            AddFont(Resources, @"Fonts/Torus-Bold");
 
-            AddFont(Resources, @"Fonts/Noto-Basic");
-            AddFont(Resources, @"Fonts/Noto-Hangul");
-            AddFont(Resources, @"Fonts/Noto-CJK-Basic");
-            AddFont(Resources, @"Fonts/Noto-CJK-Compatibility");
-            AddFont(Resources, @"Fonts/Noto-Thai");
+            AddFont(Resources, @"Fonts/Torus/Torus-Regular");
+            AddFont(Resources, @"Fonts/Torus/Torus-Light");
+            AddFont(Resources, @"Fonts/Torus/Torus-SemiBold");
+            AddFont(Resources, @"Fonts/Torus/Torus-Bold");
 
-            AddFont(Resources, @"Fonts/Venera-Light");
-            AddFont(Resources, @"Fonts/Venera-Bold");
-            AddFont(Resources, @"Fonts/Venera-Black");
-            dependencies.Cache(new CustomStore(Storage, this));
+            AddFont(Resources, @"Fonts/Inter/Inter-Regular");
+            AddFont(Resources, @"Fonts/Inter/Inter-RegularItalic");
+            AddFont(Resources, @"Fonts/Inter/Inter-Light");
+            AddFont(Resources, @"Fonts/Inter/Inter-LightItalic");
+            AddFont(Resources, @"Fonts/Inter/Inter-SemiBold");
+            AddFont(Resources, @"Fonts/Inter/Inter-SemiBoldItalic");
+            AddFont(Resources, @"Fonts/Inter/Inter-Bold");
+            AddFont(Resources, @"Fonts/Inter/Inter-BoldItalic");
+
+            AddFont(Resources, @"Fonts/Noto/Noto-Basic");
+            AddFont(Resources, @"Fonts/Noto/Noto-Hangul");
+            AddFont(Resources, @"Fonts/Noto/Noto-CJK-Basic");
+            AddFont(Resources, @"Fonts/Noto/Noto-CJK-Compatibility");
+            AddFont(Resources, @"Fonts/Noto/Noto-Thai");
+
+            AddFont(Resources, @"Fonts/Venera/Venera-Light");
+            AddFont(Resources, @"Fonts/Venera/Venera-Bold");
+            AddFont(Resources, @"Fonts/Venera/Venera-Black");
 
             Audio.Samples.PlaybackConcurrency = SAMPLE_CONCURRENCY;
 
@@ -254,7 +269,8 @@ namespace osu.Game
             dependencies.Cache(scorePerformanceManager);
             AddInternal(scorePerformanceManager);
 
-            dependencies.Cache(KeyBindingStore = new KeyBindingStore(contextFactory, RulesetStore));
+            migrateDataToRealm();
+
             dependencies.Cache(settingsStore = new SettingsStore(contextFactory));
             dependencies.Cache(rulesetConfigCache = new RulesetConfigCache(settingsStore));
 
@@ -302,7 +318,12 @@ namespace osu.Game
 
             base.Content.Add(CreateScalingContainer().WithChildren(mainContent));
 
+            KeyBindingStore = new RealmKeyBindingStore(realmFactory);
             KeyBindingStore.Register(globalBindings);
+
+            foreach (var r in RulesetStore.AvailableRulesets)
+                KeyBindingStore.Register(r);
+
             dependencies.Cache(globalBindings);
 
             PreviewTrackManager previewTrackManager;
@@ -359,8 +380,11 @@ namespace osu.Game
 
         public void Migrate(string path)
         {
-            contextFactory.FlushConnections();
-            (Storage as OsuStorage)?.Migrate(Host.GetStorage(path));
+            using (realmFactory.BlockAllOperations())
+            {
+                contextFactory.FlushConnections();
+                (Storage as OsuStorage)?.Migrate(Host.GetStorage(path));
+            }
         }
 
         protected override UserInputManager CreateUserInputManager() => new OsuUserInputManager();
@@ -370,6 +394,34 @@ namespace osu.Game
         protected virtual Container CreateScalingContainer() => new DrawSizePreservingFillContainer();
 
         protected override Storage CreateStorage(GameHost host, Storage defaultStorage) => new OsuStorage(host, defaultStorage);
+
+        private void migrateDataToRealm()
+        {
+            using (var db = contextFactory.GetForWrite())
+            using (var usage = realmFactory.GetForWrite())
+            {
+                var existingBindings = db.Context.DatabasedKeyBinding;
+
+                // only migrate data if the realm database is empty.
+                if (!usage.Realm.All<RealmKeyBinding>().Any())
+                {
+                    foreach (var dkb in existingBindings)
+                    {
+                        usage.Realm.Add(new RealmKeyBinding
+                        {
+                            KeyCombinationString = dkb.KeyCombination.ToString(),
+                            ActionInt = (int)dkb.Action,
+                            RulesetID = dkb.RulesetID,
+                            Variant = dkb.Variant
+                        });
+                    }
+                }
+
+                db.Context.RemoveRange(existingBindings);
+
+                usage.Commit();
+            }
+        }
 
         private void onRulesetChanged(ValueChangedEvent<RulesetInfo> r)
         {
