@@ -11,6 +11,7 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
+using osu.Game.Screens.Mvis;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Ranking;
 using osu.Game.Users;
@@ -34,9 +35,12 @@ namespace osu.Game.Screens.Select
         private void load(OsuColour colours)
         {
             BeatmapOptions.AddButton(@"Edit", @"beatmap", FontAwesome.Solid.PencilAlt, colours.Yellow, () => Edit());
+            Footer.AddButton(new FooterButtonOpenInMvis { Action = openMvis }, null);
 
             ((PlayBeatmapDetailArea)BeatmapDetails).Leaderboard.ScoreSelected += PresentScore;
         }
+
+        private void openMvis() => this.Push(new MvisScreen());
 
         protected void PresentScore(ScoreInfo score) =>
             FinaliseSelection(score.Beatmap, score.Ruleset, () => this.Push(new SoloResultsScreen(score, false)));

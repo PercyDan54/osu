@@ -337,3 +337,6 @@ inspectcode
 /BenchmarkDotNet.Artifacts
 
 *.GeneratedMSBuildEditorConfig.editorconfig
+
+# Fody (pulled in by Realm) - schema file
+FodyWeavers.xsd
