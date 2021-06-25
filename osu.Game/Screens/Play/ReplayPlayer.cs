@@ -3,12 +3,16 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using osu.Framework.Input.Bindings;
+using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Input.Bindings;
+using osu.Game.IO.Archives;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
+using osu.Game.Scoring.Legacy;
 using osu.Game.Screens.Ranking;
 
 namespace osu.Game.Screens.Play
@@ -35,6 +39,25 @@ namespace osu.Game.Screens.Play
         {
             DrawableRuleset?.SetReplayScore(Score);
         }
+
+        public override void OnEntering(IScreen last)
+        {
+            base.OnEntering(last);
+
+            if (!SaveScore) return;
+
+            LegacyByteArrayReader replayReader;
+
+            using (var stream = new MemoryStream())
+            {
+                new LegacyScoreEncoder(Score, GameplayBeatmap).Encode(stream);
+                replayReader = new LegacyByteArrayReader(stream.ToArray(), "replay.osr");
+            }
+
+            ScoreManager.Instance.Import(Score.ScoreInfo, replayReader).ConfigureAwait(false);
+        }
+
+        public bool SaveScore;
 
         protected override Score CreateScore() => createScore(GameplayBeatmap.PlayableBeatmap, Mods.Value);
 
