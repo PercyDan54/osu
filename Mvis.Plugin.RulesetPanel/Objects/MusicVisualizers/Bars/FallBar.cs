@@ -55,15 +55,15 @@ namespace Mvis.Plugin.RulesetPanel.Objects.MusicVisualizers.Bars
             if (newValue > mainBar.Height)
             {
                 mainBar.ResizeHeightTo(newValue)
-                    .Then()
-                    .ResizeHeightTo(0, smoothness);
+                       .Then()
+                       .ResizeHeightTo(0, smoothness);
             }
 
             if (mainBar.Height > -fallingPiece.Y)
             {
                 fallingPiece.MoveToY(-newValue)
-                    .Then()
-                    .MoveToY(0, smoothness * 6);
+                            .Then()
+                            .MoveToY(0, smoothness * 6);
             }
         }
     }

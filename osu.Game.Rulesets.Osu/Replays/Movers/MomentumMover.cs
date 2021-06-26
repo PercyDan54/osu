@@ -49,17 +49,17 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public override void OnObjChange()
         {
-            var dst = Vector2.Distance(StartPos, EndPos);
+            var distance = Vector2.Distance(StartPos, EndPos);
 
-            var s = Start as Slider;
+            var start = Start as Slider;
             var (a2, afs) = nextAngle();
-            var a1 = (ObjectsDuring[ObjectIndex] ? s?.GetStartAngle() + MathF.PI : s?.GetEndAngle()) ?? (ObjectIndex == 0 ? a2 + MathF.PI : StartPos.AngleRV(last));
+            var a1 = (ObjectsDuring[ObjectIndex] ? start?.GetStartAngle() + MathF.PI : start?.GetEndAngle()) ?? (ObjectIndex == 0 ? a2 + MathF.PI : StartPos.AngleRV(last));
 
-            p1 = V2FromRad(a1, dst * jumpMult) + StartPos;
+            p1 = V2FromRad(a1, distance * jumpMult) + StartPos;
 
             var a = EndPos.AngleRV(StartPos);
             if (!afs && MathF.Abs(a2 - a) < offset) a2 = a2 - a < offset ? a - offset : a + offset;
-            p2 = V2FromRad(a2, dst * nextMult) + EndPos;
+            p2 = V2FromRad(a2, distance * nextMult) + EndPos;
 
             if (!(End is Slider) && !isSame(Start, End)) last = p2;
         }

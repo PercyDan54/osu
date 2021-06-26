@@ -37,30 +37,30 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             float scaled = mult * dist;
             float next = nextMult * dist;
 
-            Slider s1 = Start as Slider;
-            Slider s2 = End as Slider;
+            Slider start = Start as Slider;
+            Slider end = End as Slider;
 
             float newAngle = offset * invert;
 
-            if (s1 != null && s2 != null)
+            if (start != null && end != null)
             {
                 invert *= -1;
-                p1 = V2FromRad(s1.GetEndAngle(), scaled) + StartPos;
-                p2 = V2FromRad(s2.GetStartAngle(), next) + EndPos;
+                p1 = V2FromRad(start.GetEndAngle(), scaled) + StartPos;
+                p2 = V2FromRad(end.GetStartAngle(), next) + EndPos;
             }
-            else if (s1 != null)
+            else if (start != null)
             {
                 invert *= -1;
                 lastAngle = StartPos.AngleRV(EndPos) - newAngle;
 
-                p1 = V2FromRad(s1.GetEndAngle(), scaled) + StartPos;
+                p1 = V2FromRad(start.GetEndAngle(), scaled) + StartPos;
                 p2 = V2FromRad(lastAngle, next) + EndPos;
             }
-            else if (s2 != null)
+            else if (end != null)
             {
                 lastAngle += MathF.PI;
                 p1 = V2FromRad(lastAngle, scaled) + StartPos;
-                p2 = V2FromRad(s2.GetStartAngle(), next) + EndPos;
+                p2 = V2FromRad(end.GetStartAngle(), next) + EndPos;
             }
             else
             {
