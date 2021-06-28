@@ -3,6 +3,7 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Localisation;
 using osu.Game.Configuration;
 using osu.Game.Graphics.UserInterface;
 
@@ -84,17 +85,17 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
 
         public class MultiplierSlider : OsuSliderBar<float>
         {
-            public override string TooltipText => Current.Value.ToString("g2") + "x";
+            public override LocalisableString TooltipText => Current.Value.ToString("g2") + "x";
         }
 
         private class AngleSlider : OsuSliderBar<float>
         {
-            public override string TooltipText => (Current.Value * 180).ToString("g2") + "deg";
+            public override LocalisableString TooltipText => (Current.Value * 180).ToString("g2") + "deg";
         }
 
         private class FramerateSlider : OsuSliderBar<float>
         {
-            public override string TooltipText => Current.Value.ToString("g0") + "fps";
+            public override LocalisableString TooltipText => Current.Value.ToString("g0") + "fps";
         }
     }
 }

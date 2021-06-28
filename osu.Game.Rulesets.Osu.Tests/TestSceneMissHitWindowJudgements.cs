@@ -65,7 +65,7 @@ namespace osu.Game.Rulesets.Osu.Tests
             });
         }
 
-        private class TestAutoMod : OsuModDance
+        private class TestAutoMod : OsuModAutoplay
         {
             public override Score CreateReplayScore(IBeatmap beatmap, IReadOnlyList<Mod> mods) => new Score
             {

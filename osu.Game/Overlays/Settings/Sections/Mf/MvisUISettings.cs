@@ -7,6 +7,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Localisation;
 using osu.Game.Configuration;
 using osu.Game.Screens.Mvis;
 
@@ -98,7 +99,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
             private Box l3;
             private Box c2;
 
-            public string TooltipText { get; private set; }
+            public LocalisableString TooltipText { get; private set; }
 
             [BackgroundDependencyLoader]
             private void load()
