@@ -13,6 +13,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -297,7 +298,7 @@ namespace osu.Game.Online.Leaderboards
 
             public override bool Contains(Vector2 screenSpacePos) => content.Contains(screenSpacePos);
 
-            public string TooltipText { get; }
+            public LocalisableString TooltipText { get; }
 
             public ScoreComponentLabel(LeaderboardScoreStatistic statistic)
             {
@@ -367,7 +368,7 @@ namespace osu.Game.Online.Leaderboards
                 };
             }
 
-            public string TooltipText { get; }
+            public LocalisableString TooltipText { get; }
         }
 
         public class LeaderboardScoreStatistic
