@@ -14,6 +14,7 @@ using osu.Framework.Platform;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
+using osu.Game.Graphics.Cursor;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
@@ -30,7 +31,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
     public class LyricSidebarPage : PluginSidebarPage
     {
         private BeatmapCover cover;
-        private FillFlowContainer<LyricInfoPiece> lyricFlow;
+        private FillFlowContainer<OsuContextMenuContainer> lyricFlow;
         private LoadingSpinner loading;
         private IconButton saveButton;
         private OsuSpriteText idText;
@@ -89,7 +90,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
                     Child = scroll = new OsuScrollContainer
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Child = lyricFlow = new FillFlowContainer<LyricInfoPiece>
+                        Child = lyricFlow = new FillFlowContainer<OsuContextMenuContainer>
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
@@ -186,6 +187,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
                             Origin = Anchor.BottomRight,
                             Current = config.GetBindable<double>(LyricSettings.LyricOffset),
                             LabelText = "Global lyric offset",
+                            KeyboardStep = 100,
                             RelativeSizeAxes = Axes.None,
                             Width = 200 + 25,
                             Padding = new MarginPadding { Right = 10 }
@@ -236,7 +238,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
         private void scrollToCurrent()
         {
             var pos = lyricFlow.Children.FirstOrDefault(p =>
-                p.Value == plugin.Lyrics.FindLast(l => mvisScreen.CurrentTrack.CurrentTime >= l.Time))?.Y ?? 0;
+                ((LyricInfoPiece)p.Child).Value == plugin.Lyrics.FindLast(l => mvisScreen.CurrentTrack.CurrentTime >= l.Time))?.Y ?? 0;
 
             if (pos + scroll.DrawHeight > lyricFlow.Height)
                 scroll.ScrollToEnd();
@@ -258,9 +260,14 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
 
             foreach (var t in lyrics)
             {
-                lyricFlow.Add(new LyricInfoPiece(t)
+                lyricFlow.Add(new OsuContextMenuContainer
                 {
-                    Action = l => mvisScreen.SeekTo(l.Time + 1)
+                    Child = new LyricInfoPiece(t)
+                    {
+                        Action = l => mvisScreen.SeekTo(l.Time + 1)
+                    },
+                    RelativeSizeAxes = Axes.X,
+                    AutoSizeAxes = Axes.Y
                 });
             }
         }
