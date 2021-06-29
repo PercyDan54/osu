@@ -127,17 +127,20 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
             contentText.Text = lyric.Content;
             translateText.Text = lyric.TranslatedString;
 
-            var timeSpan = TimeSpan.FromMilliseconds(lyric.Time);
-            timeText.Text = TooltipText = $"{timeSpan:mm\\:ss\\.fff}";
-
             Colour = string.IsNullOrEmpty(lyric.Content)
                 ? Color4Extensions.FromHex(@"555")
                 : Color4.White;
         }
 
+        protected override void Update()
+        {
+            var timeSpan = TimeSpan.FromMilliseconds(Value.Time - config.Get<double>(LyricSettings.LyricOffset));
+            timeText.Text = TooltipText = $"{timeSpan:mm\\:ss\\.fff}";
+        }
+
         protected override bool OnClick(ClickEvent e)
         {
-            mvisScreen.SeekTo(Value.Time + 1);
+            mvisScreen.SeekTo(Value.Time - config.Get<double>(LyricSettings.LyricOffset) + 1);
             return base.OnClick(e);
         }
 
