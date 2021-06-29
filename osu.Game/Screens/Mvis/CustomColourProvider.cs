@@ -16,7 +16,10 @@ namespace osu.Game.Screens.Mvis
     ///</summary>
     public class CustomColourProvider : Component
     {
+        public Color4 ActiveColor => Highlight2;
+        public Color4 InActiveColor => Dark4;
         public Color4 Highlight1 => getColour(1, 0.7f);
+        public Color4 Highlight2 => getColour(0.7f, 0.7f);
         public Color4 Content1 => getColour(0.4f, 1);
         public Color4 Content2 => getColour(0.4f, 0.9f);
         public Color4 Light1 => getColour(0.4f, 0.8f);
@@ -36,6 +39,7 @@ namespace osu.Game.Screens.Mvis
         public Color4 Background4 => getColour(0.1f, 0.2f);
         public Color4 Background5 => getColour(0.1f, 0.15f);
         public Color4 Background6 => getColour(0.1f, 0.1f);
+        public Color4 Background7 => getColour(0.1f, 0.05f);
         private Color4 getColour(float saturation, float lightness) => Color4.FromHsl(new Vector4(HueColour.Value, saturation, lightness, 1));
         public BindableFloat HueColour = new BindableFloat();
 

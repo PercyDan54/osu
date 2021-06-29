@@ -3,6 +3,7 @@
 
 using osu.Framework.Configuration;
 using osu.Framework.Platform;
+using osu.Game.Screens.Mvis.SideBar.Tabs;
 
 namespace osu.Game.Configuration
 {
@@ -42,6 +43,7 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.MvisInterfaceRed, 0, 0, 255f);
             SetDefault(MSetting.MvisInterfaceGreen, 119f, 0, 255f);
             SetDefault(MSetting.MvisInterfaceBlue, 255f, 0, 255f);
+            SetDefault(MSetting.MvisTabControlPosition, TabControlPosition.Right);
             SetDefault(MSetting.MvisCurrentAudioProvider, "osu.Game.Screens.Mvis.Plugins+OsuMusicControllerWrapper");
 
             //Dance settings
@@ -73,9 +75,9 @@ namespace osu.Game.Configuration
         TrianglesEnabled,
         UseSayobot,
         MvisBgBlur,
-        MvisUseOsuLogoVisualisation,
         MvisIdleBgDim,
         MvisContentAlpha,
+        MvisTabControlPosition,
         MvisEnableBgTriangles,
         MvisStoryboardProxy,
         MvisMusicSpeed,

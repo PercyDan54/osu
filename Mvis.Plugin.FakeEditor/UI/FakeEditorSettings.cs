@@ -23,7 +23,7 @@ namespace Mvis.Plugin.FakeEditor.UI
             {
                 new SettingsCheckbox
                 {
-                    LabelText = "Enable hitsounds",
+                    LabelText = "启用Note打击音效",
                     Current = config.GetBindable<bool>(FakeEditorSetting.EnableFakeEditor)
                 },
             };

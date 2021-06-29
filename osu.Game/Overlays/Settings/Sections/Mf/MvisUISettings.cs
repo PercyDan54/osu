@@ -39,7 +39,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 },
                 new SettingsSlider<float>
                 {
-                    LabelText = "Background Dim",
+                    LabelText = "Idle background Dim",
                     Current = config.GetBindable<float>(MSetting.MvisIdleBgDim),
                     DisplayAsPercentage = true,
                     KeyboardStep = 0.01f,

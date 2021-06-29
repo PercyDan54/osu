@@ -13,6 +13,7 @@ using osu.Game.Overlays;
 using osu.Game.Screens.Mvis.Plugins;
 using osu.Game.Screens.Mvis.Plugins.Config;
 using osu.Game.Screens.Mvis.Plugins.Types;
+using osu.Game.Screens.Play;
 
 namespace Mvis.Plugin.StoryboardSupport
 {
@@ -31,8 +32,6 @@ namespace Mvis.Plugin.StoryboardSupport
 
         public readonly BindableBool NeedToHideTriangles = new BindableBool();
         public readonly BindableBool StoryboardReplacesBackground = new BindableBool();
-
-        private DecoupleableInterpolatingFramedClock storyboardClock;
 
         private BackgroundStoryboard currentStoryboard;
 
@@ -59,27 +58,40 @@ namespace Mvis.Plugin.StoryboardSupport
             });
         }
 
+        private readonly EpilepsyWarning epilepsyWarning = new EpilepsyWarning
+        {
+            Anchor = Anchor.TopCentre,
+            Origin = Anchor.TopCentre,
+            Margin = new MarginPadding(20),
+            RelativeSizeAxes = Axes.X,
+            AutoSizeAxes = Axes.Y,
+            Depth = -1
+        };
+
         [BackgroundDependencyLoader]
         private void load()
         {
             var config = (SbLoaderConfigManager)DependenciesContainer.Get<MvisPluginManager>().GetConfigManager(this);
             config.BindWith(SbLoaderSettings.EnableStoryboard, Value);
 
-            currentBeatmap.BindValueChanged(v =>
-            {
-                if (v.NewValue == targetBeatmap)
-                {
-                    storyboardClock?.Start();
-                    storyboardClock?.ChangeSource(music.CurrentTrack);
-                }
-            });
-
             if (MvisScreen != null)
             {
                 MvisScreen.OnScreenExiting += UnLoad;
-                MvisScreen.OnBeatmapChanged += refresh;
                 MvisScreen.OnScreenSuspending += onScreenSuspending;
+                MvisScreen.OnScreenResuming += onScreenResuming;
+                MvisScreen.OnBeatmapChanged(refresh, this);
             }
+
+            if (MvisScreen != null)
+                MvisScreen.AddDrawableToProxy(epilepsyWarning);
+            else
+                AddInternal(epilepsyWarning);
+        }
+
+        private void onScreenResuming()
+        {
+            if (!Disabled.Value && ContentLoaded)
+                MvisScreen.HideScreenBackground.Value = targetBeatmap.Storyboard.ReplacesBackground;
         }
 
         private void onScreenSuspending()
@@ -109,7 +121,7 @@ namespace Mvis.Plugin.StoryboardSupport
 
         protected override Drawable CreateContent() => currentStoryboard = new BackgroundStoryboard(targetBeatmap)
         {
-            RunningClock = storyboardClock,
+            RunningClock = new InterpolatingFramedClock(targetBeatmap.Track),
             Alpha = 0.1f
         };
 
@@ -120,21 +132,23 @@ namespace Mvis.Plugin.StoryboardSupport
         protected override bool PostInit()
         {
             if (targetBeatmap == null)
-                throw new InvalidOperationException("currentBeatmap 不能为 null");
+                throw new InvalidOperationException("targetBeatmap 不能为 null");
+
+            epilepsyWarning.ScaleTo(1);
+
+            if (targetBeatmap.BeatmapInfo.EpilepsyWarning)
+                epilepsyWarning.Show();
+            else
+                epilepsyWarning.Hide();
 
             sbLoaded.Value = false;
             NeedToHideTriangles.Value = false;
             StoryboardReplacesBackground.Value = false;
 
-            storyboardClock = new DecoupleableInterpolatingFramedClock
-            {
-                IsCoupled = true,
-            };
-
             return true;
         }
 
-        public override int Version => 3;
+        public override int Version => 5;
 
         private Drawable prevProxy;
 
@@ -142,8 +156,6 @@ namespace Mvis.Plugin.StoryboardSupport
         {
             var newStoryboard = (BackgroundStoryboard)content;
 
-            //bug: 过早Seek至歌曲时间会导致部分故事版加载过程僵死
-            storyboardClock.ChangeSource(music.CurrentTrack);
             Seek(music.CurrentTrack.CurrentTime);
 
             sbLoaded.Value = true;
@@ -171,6 +183,9 @@ namespace Mvis.Plugin.StoryboardSupport
                 MvisScreen.HideScreenBackground.Value = targetBeatmap.Storyboard.ReplacesBackground;
             }
 
+            if (targetBeatmap.BeatmapInfo.EpilepsyWarning)
+                epilepsyWarning.ScaleTo(1.001f, 5000).OnComplete(_ => epilepsyWarning.Hide());
+
             return true;
         }
 
@@ -184,7 +199,7 @@ namespace Mvis.Plugin.StoryboardSupport
             if (MvisScreen != null)
             {
                 MvisScreen.OnScreenSuspending -= onScreenSuspending;
-                MvisScreen.OnBeatmapChanged -= refresh;
+                MvisScreen.OnScreenResuming -= onScreenResuming;
                 MvisScreen.OnScreenExiting -= UnLoad;
                 MvisScreen.OnSeek -= Seek;
             }
@@ -258,7 +273,8 @@ namespace Mvis.Plugin.StoryboardSupport
             return storyboard.StoryboardProxy();
         }
 
-        public void Seek(double position) =>
-            storyboardClock?.Seek(position);
+        public void Seek(double position)
+        {
+        }
     }
 }

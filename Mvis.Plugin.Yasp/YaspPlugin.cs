@@ -36,12 +36,15 @@ namespace Mvis.Plugin.Yasp
         public override PluginSettingsSubSection CreateSettingsSubSection()
             => new YaspSettingsSubSection(this);
 
-        public override int Version => 3;
+        public override PluginSidebarSettingsSection CreateSidebarSettingsSection()
+            => new YaspSidebarSection(this);
+
+        public override int Version => 5;
 
         public YaspPlugin()
         {
             Name = "YASP";
-            Description = "Yet another simple player";
+            Description = "另一个简单的播放器面板";
             Author = "MATRIX-夜翎";
 
             Flags.AddRange(new[]
@@ -135,20 +138,17 @@ namespace Mvis.Plugin.Yasp
         public override bool Disable()
         {
             this.MoveToX(-10, 300, Easing.OutQuint).FadeOut(300, Easing.OutQuint);
-            MvisScreen.OnBeatmapChanged -= onBeatmapChanged;
             return base.Disable();
         }
 
         public override bool Enable()
         {
+            bool result = base.Enable();
+
             this.MoveToX(0, 300, Easing.OutQuint).FadeIn(300, Easing.OutQuint);
+            MvisScreen?.OnBeatmapChanged(onBeatmapChanged, this, true);
 
-            MvisScreen.OnBeatmapChanged += onBeatmapChanged;
-
-            if (MvisScreen.Beatmap.Value != currentWorkingBeatmap)
-                onBeatmapChanged(MvisScreen.Beatmap.Value);
-
-            return base.Enable();
+            return result;
         }
 
         private Bindable<float> scaleBindable;
@@ -176,8 +176,13 @@ namespace Mvis.Plugin.Yasp
 
         private void onBeatmapChanged(WorkingBeatmap working)
         {
-            currentWorkingBeatmap = working;
-            refresh();
+            if (Disabled.Value) return;
+
+            if (currentWorkingBeatmap != working)
+            {
+                currentWorkingBeatmap = working;
+                refresh();
+            }
         }
     }
 }

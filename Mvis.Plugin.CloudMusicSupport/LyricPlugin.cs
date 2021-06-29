@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using Mvis.Plugin.CloudMusicSupport.Config;
@@ -14,10 +15,13 @@ using osu.Game.Screens.Mvis.Plugins.Config;
 using osu.Game.Screens.Mvis.Plugins.Types;
 using osu.Framework.Audio.Track;
 using osu.Framework.Bindables;
+using osu.Framework.Graphics.Audio;
+using osu.Game.Configuration;
+using osu.Game.Overlays;
 
 namespace Mvis.Plugin.CloudMusicSupport
 {
-    public class LyricPlugin : BindableControlledPlugin
+    public class LyricPlugin : BindableControlledPlugin, IProvideAudioControlPlugin
     {
         /// <summary>
         /// 请参阅 <see cref="MvisPlugin.TargetLayer"/>
@@ -31,9 +35,12 @@ namespace Mvis.Plugin.CloudMusicSupport
             => new LyricSettingsSubSection(this);
 
         public override PluginSidebarPage CreateSidebarPage()
-            => new LyricSidebarPage(this, 0.4f);
+            => new LyricSidebarSectionContainer(this);
 
-        public override int Version => 3;
+        public override PluginSidebarSettingsSection CreateSidebarSettingsSection()
+            => new LyricSidebarSection(this);
+
+        public override int Version => 5;
 
         private WorkingBeatmap currentWorkingBeatmap;
         private LyricLine lrcLine;
@@ -48,6 +55,41 @@ namespace Mvis.Plugin.CloudMusicSupport
         [NotNull]
         public List<Lyric> Lyrics { get; private set; } = new List<Lyric>();
 
+        public void ReplaceLyricWith(List<Lyric> newList, bool saveToDisk)
+        {
+            CurrentStatus.Value = Status.Working;
+
+            Lyrics = newList;
+
+            if (saveToDisk)
+                WriteLyricToDisk();
+
+            CurrentStatus.Value = Status.Finish;
+        }
+
+        [Resolved]
+        private MusicController controller { get; set; }
+
+        [Resolved]
+        private MConfigManager mConfig { get; set; }
+
+        public void RequestControl(Action onAllow)
+        {
+            MvisScreen.RequestAudioControl(this,
+                "Disable song switch to edit lyrics",
+                () => IsEditing = false,
+                onAllow);
+        }
+
+        public bool IsEditing
+        {
+            set
+            {
+                if (!value)
+                    MvisScreen.ReleaseAudioControlFrom(this);
+            }
+        }
+
         private Track track;
         private readonly BindableDouble offset = new BindableDouble();
         private Bindable<bool> autoSave;
@@ -59,6 +101,7 @@ namespace Mvis.Plugin.CloudMusicSupport
             Name = "Lyrics";
             Description = "Get lyrics from Netease";
             Author = "MATRIX-夜翎";
+            Depth = -1;
 
             Flags.AddRange(new[]
             {
@@ -104,6 +147,7 @@ namespace Mvis.Plugin.CloudMusicSupport
             }
 
             Lyrics.Clear();
+            CurrentLine = null;
 
             processor.StartFetchLrcFor(currentWorkingBeatmap, noLocalFile, onLyricRequestFinished, onLyricRequestFail);
         }
@@ -112,6 +156,8 @@ namespace Mvis.Plugin.CloudMusicSupport
 
         private void onBeatmapChanged(WorkingBeatmap working)
         {
+            if (Disabled.Value) return;
+
             currentWorkingBeatmap = working;
             track = working.Track;
 
@@ -142,25 +188,24 @@ namespace Mvis.Plugin.CloudMusicSupport
         public override bool Disable()
         {
             this.MoveToX(-10, 300, Easing.OutQuint).FadeOut(300, Easing.OutQuint);
-            MvisScreen.OnBeatmapChanged -= onBeatmapChanged;
 
             return base.Disable();
         }
 
         public override bool Enable()
         {
+            bool result = base.Enable();
+
             this.MoveToX(0, 300, Easing.OutQuint).FadeIn(300, Easing.OutQuint);
-            MvisScreen.OnBeatmapChanged += onBeatmapChanged;
 
-            if (MvisScreen.Beatmap.Value != currentWorkingBeatmap)
-                onBeatmapChanged(MvisScreen.Beatmap.Value);
+            MvisScreen?.OnBeatmapChanged(onBeatmapChanged, this, true);
 
-            return base.Enable();
+            return result;
         }
 
         protected override bool PostInit() => true;
 
-        private Lyric currentLine;
+        public Lyric CurrentLine;
         private readonly Lyric defaultLrc = new Lyric();
 
         protected override void Update()
@@ -173,13 +218,13 @@ namespace Mvis.Plugin.CloudMusicSupport
             {
                 var lrc = Lyrics.FindLast(l => targetTime >= l.Time) ?? defaultLrc;
 
-                if (lrc != currentLine)
+                if (!lrc.Equals(CurrentLine))
                 {
                     lrcLine.Text = lrc.Content;
                     lrcLine.TranslatedText = lrc.TranslatedString;
-                }
 
-                currentLine = lrc;
+                    CurrentLine = lrc.GetCopy();
+                }
             }
         }
 
@@ -189,5 +234,21 @@ namespace Mvis.Plugin.CloudMusicSupport
             Failed,
             Finish
         }
+
+        public void NextTrack()
+        {
+        }
+
+        public void PrevTrack()
+        {
+        }
+
+        public void TogglePause() => controller.TogglePause();
+
+        public void Seek(double position) => currentWorkingBeatmap?.Track.Seek(position);
+
+        public DrawableTrack GetCurrentTrack() => controller.CurrentTrack;
+
+        public bool IsCurrent { get; set; }
     }
 }

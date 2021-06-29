@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
@@ -36,7 +34,7 @@ using osu.Game.Resources;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
-using osu.Game.Screens.Mvis;
+using osu.Game.Screens;
 using osu.Game.Skinning;
 using osu.Game.Utils;
 
@@ -170,7 +168,7 @@ namespace osu.Game
 
             dependencies.CacheAs(this);
             dependencies.CacheAs(LocalConfig);
-            dependencies.Cache(MConfig);       
+            dependencies.Cache(MConfig);
             dependencies.Cache(new CustomStore(Storage, this));
 
             AddFont(Resources, @"Fonts/osuFont");

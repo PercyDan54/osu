@@ -102,7 +102,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvis.Plugin.FakeEditor", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvis.Plugin.CollectionSupport", "Mvis.Plugin.CollectionSupport\Mvis.Plugin.CollectionSupport.csproj", "{EF6F8297-93A3-454F-B903-003CBEAED1F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvis.Plugin.RulesetPanel", "Mvis.Plugin.RulesetPanel\Mvis.Plugin.RulesetPanel.csproj", "{5E126312-1459-4965-ABAC-8A11F378F037}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvis.Plugin.SandboxToPanel", "Mvis.Plugin.SandboxToPanel\Mvis.Plugin.SandboxToPanel.csproj", "{5E126312-1459-4965-ABAC-8A11F378F037}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mvis.Plugin.StoryboardSupport", "Mvis.Plugin.StoryboardSupport\Mvis.Plugin.StoryboardSupport.csproj", "{45D5433E-6ECD-4EB1-8558-301E0D99714D}"
 EndProject

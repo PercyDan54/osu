@@ -36,10 +36,12 @@ namespace Mvis.Plugin.FakeEditor
 
         private WorkingBeatmap beatmap;
 
+        public override int Version => 5;
+
         public FakeEditor()
         {
             Name = "Fake editor";
-            Description = "Used to provide hitsounds, high memory usage";
+            Description = "Used to provide hitsounds";
             Author = "mf-osu";
 
             Masking = true;
@@ -72,7 +74,7 @@ namespace Mvis.Plugin.FakeEditor
             if (MvisScreen != null)
             {
                 MvisScreen.OnSeek += Seek;
-                MvisScreen.OnBeatmapChanged += initDependencies;
+                MvisScreen.OnBeatmapChanged(initDependencies, this);
             }
         }
 
@@ -82,13 +84,13 @@ namespace Mvis.Plugin.FakeEditor
         public override PluginSettingsSubSection CreateSettingsSubSection()
             => new FakeEditorSettings(this);
 
+        public override PluginSidebarSettingsSection CreateSidebarSettingsSection()
+            => new FakeEditorSidebarSection(this);
+
         public override void UnLoad()
         {
             if (MvisScreen != null)
-            {
                 MvisScreen.OnSeek -= Seek;
-                MvisScreen.OnBeatmapChanged -= initDependencies;
-            }
 
             base.UnLoad();
         }
@@ -159,10 +161,6 @@ namespace Mvis.Plugin.FakeEditor
             => new EditorContainer(beatmap);
 
         protected override bool PostInit() => true;
-        public override int Version => 3;
-
-        private void updateSamplePlaybackDisabled() =>
-            samplePlaybackDisabled.Value = !Value.Value || !musicController.CurrentTrack.IsRunning;
 
         protected override bool OnContentLoaded(Drawable content)
         {
@@ -174,14 +172,11 @@ namespace Mvis.Plugin.FakeEditor
             if (MvisScreen != null)
                 MvisScreen.OnTrackRunningToggle += _ => updateSamplePlaybackDisabled();
 
-            //Logger.Log($"Clock源: {EditorClock.Source}");
-            //Logger.Log($"是否不能单独操作: {EditorClock.IsCoupled}");
-            //Logger.Log($"是否在运行: {EditorClock.IsRunning}");
-            //Logger.Log($"当前Track是否在运行: {music.CurrentTrack.IsRunning}");
-            //Logger.Log($"在Seek或已经停止: {EditorClock.SeekingOrStopped}");
-
             return true;
         }
+
+        private void updateSamplePlaybackDisabled() =>
+            samplePlaybackDisabled.Value = !Value.Value || !musicController.CurrentTrack.IsRunning;
 
         public double SnapTime(double time, double? referenceTime = null) => 0;
 

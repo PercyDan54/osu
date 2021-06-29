@@ -2,29 +2,22 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Screens.Mvis;
-using osu.Game.Screens.Mvis.Skinning;
-using osu.Game.Skinning;
 using osuTK;
 
 namespace Mvis.Plugin.CollectionSupport.Sidebar
 {
     public class CollectionInfo : CompositeDrawable
     {
-        [Resolved]
-        private BeatmapManager beatmaps { get; set; }
-
         private OsuSpriteText collectionName;
         private OsuSpriteText collectionBeatmapCount;
         private readonly Bindable<BeatmapCollection> collection = new Bindable<BeatmapCollection>();
@@ -47,20 +40,6 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         {
             InternalChildren = new Drawable[]
             {
-                new SkinnableComponent(
-                    "MSidebar-Collection-background",
-                    confineMode: ConfineMode.ScaleToFill,
-                    defaultImplementation: _ => createDefaultBackground())
-                {
-                    Name = "收藏夹背景",
-                    Anchor = Anchor.BottomRight,
-                    Origin = Anchor.BottomRight,
-                    ChildAnchor = Anchor.BottomRight,
-                    ChildOrigin = Anchor.BottomRight,
-                    RelativeSizeAxes = Axes.Both,
-                    CentreComponent = false,
-                    OverrideChildAnchor = true,
-                },
                 new GridContainer
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -83,20 +62,6 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                                 Masking = true,
                                 Children = new Drawable[]
                                 {
-                                    new SkinnableComponent(
-                                        "transparent",
-                                        confineMode: ConfineMode.ScaleToFill,
-                                        masking: true,
-                                        defaultImplementation: _ => new PlaceHolder())
-                                    {
-                                        Anchor = Anchor.TopRight,
-                                        Origin = Anchor.TopRight,
-                                        ChildAnchor = Anchor.TopRight,
-                                        ChildOrigin = Anchor.TopRight,
-                                        RelativeSizeAxes = Axes.Both,
-                                        CentreComponent = false,
-                                        OverrideChildAnchor = true,
-                                    },
                                     new FillFlowContainer
                                     {
                                         RelativeSizeAxes = Axes.X,
@@ -150,23 +115,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         {
             base.LoadComplete();
 
-            colourProvider.HueColour.BindValueChanged(_ =>
-            {
-                bgBox?.FadeColour(colourProvider.Background5);
-            }, true);
-
             collection.BindValueChanged(onCollectionChanged);
-        }
-
-        private Drawable createDefaultBackground()
-        {
-            bgBox = new Box
-            {
-                RelativeSizeAxes = Axes.Both,
-                Colour = colourProvider.Background5
-            };
-
-            return bgBox;
         }
 
         private void onCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
@@ -201,9 +150,6 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         private CancellationTokenSource refreshTaskCancellationToken;
         private Container listContainer;
         private LoadingSpinner loadingSpinner;
-
-        [CanBeNull]
-        private Box bgBox;
 
         private void refreshBeatmapSetList()
         {
@@ -252,8 +198,8 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         {
             beatmapSets.Clear();
             beatmapList.ClearList();
-            collectionName.Text = "未选择收藏夹";
-            collectionBeatmapCount.Text = "请先选择一个!";
+            collectionName.Text = "No collection selected";
+            collectionBeatmapCount.Text = "Select a collection first!";
         }
     }
 }

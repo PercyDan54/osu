@@ -1,22 +1,19 @@
 using osu.Framework.Allocation;
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Sprites;
-using osu.Game.Screens.Mvis.Misc;
+using osu.Framework.Logging;
+using osu.Game.Online.Placeholders;
 using osu.Game.Screens.Mvis.Plugins.Config;
 using osu.Game.Screens.Mvis.SideBar;
 using osuTK;
-using osuTK.Graphics;
 using osuTK.Input;
 
 namespace osu.Game.Screens.Mvis.Plugins
 {
     public abstract class PluginSidebarPage : Container, ISidebarContent
     {
-        private readonly Container placeholder;
+        private readonly ClickablePlaceholder placeholder;
         private readonly Container content;
 
         protected override Container<Drawable> Content => content;
@@ -33,9 +30,11 @@ namespace osu.Game.Screens.Mvis.Plugins
         public MvisPlugin Plugin { get; }
         protected IPluginConfigManager Config => Dependencies.Get<MvisPluginManager>().GetConfigManager(Plugin);
 
-        protected PluginSidebarPage(MvisPlugin plugin, float resizeWidth)
+        [Resolved]
+        private MvisPluginManager pluginManager { get; set; }
+
+        protected PluginSidebarPage(MvisPlugin plugin, float resizeWidth = -1)
         {
-            ResizeWidth = resizeWidth;
             Plugin = plugin;
             Title = plugin.Name;
             RelativeSizeAxes = Axes.Both;
@@ -47,51 +46,25 @@ namespace osu.Game.Screens.Mvis.Plugins
                     RelativeSizeAxes = Axes.Both,
                     Alpha = 0
                 },
-                placeholder = new Container
+                placeholder = new ClickablePlaceholder("Enable this plugin first!", FontAwesome.Solid.Plug)
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Depth = float.MinValue,
-                    Children = new Drawable[]
-                    {
-                        new BlockMouseBox
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = Color4.Black.Opacity(0.5f),
-                        },
-                        new FillFlowContainer
-                        {
-                            AutoSizeAxes = Axes.Both,
-                            Direction = FillDirection.Vertical,
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            Colour = Color4.White.Opacity(0.6f),
-                            Children = new Drawable[]
-                            {
-                                new SpriteIcon
-                                {
-                                    Icon = FontAwesome.Solid.Ban,
-                                    Size = new Vector2(60),
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                },
-                                new OsuSpriteText
-                                {
-                                    Text = "Plugin unavailable",
-                                    Font = OsuFont.GetFont(size: 45, weight: FontWeight.Bold),
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                }
-                            }
-                        },
-                    }
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Action = () => pluginManager?.ActivePlugin(Plugin),
+                    Scale = new Vector2(1.25f)
                 }
             };
+
+            if (resizeWidth != -1) Logger.Log("resizeWidth is deprecated", level: LogLevel.Important);
         }
 
         private DependencyContainer dependencies;
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
             dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
+
+        [Resolved]
+        private CustomColourProvider colourProvider { get; set; }
 
         [BackgroundDependencyLoader]
         private void load()
@@ -102,8 +75,16 @@ namespace osu.Game.Screens.Mvis.Plugins
 
             Plugin.Disabled.BindValueChanged(v =>
             {
-                content.FadeTo(v.NewValue ? 0 : 1);
-                placeholder.FadeTo(v.NewValue ? 1 : 0, 200);
+                if (v.NewValue)
+                {
+                    content.FadeOut();
+                    placeholder.MoveToY(0, 200, Easing.OutQuint).FadeIn(200, Easing.OutQuint);
+                }
+                else
+                {
+                    content.FadeIn(200, Easing.OutQuint);
+                    placeholder.MoveToY(30, 200, Easing.OutQuint).FadeOut(200, Easing.OutQuint);
+                }
 
                 if (!v.NewValue && !contentInit)
                 {
@@ -113,7 +94,7 @@ namespace osu.Game.Screens.Mvis.Plugins
             }, true);
         }
 
-        public float ResizeWidth { get; }
         public string Title { get; }
+        public IconUsage Icon { get; set; } = FontAwesome.Solid.Plug;
     }
 }

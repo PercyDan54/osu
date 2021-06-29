@@ -8,35 +8,24 @@ using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Input.Events;
-using osu.Game.Graphics.Containers;
-using osu.Game.Screens.Mvis.SideBar.Header;
-using osu.Game.Screens.Mvis.Skinning;
-using osu.Game.Skinning;
-using osuTK;
+using osu.Game.Screens.Mvis.SideBar.Tabs;
 using osuTK.Graphics;
 
 namespace osu.Game.Screens.Mvis.SideBar
 {
     internal class Sidebar : VisibilityContainer
     {
-        [Resolved]
-        private CustomColourProvider colourProvider { get; set; }
-
-        [Resolved]
+        [CanBeNull]
+        [Resolved(CanBeNull = true)]
         private MvisScreen mvisScreen { get; set; }
 
         public readonly List<ISidebarContent> Components = new List<ISidebarContent>();
-        private readonly TabHeader header;
+        public TabControl Header;
         private const float duration = 400;
-        private HeaderTabItem prevTab;
+        private TabControlItem prevTab;
 
-        [CanBeNull]
-        private Box sidebarBg;
-
-        public bool Hiding;
+        public BindableBool IsVisible = new BindableBool();
         public Bindable<Drawable> CurrentDisplay = new Bindable<Drawable>();
 
         private readonly Container<Drawable> contentContainer;
@@ -47,8 +36,8 @@ namespace osu.Game.Screens.Mvis.SideBar
         private Sample samplePopOut;
 
         private bool startFromHiddenState;
-        private readonly Container content;
         private bool isFirstHide = true;
+        private readonly Box bgBox;
 
         public Sidebar()
         {
@@ -56,45 +45,17 @@ namespace osu.Game.Screens.Mvis.SideBar
 
             InternalChildren = new Drawable[]
             {
-                new ClickToCloseBox
+                bgBox = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.Black.Opacity(0.7f),
-                    Action = () =>
-                    {
-                        if (!content.IsHovered)
-                            Hide();
-                    }
+                    Colour = Color4.Black.Opacity(0.6f)
                 },
-                content = new BlockClickContainer
+                contentContainer = new Container
                 {
+                    Name = "Content",
+                    RelativeSizeAxes = Axes.Both,
                     Anchor = Anchor.BottomRight,
                     Origin = Anchor.BottomRight,
-                    RelativeSizeAxes = Axes.Both,
-                    Size = new Vector2(0.3f, 1f),
-                    Masking = true,
-                    EdgeEffect = new EdgeEffectParameters
-                    {
-                        Type = EdgeEffectType.Shadow,
-                        Radius = 5,
-                        Colour = Color4.Black.Opacity(0.5f)
-                    },
-                    Children = new Drawable[]
-                    {
-                        header = new TabHeader
-                        {
-                            Depth = float.MinValue
-                        },
-                        contentContainer = new Container
-                        {
-                            Name = "Content",
-                            RelativeSizeAxes = Axes.Both
-                        },
-                        new Footer.Footer
-                        {
-                            Depth = float.MinValue
-                        }
-                    }
                 }
             };
         }
@@ -105,32 +66,6 @@ namespace osu.Game.Screens.Mvis.SideBar
             sampleToggle = audio.Samples.Get("UI/overlay-pop-in");
             samplePopIn = audio.Samples.Get("UI/overlay-pop-in");
             samplePopOut = audio.Samples.Get("UI/overlay-pop-out");
-
-            content.Add(new SkinnableComponent(
-                "MSidebar-background",
-                confineMode: ConfineMode.ScaleToFill,
-                defaultImplementation: _ => sidebarBg = new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = colourProvider.Background6,
-                    Depth = float.MaxValue
-                })
-            {
-                Name = "侧边栏背景",
-                Depth = float.MaxValue,
-                Anchor = Anchor.BottomRight,
-                Origin = Anchor.BottomRight,
-                ChildAnchor = Anchor.BottomRight,
-                ChildOrigin = Anchor.BottomRight,
-                RelativeSizeAxes = Axes.Both,
-                CentreComponent = false,
-                OverrideChildAnchor = true,
-            });
-
-            colourProvider.HueColour.BindValueChanged(_ =>
-            {
-                sidebarBg?.FadeColour(colourProvider.Background6);
-            }, true);
         }
 
         protected override void LoadComplete()
@@ -145,7 +80,7 @@ namespace osu.Game.Screens.Mvis.SideBar
 
             prevTab?.MakeInActive();
 
-            foreach (var t in header.Tabs)
+            foreach (var t in Header.Tabs)
             {
                 if (t.Value == sc)
                 {
@@ -163,14 +98,16 @@ namespace osu.Game.Screens.Mvis.SideBar
         {
             contentContainer.Padding = new MarginPadding
             {
-                Top = header.Height + header.DrawPosition.Y,
-                Bottom = mvisScreen.BottombarHeight
+                Right = Header.GetRightUnavaliableSpace(),
+                Left = Header.GetLeftUnavaliableSpace(),
+                Top = Header.GetTopUnavaliableSpace(),
+                Bottom = mvisScreen?.BottombarHeight ?? 0
             };
 
             base.UpdateAfterChildren();
         }
 
-        public void ShowComponent(Drawable d)
+        public void ShowComponent(Drawable d, bool allowHide = false)
         {
             if (!(d is ISidebarContent c))
                 throw new InvalidOperationException($"{d}不是{typeof(ISidebarContent)}");
@@ -178,18 +115,22 @@ namespace osu.Game.Screens.Mvis.SideBar
             if (!Components.Contains(c))
                 throw new InvalidOperationException($"组成部分中不包含{c}");
 
-            if (c.ResizeWidth < 0.3f || c.ResizeHeight < 0.3f)
-                throw new InvalidOperationException("组件过小, 缩放大小不能小于30%(0.3)");
-
             startFromHiddenState = State.Value == Visibility.Hidden;
 
-            Show();
-
-            //如果要显示的是当前正在显示的内容，则中断
             if (CurrentDisplay.Value == d)
             {
-                return;
+                //如果要显示的是当前正在显示的内容，则中断
+                if (IsVisible.Value)
+                {
+                    if (allowHide) Hide();
+
+                    return;
+                }
+                else
+                    prevTab?.MakeActive();
             }
+
+            Show();
 
             var resizeDuration = startFromHiddenState ? 0 : duration;
 
@@ -205,8 +146,6 @@ namespace osu.Game.Screens.Mvis.SideBar
              .Delay(resizeDuration / 2).FadeIn(resizeDuration / 2);
 
             CurrentDisplay.Value = d;
-
-            content.ResizeTo(new Vector2(c.ResizeWidth, c.ResizeHeight), resizeDuration, Easing.OutQuint);
         }
 
         private void addDrawableToList(Drawable d)
@@ -215,9 +154,9 @@ namespace osu.Game.Screens.Mvis.SideBar
             {
                 d.Alpha = 0;
                 Components.Add(s);
-                header.Tabs.Add(new HeaderTabItem(s)
+                Header.Tabs.Add(new TabControlItem(s)
                 {
-                    Action = () => ShowComponent(d)
+                    Action = () => ShowComponent(d, true)
                 });
             }
         }
@@ -226,7 +165,7 @@ namespace osu.Game.Screens.Mvis.SideBar
 
         public override void Clear(bool disposeChildren)
         {
-            header.Tabs.Clear(disposeChildren);
+            Header.Tabs.Clear(disposeChildren);
             contentContainer.Clear(disposeChildren);
         }
 
@@ -234,11 +173,11 @@ namespace osu.Game.Screens.Mvis.SideBar
         {
             if (drawable is ISidebarContent sc)
             {
-                foreach (var t in header.Tabs)
+                foreach (var t in Header.Tabs)
                 {
                     if (t.Value == sc)
                     {
-                        header.Tabs.Remove(t);
+                        Header.Tabs.Remove(t);
                         drawable.Expire();
                         return true;
                     }
@@ -255,41 +194,30 @@ namespace osu.Game.Screens.Mvis.SideBar
             else
                 isFirstHide = false;
 
-            content.MoveToX(100, duration + 100, Easing.OutQuint);
-            this.FadeOut(duration + 100, Easing.OutQuint);
+            Header.SidebarActive = false;
+            Header.Hide();
+            bgBox.FadeOut(duration, Easing.OutQuint);
 
-            contentContainer.FadeOut(WaveContainer.DISAPPEAR_DURATION, Easing.OutQuint);
+            contentContainer.FadeOut(duration, Easing.OutQuint)
+                            .MoveToY(70, duration, Easing.OutQuint);
 
-            Hiding = true;
+            prevTab?.MakeInActive();
+
+            IsVisible.Value = false;
         }
 
         protected override void PopIn()
         {
             samplePopIn?.Play();
 
-            content.MoveToX(0, duration + 100, Easing.OutQuint);
-            this.FadeIn(duration + 100, Easing.OutQuint);
+            Header.SidebarActive = true;
+            Header.Show();
+            bgBox.FadeIn(duration, Easing.OutQuint);
 
-            contentContainer.FadeIn(WaveContainer.APPEAR_DURATION, Easing.OutQuint);
+            contentContainer.FadeIn(duration, Easing.OutQuint)
+                            .MoveToY(0, duration, Easing.OutQuint);
 
-            Hiding = false;
-        }
-
-        private class ClickToCloseBox : Box
-        {
-            public Action Action;
-
-            protected override bool OnClick(ClickEvent e)
-            {
-                Action?.Invoke();
-                return base.OnClick(e);
-            }
-        }
-
-        private class BlockClickContainer : Container
-        {
-            protected override bool OnClick(ClickEvent e) => true;
-            protected override bool OnMouseDown(MouseDownEvent e) => true;
+            IsVisible.Value = true;
         }
     }
 }

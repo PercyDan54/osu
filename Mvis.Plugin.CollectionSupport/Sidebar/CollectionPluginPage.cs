@@ -4,10 +4,13 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Sprites;
 using osu.Game.Collections;
 using osu.Game.Graphics.Containers;
 using osu.Game.Screens.Mvis;
 using osu.Game.Screens.Mvis.Plugins;
+using osu.Game.Screens.Mvis.Skinning;
+using osu.Game.Skinning;
 using osuTK;
 using osuTK.Input;
 
@@ -33,8 +36,9 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         private CollectionInfo info;
 
         public CollectionPluginPage(MvisPlugin plugin)
-            : base(plugin, 0.8f)
+            : base(plugin)
         {
+            Icon = FontAwesome.Solid.Check;
             RelativeSizeAxes = Axes.Both;
             collectionHelper = (CollectionHelper)plugin;
         }
@@ -54,6 +58,20 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
 
             Children = new Drawable[]
             {
+                new SkinnableComponent(
+                    "MSidebar-Collection-background",
+                    confineMode: ConfineMode.ScaleToFill,
+                    defaultImplementation: _ => new PlaceHolder())
+                {
+                    Name = "收藏夹背景",
+                    Anchor = Anchor.BottomRight,
+                    Origin = Anchor.BottomRight,
+                    ChildAnchor = Anchor.BottomRight,
+                    ChildOrigin = Anchor.BottomRight,
+                    RelativeSizeAxes = Axes.Both,
+                    CentreComponent = false,
+                    OverrideChildAnchor = true,
+                },
                 new Container
                 {
                     Name = "Collection selection",
@@ -187,9 +205,17 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             searchForCurrentSelection();
         }
 
+        private bool requestedOnce;
+
         private void makeCurrentSelected()
         {
             collectionHelper.CurrentCollection.Value = selectedCollection.Value;
+
+            if (!requestedOnce)
+            {
+                requestedOnce = true;
+                mvisScreen?.RequestAudioControl((CollectionHelper)Plugin, "激活以确保插件可以发挥功能\n本提示在本次会话中不会出现第二次。", null, null);
+            }
         }
 
         protected override void Dispose(bool isDisposing)

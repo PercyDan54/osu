@@ -19,12 +19,18 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
         {
             var config = (LyricConfigManager)ConfigManager;
 
+            SettingsCheckbox useDrawablePoolCheckBox;
             Children = new Drawable[]
             {
                 new SettingsCheckbox
                 {
                     LabelText = "Enable lyrics",
                     Current = config.GetBindable<bool>(LyricSettings.EnablePlugin)
+                },
+                useDrawablePoolCheckBox = new SettingsCheckbox
+                {
+                    LabelText = "Use DrawablePool",
+                    Current = config.GetBindable<bool>(LyricSettings.UseDrawablePool)
                 },
                 new SettingsCheckbox
                 {
@@ -34,7 +40,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 },
                 new SettingsCheckbox
                 {
-                    LabelText = "Disable shader",
+                    LabelText = "Disable shadow",
                     Current = config.GetBindable<bool>(LyricSettings.NoExtraShadow),
                     TooltipText = "Don't add shaders to texts"
                 },
@@ -55,6 +61,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                     Current = config.GetBindable<float>(LyricSettings.LyricFadeOutDuration)
                 },
             };
+            useDrawablePoolCheckBox.WarningText = "Experimental function!";
         }
     }
 }

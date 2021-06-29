@@ -24,7 +24,7 @@ namespace osu.Game.Screens.Mvis.BottomBar.Buttons
 
         public SongProgressButton()
         {
-            TooltipText = "Toggle pause";
+            TooltipText = "切换暂停";
             AutoSizeAxes = Axes.X;
         }
 
