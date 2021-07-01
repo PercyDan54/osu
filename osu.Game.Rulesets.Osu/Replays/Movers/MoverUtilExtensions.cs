@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 
@@ -26,6 +27,40 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             var b = Vector2.Distance(centre, v2);
             var c = Vector2.Distance(v1, v2);
             return MathF.Acos((a * a + b * b - c * c) / (2 * a * b));
+        }
+
+        public static bool IsStream(params OsuHitObject[] hitObjects)
+        {
+            const float min = 50f;
+            const float max = 10000f;
+
+            var h = hitObjects[0];
+            var isStream = false;
+
+            for (int i = 0; i < hitObjects.Length - 1; i++)
+            {
+                var next = hitObjects[i + 1];
+                var distanceSquared = Vector2.DistanceSquared(next.StackedPosition, h.StackedEndPosition);
+                var timeDifference = next.StartTime - h.GetEndTime();
+
+                isStream = distanceSquared >= min && distanceSquared <= max && timeDifference < 200 && h is HitCircle && next is HitCircle;
+                h = next;
+            }
+
+            return isStream;
+        }
+
+        public static Vector2 ApplyPippiOffset(Vector2 pos, double time, float radius = -1f)
+        {
+            if (radius < 0f)
+            {
+                radius = OsuHitObject.OBJECT_RADIUS / 2 * 0.98f;
+            }
+
+            var t = (float)time / 100f;
+            Vector2 vector = radius * new Vector2(MathF.Cos(t), MathF.Sin(t));
+
+            return pos + vector;
         }
     }
 }
