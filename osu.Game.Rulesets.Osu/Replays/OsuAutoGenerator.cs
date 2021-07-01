@@ -88,11 +88,9 @@ namespace osu.Game.Rulesets.Osu.Replays
                 addHitObjectReplay(h, i);
             }
 
-            //Apply adjustments
-            framesPendingAdjust.Remove(framesPendingAdjust.LastOrDefault()); // Don't change the last frame
-
-            foreach (var frame in framesPendingAdjust) Frames.Remove(frame);
-            foreach (var frame in framesAfterAdjust) AddFrameToReplay(frame);
+            //Apply key up frame adjustments at the end to ensure frame order
+            framesPendingAdjust.ForEach(f => Frames.Remove(f));
+            framesAfterAdjust.ForEach(AddFrameToReplay);
 
             return Replay;
         }
@@ -174,15 +172,6 @@ namespace osu.Game.Rulesets.Osu.Replays
                 }
             }
 
-            //Gets the actual next hitobject auto should move to
-            var next = Beatmap.HitObjects[index == Beatmap.HitObjects.Count - 1 ? index : index + 1];
-
-            while (next is Spinner s && s.SpinsRequired == 0 && index < Beatmap.HitObjects.Count - 1)
-            {
-                index++;
-                next = Beatmap.HitObjects[index == Beatmap.HitObjects.Count - 1 ? index : index + 1];
-            }
-
             // Do some nice easing for cursor movements
             if (Frames.Count > 0)
             {
@@ -190,7 +179,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
 
             // Add frames to click the hitobject
-            addHitObjectClickFrames(h, next, startPosition, spinnerDirection);
+            addHitObjectClickFrames(h, (OsuHitObject)GetNextObject(index), startPosition, spinnerDirection);
         }
 
         #endregion
@@ -244,6 +233,22 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
         }
 
+        /// <summary>
+        /// Gets the next hitobect that requires an action
+        /// Returns the same object if currentIndex is the index of the last hitobject
+        /// </summary>
+        protected override HitObject GetNextObject(int currentIndex)
+        {
+            var next = Beatmap.HitObjects[currentIndex == Beatmap.HitObjects.Count - 1 ? currentIndex : currentIndex + 1];
+
+            while (next is Spinner { SpinsRequired: 0 } && currentIndex < Beatmap.HitObjects.Count - 1)
+            {
+                next = Beatmap.HitObjects[++currentIndex];
+            }
+
+            return next;
+        }
+
         private void moveToHitObject(OsuHitObject h, Vector2 targetPos, Easing easing)
         {
             OsuReplayFrame lastFrame = (OsuReplayFrame)Frames[^1];
@@ -253,7 +258,9 @@ namespace osu.Game.Rulesets.Osu.Replays
 
             if (waitTime > lastFrame.Time)
             {
-                framesPendingAdjust.Remove(lastFrame); // No need to adjust notes that are too far in time
+                // No need to adjust frames that are too far in time
+                framesPendingAdjust.Remove(lastFrame);
+
                 lastFrame = new OsuReplayFrame(waitTime, lastFrame.Position) { Actions = lastFrame.Actions };
                 AddFrameToReplay(lastFrame);
             }
@@ -272,7 +279,8 @@ namespace osu.Game.Rulesets.Osu.Replays
                 {
                     Vector2 currentPosition = Interpolation.ValueAt(time, lastPosition, targetPos, lastFrame.Time, h.StartTime, easing);
 
-                    //Search for frame that needs to be adjusted
+                    //Search in framesPendingAdjust for frames with .Time == current time
+                    //If found, it means the cursor should be at currentPosition assume it's still moving during the KEY_UP_DELAY.
                     var adjustingFrame = framesPendingAdjust.FirstOrDefault(frame => Precision.AlmostEquals(frame.Time, time, GetFrameDelay(time)));
 
                     if (adjustingFrame != null)
@@ -316,11 +324,14 @@ namespace osu.Game.Rulesets.Osu.Replays
 
             var timeDifference = ApplyModsToTimeDelta(endFrame.Time, next.StartTime);
 
-            //We don't know the exact position the cursor will be at end time, so add it to pending adjust
-            if (timeDifference > GetFrameDelay(endFrame.Time)) framesPendingAdjust.Add(endFrame);
-            //In some 2B maps there are notes that are very close to the next one
-            //And searching with FirstOrDefault() in moveToHitObject() may gets the wrong frame, so adjust it here.
-            else if (next != h /* is not the last hitobject */) endFrame.Position = next.StackedPosition; // Since the time difference is less than frame delay, so just move to the next one
+            //We don't know where the cursor should be at end time, so add it to pending adjust
+            if (timeDifference > GetFrameDelay(endFrame.Time))
+                framesPendingAdjust.Add(endFrame);
+
+            //For 2B maps which we can't order hitobjects by their start time, so just move to the next one
+            //Moving to StackedEndPosition because timeDifference < FrameDelay < KEY_UP_DELAY
+            else
+                endFrame.Position = next.StackedEndPosition;
 
             // Decrement because we want the previous frame, not the next one
             int index = FindInsertionIndex(startFrame) - 1;
