@@ -20,6 +20,7 @@ using osu.Framework.Graphics.Performance;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Input;
 using osu.Framework.Logging;
+using osu.Framework.Threading;
 using osu.Game.Audio;
 using osu.Game.Database;
 using osu.Game.Input;
@@ -122,7 +123,7 @@ namespace osu.Game
 
         private RulesetConfigCache rulesetConfigCache;
 
-        public virtual string Version => "2021.623.0";
+        public virtual string Version => "2021.703.0";
 
         private SpectatorClient spectatorClient;
 
@@ -142,6 +143,8 @@ namespace osu.Game
 
         private readonly BindableNumber<double> globalTrackVolumeAdjust = new BindableNumber<double>(GLOBAL_TRACK_VOLUME_ADJUST);
 
+        private IBindable<GameThreadState> updateThreadState;
+
         public OsuGameBase()
         {
             UseDevelopmentServer = false;
@@ -151,13 +154,17 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "dbdf691519cd3afee50ef5a6b90e9e7e";
+            VersionHash = "d89569f70e0281c0f437d952bef996bd";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
             dependencies.Cache(contextFactory = new DatabaseContextFactory(Storage));
 
             dependencies.Cache(realmFactory = new RealmContextFactory(Storage));
+
+            updateThreadState = Host.UpdateThread.State.GetBoundCopy();
+            updateThreadState.BindValueChanged(updateThreadStateChanged);
+
             AddInternal(realmFactory);
 
             dependencies.CacheAs(Storage);
@@ -334,6 +341,23 @@ namespace osu.Game
             Ruleset.BindValueChanged(onRulesetChanged);
         }
 
+        private IDisposable blocking;
+
+        private void updateThreadStateChanged(ValueChangedEvent<GameThreadState> state)
+        {
+            switch (state.NewValue)
+            {
+                case GameThreadState.Running:
+                    blocking?.Dispose();
+                    blocking = null;
+                    break;
+
+                case GameThreadState.Paused:
+                    blocking = realmFactory.BlockAllOperations();
+                    break;
+            }
+        }
+
         protected override void LoadComplete()
         {
             base.LoadComplete();
@@ -378,11 +402,15 @@ namespace osu.Game
 
         public void Migrate(string path)
         {
+            Logger.Log($@"Migrating osu! data from ""{Storage.GetFullPath(string.Empty)}"" to ""{path}""...");
+
             using (realmFactory.BlockAllOperations())
             {
                 contextFactory.FlushConnections();
                 (Storage as OsuStorage)?.Migrate(Host.GetStorage(path));
             }
+
+            Logger.Log(@"Migration complete!");
         }
 
         protected override UserInputManager CreateUserInputManager() => new OsuUserInputManager();
