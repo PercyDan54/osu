@@ -88,7 +88,7 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeB
 
             Beatmap.BindValueChanged(b =>
             {
-                text.Text = $"{b.NewValue.Metadata.Artist} - {b.NewValue.Metadata.Title}";
+                text.Text = b.NewValue.Metadata.ToRomanisableString(false);
             }, true);
 
             type.BindValueChanged(t =>

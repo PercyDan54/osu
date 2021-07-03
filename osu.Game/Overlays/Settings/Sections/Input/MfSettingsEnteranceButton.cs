@@ -7,7 +7,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
 {
     public class MfSettingsEnteranceButton : SettingsSubsection
     {
-        protected override string Header => "Custom osu settings";
+        protected override string Header => "Super secret settings";
 
         public MfSettingsEnteranceButton(MfSettingsPanel mfpanel)
         {

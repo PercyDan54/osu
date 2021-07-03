@@ -91,10 +91,13 @@ namespace osu.Game.Beatmaps
             return $"{Artist} - {Title} {author}".Trim();
         }
 
-        public RomanisableString ToRomanisableString()
+        public RomanisableString ToRomanisableString(bool withAuthor = true)
         {
-            string author = Author == null ? string.Empty : $"({Author})";
-            return new RomanisableString($"{ArtistUnicode} - {TitleUnicode} {author}".Trim(), $"{Artist} - {Title} {author}".Trim());
+            string author = Author == null || !withAuthor ? string.Empty : $"({Author})";
+            var artistUnicode = string.IsNullOrEmpty(ArtistUnicode) ? Artist : ArtistUnicode;
+            var titleUnicode = string.IsNullOrEmpty(TitleUnicode) ? Title : TitleUnicode;
+
+            return new RomanisableString($"{artistUnicode} - {titleUnicode} {author}".Trim(), $"{Artist} - {Title} {author}".Trim());
         }
 
         [JsonIgnore]
