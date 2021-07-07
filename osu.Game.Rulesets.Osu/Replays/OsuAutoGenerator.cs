@@ -22,8 +22,6 @@ namespace osu.Game.Rulesets.Osu.Replays
     public class OsuAutoGenerator : OsuAutoGeneratorBase
     {
         public new OsuBeatmap Beatmap => (OsuBeatmap)base.Beatmap;
-        private readonly List<OsuReplayFrame> framesPendingAdjust = new List<OsuReplayFrame>();
-        private readonly List<OsuReplayFrame> framesAfterAdjust = new List<OsuReplayFrame>();
 
         #region Parameters
 
@@ -85,12 +83,8 @@ namespace osu.Game.Rulesets.Osu.Replays
                     addDelayedMovements(h, prev);
                 }
 
-                addHitObjectReplay(h, i);
+                addHitObjectReplay(h);
             }
-
-            //Apply key up frame adjustments at the end to ensure frame order
-            framesPendingAdjust.ForEach(f => Frames.Remove(f));
-            framesAfterAdjust.ForEach(AddFrameToReplay);
 
             return Replay;
         }
@@ -145,7 +139,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
         }
 
-        private void addHitObjectReplay(OsuHitObject h, int index)
+        private void addHitObjectReplay(OsuHitObject h)
         {
             // Default values for circles/sliders
             Vector2 startPosition = h.StackedPosition;
@@ -179,7 +173,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
 
             // Add frames to click the hitobject
-            addHitObjectClickFrames(h, (OsuHitObject)GetNextObject(index), startPosition, spinnerDirection);
+            addHitObjectClickFrames(h, startPosition, spinnerDirection);
         }
 
         #endregion
@@ -233,71 +227,49 @@ namespace osu.Game.Rulesets.Osu.Replays
             }
         }
 
-        /// <summary>
-        /// Gets the next hitobect that requires an action
-        /// Returns the same object if currentIndex is the index of the last hitobject
-        /// </summary>
-        protected override HitObject GetNextObject(int currentIndex)
-        {
-            var next = Beatmap.HitObjects[currentIndex == Beatmap.HitObjects.Count - 1 ? currentIndex : currentIndex + 1];
-
-            while (next is Spinner { SpinsRequired: 0 } && currentIndex < Beatmap.HitObjects.Count - 1)
-            {
-                next = Beatmap.HitObjects[++currentIndex];
-            }
-
-            return next;
-        }
-
         private void moveToHitObject(OsuHitObject h, Vector2 targetPos, Easing easing)
         {
             OsuReplayFrame lastFrame = (OsuReplayFrame)Frames[^1];
 
             // Wait until Auto could "see and react" to the next note.
             double waitTime = h.StartTime - Math.Max(0.0, h.TimePreempt - getReactionTime(h.StartTime - h.TimePreempt));
+            bool hasWaited = false;
 
             if (waitTime > lastFrame.Time)
             {
-                // No need to adjust frames that are too far in time
-                framesPendingAdjust.Remove(lastFrame);
-
                 lastFrame = new OsuReplayFrame(waitTime, lastFrame.Position) { Actions = lastFrame.Actions };
+                hasWaited = true;
                 AddFrameToReplay(lastFrame);
             }
 
-            Vector2 lastPosition = lastFrame.Position;
-
             double timeDifference = ApplyModsToTimeDelta(lastFrame.Time, h.StartTime);
+            OsuReplayFrame lastLastFrame = Frames.Count >= 2 ? (OsuReplayFrame)Frames[^2] : null;
 
-            // Only "snap" to hitcircles if they are far enough apart. As the time between hitcircles gets shorter the snapping threshold goes up.
-            if (timeDifference > 0 && // Sanity checks
-                ((lastPosition - targetPos).Length > h.Radius * (1.5 + 100.0 / timeDifference) || // Either the distance is big enough
-                 timeDifference >= 266)) // ... or the beats are slow enough to tap anyway.
+            if (timeDifference > 0)
             {
-                // Perform eased movement
+                // If the last frame is a key-up frame and there has been no wait period, adjust the last frame's position such that it begins eased movement instantaneously.
+                if (lastLastFrame != null && lastFrame is OsuKeyUpReplayFrame && !hasWaited)
+                {
+                    // [lastLastFrame] ... [lastFrame] ... [current frame]
+                    // We want to find the cursor position at lastFrame, so interpolate between lastLastFrame and the new target position.
+                    lastFrame.Position = Interpolation.ValueAt(lastFrame.Time, lastFrame.Position, targetPos, lastLastFrame.Time, h.StartTime, easing);
+                }
+
+                Vector2 lastPosition = lastFrame.Position;
+
+                // Perform the rest of the eased movement until the target position is reached.
                 for (double time = lastFrame.Time + GetFrameDelay(lastFrame.Time); time < h.StartTime; time += GetFrameDelay(time))
                 {
                     Vector2 currentPosition = Interpolation.ValueAt(time, lastPosition, targetPos, lastFrame.Time, h.StartTime, easing);
-
-                    //Search in framesPendingAdjust for frames with .Time == current time
-                    //If found, it means the cursor should be at currentPosition assume it's still moving during the KEY_UP_DELAY.
-                    var adjustingFrame = framesPendingAdjust.FirstOrDefault(frame => Precision.AlmostEquals(frame.Time, time, GetFrameDelay(time)));
-
-                    if (adjustingFrame != null)
-                    {
-                        adjustingFrame.Position = currentPosition;
-                        framesAfterAdjust.Add(adjustingFrame);
-                    }
-
                     AddFrameToReplay(new OsuReplayFrame((int)time, new Vector2(currentPosition.X, currentPosition.Y)) { Actions = lastFrame.Actions });
                 }
+            }
 
-                buttonIndex = 0;
-            }
-            else
-            {
+            // Start alternating once the time separation is too small (faster than ~225BPM).
+            if (timeDifference > 0 && timeDifference < 266)
                 buttonIndex++;
-            }
+            else
+                buttonIndex = 0;
         }
 
         /// <summary>
@@ -309,7 +281,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         private double getReactionTime(double timeInstant) => ApplyModsToRate(timeInstant, 100);
 
         // Add frames to click the hitobject
-        private void addHitObjectClickFrames(OsuHitObject h, OsuHitObject next, Vector2 startPosition, float spinnerDirection)
+        private void addHitObjectClickFrames(OsuHitObject h, Vector2 startPosition, float spinnerDirection)
         {
             // Time to insert the first frame which clicks the object
             // Here we mainly need to determine which button to use
@@ -320,18 +292,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             // TODO: Why do we delay 1 ms if the object is a spinner? There already is KEY_UP_DELAY from hEndTime.
             double hEndTime = h.GetEndTime() + KEY_UP_DELAY;
             int endDelay = h is Spinner ? 1 : 0;
-            var endFrame = new OsuReplayFrame(hEndTime + endDelay, new Vector2(h.StackedEndPosition.X, h.StackedEndPosition.Y));
-
-            var timeDifference = ApplyModsToTimeDelta(endFrame.Time, next.StartTime);
-
-            //We don't know where the cursor should be at end time, so add it to pending adjust
-            if (timeDifference > GetFrameDelay(endFrame.Time))
-                framesPendingAdjust.Add(endFrame);
-
-            //For 2B maps which we can't order hitobjects by their start time, so just move to the next one
-            //Moving to StackedEndPosition because timeDifference < FrameDelay < KEY_UP_DELAY
-            else
-                endFrame.Position = next.StackedEndPosition;
+            var endFrame = new OsuKeyUpReplayFrame(hEndTime + endDelay, new Vector2(h.StackedEndPosition.X, h.StackedEndPosition.Y));
 
             // Decrement because we want the previous frame, not the next one
             int index = FindInsertionIndex(startFrame) - 1;
@@ -428,5 +389,13 @@ namespace osu.Game.Rulesets.Osu.Replays
         }
 
         #endregion
+
+        private class OsuKeyUpReplayFrame : OsuReplayFrame
+        {
+            public OsuKeyUpReplayFrame(double time, Vector2 position)
+                : base(time, position)
+            {
+            }
+        }
     }
 }
