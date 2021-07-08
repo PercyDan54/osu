@@ -1,7 +1,6 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System.ComponentModel;
 using osu.Framework.Configuration;
 using osu.Framework.Platform;
 using osu.Game.Screens.Mvis.SideBar.Tabs;
@@ -75,8 +74,11 @@ namespace osu.Game.Configuration
 
     public enum MSetting
     {
+        //Other Settings
         TrianglesEnabled,
         UseSayobot,
+
+        //Mvis Settings
         MvisBgBlur,
         MvisIdleBgDim,
         MvisContentAlpha,
@@ -91,6 +93,8 @@ namespace osu.Game.Configuration
         MvisInterfaceBlue,
         MvisCurrentAudioProvider,
         SamplePlaybackGain,
+
+        //Dance settings
         ReplayFramerate,
         SpinnerRadiusStart,
         SpinnerRadiusEnd,
@@ -102,20 +106,21 @@ namespace osu.Game.Configuration
         SkipStackAngles,
         PippiSpinner,
         PippiStream,
+        SliderDanceMult,
+        SliderDance,
+
+        //Cursor settings
         CursorTrailDensity,
         CursorTrailHueShift,
         CursorTrailHueSpeed,
         CursorTrailFadeDuration,
         CursorTrailSize,
         CursorTrailHue,
-        CursorTrailHueOverride,
-        SliderDanceMult,
-        SliderDance
+        CursorTrailHueOverride
     }
 
     public enum OsuDanceMover
     {
-        [Description("Dancing pippi")]
         Pippi,
         Momentum,
         Flower,

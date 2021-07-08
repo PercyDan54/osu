@@ -221,9 +221,6 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
             private Texture texture;
 
             private float time;
-
-            //private float color;
-
             private readonly TrailPart[] parts = new TrailPart[max_sprites];
             private Vector2 size;
 
