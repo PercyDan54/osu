@@ -15,7 +15,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
 {
     public class MvisUISettings : SettingsSubsection
     {
-        protected override string Header => "UI";
+        protected override LocalisableString Header => "UI";
         private readonly BindableFloat iR = new BindableFloat();
         private readonly BindableFloat iG = new BindableFloat();
         private readonly BindableFloat iB = new BindableFloat();

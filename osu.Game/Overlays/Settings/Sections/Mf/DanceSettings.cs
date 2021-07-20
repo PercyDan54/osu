@@ -11,7 +11,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
 {
     public class DanceSettings : SettingsSubsection
     {
-        protected override string Header => "Osu cursor dance settings";
+        protected override LocalisableString Header => "Osu cursor dance settings";
 
         [BackgroundDependencyLoader]
         private void load(MConfigManager config)

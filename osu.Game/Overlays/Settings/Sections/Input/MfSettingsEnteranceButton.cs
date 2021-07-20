@@ -2,12 +2,13 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Graphics;
+using osu.Framework.Localisation;
 
 namespace osu.Game.Overlays.Settings.Sections.Input
 {
     public class MfSettingsEnteranceButton : SettingsSubsection
     {
-        protected override string Header => "Super secret settings";
+        protected override LocalisableString Header => "Super secret settings";
 
         public MfSettingsEnteranceButton(MfSettingsPanel mfpanel)
         {

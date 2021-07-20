@@ -3,14 +3,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
 using osu.Framework.Input.Bindings;
+using osu.Framework.Threading;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
+using osu.Game.Extensions;
 using osu.Game.Input.Bindings;
 using osu.Game.IO.Archives;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Rulesets.Objects;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
 using osu.Game.Screens.Ranking;
@@ -66,10 +70,24 @@ namespace osu.Game.Screens.Play
 
         protected override ResultsScreen CreateResults(ScoreInfo score) => new SoloResultsScreen(score, false);
 
+        private ScheduledDelegate keyboardSeekDelegate;
+
         public bool OnPressed(GlobalAction action)
         {
+            const double keyboard_seek_amount = 5000;
+
             switch (action)
             {
+                case GlobalAction.SeekReplayBackward:
+                    keyboardSeekDelegate?.Cancel();
+                    keyboardSeekDelegate = this.BeginKeyRepeat(Scheduler, () => keyboardSeek(-1));
+                    return true;
+
+                case GlobalAction.SeekReplayForward:
+                    keyboardSeekDelegate?.Cancel();
+                    keyboardSeekDelegate = this.BeginKeyRepeat(Scheduler, () => keyboardSeek(1));
+                    return true;
+
                 case GlobalAction.TogglePauseReplay:
                     if (GameplayClockContainer.IsPaused.Value)
                         GameplayClockContainer.Start();
@@ -79,10 +97,24 @@ namespace osu.Game.Screens.Play
             }
 
             return false;
+
+            void keyboardSeek(int direction)
+            {
+                double target = Math.Clamp(GameplayClockContainer.CurrentTime + direction * keyboard_seek_amount, 0, GameplayBeatmap.HitObjects.Last().GetEndTime());
+
+                Seek(target);
+            }
         }
 
         public void OnReleased(GlobalAction action)
         {
+            switch (action)
+            {
+                case GlobalAction.SeekReplayBackward:
+                case GlobalAction.SeekReplayForward:
+                    keyboardSeekDelegate?.Cancel();
+                    break;
+            }
         }
     }
 }

@@ -3,13 +3,14 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Localisation;
 using osu.Game.Configuration;
 
 namespace osu.Game.Overlays.Settings.Sections.Mf
 {
     public class MvisAudioSettings : SettingsSubsection
     {
-        protected override string Header => "Audio";
+        protected override LocalisableString Header => "Audio";
 
         [BackgroundDependencyLoader]
         private void load(MConfigManager config)

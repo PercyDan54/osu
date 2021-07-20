@@ -3,13 +3,14 @@
 
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Localisation;
 using osu.Game.Configuration;
 
 namespace osu.Game.Overlays.Settings.Sections.General
 {
     public class MvisStoryBoardSettings : SettingsSubsection
     {
-        protected override string Header => "Storyboard";
+        protected override LocalisableString Header => "Storyboard";
 
         [BackgroundDependencyLoader]
         private void load(MConfigManager config)
