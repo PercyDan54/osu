@@ -3,13 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
-using osu.Game.IO.Archives;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Replays;
 using osu.Game.Scoring;
