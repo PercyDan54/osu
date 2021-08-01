@@ -124,7 +124,7 @@ namespace osu.Game
 
         private RulesetConfigCache rulesetConfigCache;
 
-        public virtual string Version => "2021.724.1-lazer";
+        public virtual string Version => "2021.731.0-lazer";
 
         private SpectatorClient spectatorClient;
 
@@ -155,7 +155,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "fd222cc3f87ad548cda7c2e9cc76245d";
+            VersionHash = "5381498772284a83718d75f7f2735b94";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -456,13 +456,17 @@ namespace osu.Game
 
         private void onRulesetChanged(ValueChangedEvent<RulesetInfo> r)
         {
+            if (r.NewValue?.Available != true)
+            {
+                // reject the change if the ruleset is not available.
+                Ruleset.Value = r.OldValue?.Available == true ? r.OldValue : RulesetStore.AvailableRulesets.First();
+                return;
+            }
+
             var dict = new Dictionary<ModType, IReadOnlyList<Mod>>();
 
-            if (r.NewValue?.Available == true)
-            {
-                foreach (ModType type in Enum.GetValues(typeof(ModType)))
-                    dict[type] = r.NewValue.CreateInstance().GetModsFor(type).ToList();
-            }
+            foreach (ModType type in Enum.GetValues(typeof(ModType)))
+                dict[type] = r.NewValue.CreateInstance().GetModsFor(type).ToList();
 
             if (!SelectedMods.Disabled)
                 SelectedMods.Value = Array.Empty<Mod>();

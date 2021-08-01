@@ -57,7 +57,7 @@ namespace osu.Game.Screens.Mvis
                                               || tabHeader.IsVisible.Value //TabHeader可见
                                               || IsHovered == false; //隐藏界面或侧边栏可见，显示光标
 
-        public override bool AllowRateAdjustments => true;
+        public override bool AllowTrackAdjustments => true;
 
         private bool okForHide => IsHovered
                                   && isIdle.Value
