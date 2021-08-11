@@ -21,6 +21,7 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeB
         private readonly Bindable<int> decay = new Bindable<int>();
         private readonly Bindable<int> smoothness = new Bindable<int>();
         private readonly Bindable<LinearBarType> type = new Bindable<LinearBarType>();
+        private readonly BindableBool showBeatmapInfo = new BindableBool();
 
         private OsuSpriteText text;
         private Box progress;
@@ -80,6 +81,7 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeB
             config.BindWith(SandboxSetting.DecayB, decay);
             config.BindWith(SandboxSetting.SmoothnessB, smoothness);
             config.BindWith(SandboxSetting.LinearBarType, type);
+            config.BindWith(SandboxSetting.ShowBeatmapInfo, showBeatmapInfo);
         }
 
         protected override void LoadComplete()
@@ -115,6 +117,12 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeB
                     d.Decay.BindTo(decay);
                     d.Smoothness.BindTo(smoothness);
                 });
+            }, true);
+
+            showBeatmapInfo.BindValueChanged(v =>
+            {
+                if (v.NewValue) text.FadeIn(300, Easing.OutQuint);
+                else text.FadeOut(300, Easing.OutQuint);
             }, true);
         }
 

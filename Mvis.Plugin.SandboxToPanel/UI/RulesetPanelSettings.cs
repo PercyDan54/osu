@@ -55,6 +55,11 @@ namespace Mvis.Plugin.Sandbox.UI
                     Current = config.GetBindable<int>(SandboxSetting.ParticleCount),
                     KeyboardStep = 1,
                 },
+                new SettingsCheckbox
+                {
+                    LabelText = "Show beatmap info",
+                    Current = config.GetBindable<bool>(SandboxSetting.ShowBeatmapInfo)
+                },
                 new SettingsEnumDropdown<VisualizerLayout>
                 {
                     LabelText = "Layout type",

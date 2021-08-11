@@ -40,6 +40,7 @@ namespace Mvis.Plugin.Sandbox.Config
             SetDefault(SandboxSetting.BarWidthB, 3.0, 1, 20);
             SetDefault(SandboxSetting.BarCountB, 120, 10, 3500);
             SetDefault(SandboxSetting.LinearBarType, LinearBarType.Basic);
+            SetDefault(SandboxSetting.ShowBeatmapInfo, true);
 
             //插件
             SetDefault(SandboxSetting.EnableRulesetPanel, true);
@@ -81,7 +82,8 @@ namespace Mvis.Plugin.Sandbox.Config
         SmoothnessB,
         BarWidthB,
         BarCountB,
-        LinearBarType
+        LinearBarType,
+        ShowBeatmapInfo
     }
 
     //上游

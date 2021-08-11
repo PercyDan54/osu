@@ -87,10 +87,6 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeA
         {
             switch (type.Value)
             {
-                default:
-                case CircularBarType.Basic:
-                    return new BasicMusicVisualizerDrawable();
-
                 case CircularBarType.Rounded:
                     return new RoundedMusicVisualizerDrawable();
 
@@ -99,6 +95,9 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeA
 
                 case CircularBarType.Dots:
                     return new DotsMusicVisualizerDrawable();
+
+                default:
+                    return new BasicMusicVisualizerDrawable();
             }
         }
 
