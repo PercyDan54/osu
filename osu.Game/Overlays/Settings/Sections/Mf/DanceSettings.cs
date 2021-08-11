@@ -11,7 +11,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
 {
     public class DanceSettings : SettingsSubsection
     {
-        protected override LocalisableString Header => "Osu cursor dance settings";
+        protected override LocalisableString Header => "osu! cursor dance settings";
 
         [BackgroundDependencyLoader]
         private void load(MConfigManager config)
@@ -43,9 +43,9 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 },
                 new SettingsSlider<float, MultiplierSlider>
                 {
-                    LabelText = "Slider dance multiplier",
-                    Current = config.GetBindable<float>(MSetting.SliderDanceMult),
-                    KeyboardStep = 0.1f,
+                    LabelText = "Stream multiplier",
+                    Current = config.GetBindable<float>(MSetting.StreamMult),
+                    KeyboardStep = 0.1f
                 },
                 new SettingsSlider<float, AngleSlider>
                 {
@@ -53,17 +53,35 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     Current = config.GetBindable<float>(MSetting.AngleOffset),
                     KeyboardStep = 1f / 18f
                 },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Restrict angle",
+                    Current = config.GetBindable<float>(MSetting.RestrictAngle),
+                    KeyboardStep = 1
+                },
                 new SettingsSlider<float, MultiplierSlider>
                 {
                     LabelText = "Jump multiplier",
-                    Current = config.GetBindable<float>(MSetting.JumpMulti),
+                    Current = config.GetBindable<float>(MSetting.JumpMult),
                     KeyboardStep = 0.01f
                 },
                 new SettingsSlider<float, MultiplierSlider>
                 {
                     LabelText = "Next jump multiplier",
-                    Current = config.GetBindable<float>(MSetting.NextJumpMulti),
+                    Current = config.GetBindable<float>(MSetting.NextJumpMult),
                     KeyboardStep = 0.01f
+                },
+                new SettingsSlider<float, MultiplierSlider>
+                {
+                    LabelText = "Duration multiplier",
+                    Current = config.GetBindable<float>(MSetting.DurationMult),
+                    KeyboardStep = 0.05f
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Duration multiplier trigger",
+                    Current = config.GetBindable<float>(MSetting.DurationTrigger),
+                    KeyboardStep = 100f
                 },
                 new SettingsCheckbox
                 {
@@ -74,6 +92,16 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 {
                     LabelText = "Skip stack angles",
                     Current = config.GetBindable<bool>(MSetting.SkipStackAngles)
+                },
+                new SettingsCheckbox
+                {
+                    LabelText = "Restrict invert",
+                    Current = config.GetBindable<bool>(MSetting.RestrictInvert)
+                },
+                new SettingsCheckbox
+                {
+                    LabelText = "Stream restrict",
+                    Current = config.GetBindable<bool>(MSetting.StreamRestrict)
                 },
                 new SettingsCheckbox
                 {
