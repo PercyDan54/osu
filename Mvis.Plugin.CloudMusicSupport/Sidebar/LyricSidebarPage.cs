@@ -32,6 +32,15 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
         [Resolved]
         private MvisScreen mvisScreen { get; set; }
 
+        [Resolved]
+        private Storage storage { get; set; }
+
+        [Resolved]
+        private DialogOverlay dialog { get; set; }
+
+        [Resolved(canBeNull: true)]
+        private GameHost host { get; set; }
+
         private LyricPlugin plugin => (LyricPlugin)Plugin;
 
         public int BeatmapSetId;

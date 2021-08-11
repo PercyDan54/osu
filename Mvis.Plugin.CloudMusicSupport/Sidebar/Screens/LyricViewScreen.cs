@@ -1,3 +1,4 @@
+using Mvis.Plugin.CloudMusicSupport.Config;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 using Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic;
 using osu.Framework.Allocation;
@@ -5,7 +6,6 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
-using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
@@ -21,9 +21,6 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
 
         [Resolved]
         private DialogOverlay dialog { get; set; }
-
-        [Resolved]
-        private LyricSidebarSectionContainer sectionContainer { get; set; }
 
         protected override DrawableLyric CreateDrawableLyric(Lyric lyric)
             => new LyricPiece(lyric);
@@ -55,6 +52,13 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
                 Size = new Vector2(45),
                 TooltipText = "Edit",
                 Action = pushEditScreen
+            },
+            new IconButton
+            {
+                Icon = FontAwesome.Solid.AngleDown,
+                Size = new Vector2(45),
+                TooltipText = "Scroll to current",
+                Action = ScrollToCurrent
             }
         };
 
@@ -70,9 +74,16 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             TooltipText = "Save as .lrc"
         };
 
+        [Resolved]
+        private LyricConfigManager configManager { get; set; }
+
+        private readonly BindableBool autoScroll = new BindableBool();
+
         protected override void LoadComplete()
         {
             saveButton.Action = plugin.WriteLyricToDisk;
+
+            configManager.BindWith(LyricSettings.AutoScrollToCurrent, autoScroll);
 
             plugin.CurrentStatus.BindValueChanged(v =>
             {
@@ -95,7 +106,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
 
         protected override void Update()
         {
-            if (followCooldown.Value == 0) ScrollToCurrent();
+            if (followCooldown.Value == 0 && autoScroll.Value) ScrollToCurrent();
             base.Update();
         }
 

@@ -19,7 +19,6 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
         {
             var config = (LyricConfigManager)ConfigManager;
 
-            SettingsCheckbox useDrawablePoolCheckBox;
             Children = new Drawable[]
             {
                 new SettingsCheckbox
@@ -27,7 +26,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                     LabelText = "Enable lyrics",
                     Current = config.GetBindable<bool>(LyricSettings.EnablePlugin)
                 },
-                useDrawablePoolCheckBox = new SettingsCheckbox
+                new SettingsCheckbox
                 {
                     LabelText = "Use DrawablePool",
                     Current = config.GetBindable<bool>(LyricSettings.UseDrawablePool)
@@ -60,8 +59,12 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                     LabelText = "Fade out duration",
                     Current = config.GetBindable<float>(LyricSettings.LyricFadeOutDuration)
                 },
+                new SettingsCheckbox
+                {
+                    LabelText = "Auto scroll",
+                    Current = config.GetBindable<bool>(LyricSettings.AutoScrollToCurrent)
+                },
             };
-            useDrawablePoolCheckBox.WarningText = "Experimental function!";
         }
     }
 }

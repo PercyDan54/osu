@@ -7,17 +7,17 @@ using Mvis.Plugin.CloudMusicSupport.Misc;
 using Mvis.Plugin.CloudMusicSupport.Sidebar;
 using Mvis.Plugin.CloudMusicSupport.UI;
 using osu.Framework.Allocation;
+using osu.Framework.Audio.Track;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Audio;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
+using osu.Game.Overlays;
 using osu.Game.Screens.Mvis.Plugins;
 using osu.Game.Screens.Mvis.Plugins.Config;
 using osu.Game.Screens.Mvis.Plugins.Types;
-using osu.Framework.Audio.Track;
-using osu.Framework.Bindables;
-using osu.Framework.Graphics.Audio;
-using osu.Game.Configuration;
-using osu.Game.Overlays;
 
 namespace Mvis.Plugin.CloudMusicSupport
 {
@@ -79,6 +79,12 @@ namespace Mvis.Plugin.CloudMusicSupport
                 "Disable song switch to edit lyrics",
                 () => IsEditing = false,
                 onAllow);
+        }
+
+        public void GetLyricFor(int id)
+        {
+            CurrentStatus.Value = Status.Working;
+            processor.StartFetchById(id, onLyricRequestFinished, onLyricRequestFail);
         }
 
         public bool IsEditing
@@ -149,7 +155,7 @@ namespace Mvis.Plugin.CloudMusicSupport
             Lyrics.Clear();
             CurrentLine = null;
 
-            processor.StartFetchLrcFor(currentWorkingBeatmap, noLocalFile, onLyricRequestFinished, onLyricRequestFail);
+            processor.StartFetchByBeatmap(currentWorkingBeatmap, noLocalFile, onLyricRequestFinished, onLyricRequestFail);
         }
 
         private double targetTime => track.CurrentTime + offset.Value;
@@ -169,7 +175,11 @@ namespace Mvis.Plugin.CloudMusicSupport
         private void onLyricRequestFail(string msg)
         {
             //onLyricRequestFail会在非Update上执行，因此添加Schedule确保不会发生InvalidThreadForMutationException
-            Schedule(() => CurrentStatus.Value = Status.Failed);
+            Schedule(() =>
+            {
+                Lyrics.Clear();
+                CurrentStatus.Value = Status.Failed;
+            });
         }
 
         private void onLyricRequestFinished(List<Lyric> lyrics)

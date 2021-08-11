@@ -1,3 +1,4 @@
+using System;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 
 namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
@@ -6,12 +7,12 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
     {
         public override int FinalHeight()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         protected override void UpdateValue(Lyric lyric)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }

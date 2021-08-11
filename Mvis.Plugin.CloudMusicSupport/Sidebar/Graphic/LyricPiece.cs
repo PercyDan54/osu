@@ -25,7 +25,8 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
         [Resolved]
         private LyricConfigManager config { get; set; }
 
-        public MenuItem[] ContextMenuItems => new MenuItem[] { new OsuMenuItem("Adjust offset to this line", MenuItemType.Standard, () => config.SetValue(LyricSettings.LyricOffset, Value.Time - mvisScreen.CurrentTrack.CurrentTime)) };
+        public MenuItem[] ContextMenuItems => new MenuItem[]
+            { new OsuMenuItem("Adjust offset to this line", MenuItemType.Standard, () => config.SetValue(LyricSettings.LyricOffset, Value.Time - mvisScreen.CurrentTrack.CurrentTime)) };
 
         private Box hoverBox;
         private OsuSpriteText contentText;

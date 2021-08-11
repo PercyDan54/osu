@@ -603,7 +603,7 @@ namespace osu.Game.Screens.Mvis
                         {
                             pluginKeyBindings[pluginSidebarPage.ShortcutKey] = () =>
                             {
-                                if (!pl.Disabled.Value) btn?.Click();
+                                if (!pl.Disabled.Value) btn?.TriggerClick();
                             };
                         }
                     }
@@ -654,14 +654,14 @@ namespace osu.Game.Screens.Mvis
 
         private void setupKeyBindings()
         {
-            keyBindings[GlobalAction.MvisMusicPrev] = () => prevButton.Click();
-            keyBindings[GlobalAction.MvisMusicNext] = () => nextButton.Click();
-            keyBindings[GlobalAction.MvisOpenInSongSelect] = () => soloButton.Click();
-            keyBindings[GlobalAction.MvisToggleOverlayLock] = () => lockButton.Click();
-            keyBindings[GlobalAction.MvisTogglePluginPage] = () => pluginButton.Click();
-            keyBindings[GlobalAction.MvisTogglePause] = () => songProgressButton.Click();
-            keyBindings[GlobalAction.MvisToggleTrackLoop] = () => loopToggleButton.Click();
-            keyBindings[GlobalAction.MvisTogglePlayList] = () => sidebarToggleButton.Click();
+            keyBindings[GlobalAction.MvisMusicPrev] = () => prevButton.TriggerClick();
+            keyBindings[GlobalAction.MvisMusicNext] = () => nextButton.TriggerClick();
+            keyBindings[GlobalAction.MvisOpenInSongSelect] = () => soloButton.TriggerClick();
+            keyBindings[GlobalAction.MvisToggleOverlayLock] = () => lockButton.TriggerClick();
+            keyBindings[GlobalAction.MvisTogglePluginPage] = () => pluginButton.TriggerClick();
+            keyBindings[GlobalAction.MvisTogglePause] = () => songProgressButton.TriggerClick();
+            keyBindings[GlobalAction.MvisToggleTrackLoop] = () => loopToggleButton.TriggerClick();
+            keyBindings[GlobalAction.MvisTogglePlayList] = () => sidebarToggleButton.TriggerClick();
             keyBindings[GlobalAction.MvisForceLockOverlayChanges] = () => lockChanges.Toggle();
             keyBindings[GlobalAction.Back] = () =>
             {

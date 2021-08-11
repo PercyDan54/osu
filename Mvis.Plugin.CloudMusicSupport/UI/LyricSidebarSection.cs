@@ -56,6 +56,11 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 {
                     Description = "Fade out duration",
                     Bindable = config.GetBindable<float>(LyricSettings.LyricFadeOutDuration)
+                },
+                new SettingsTogglePiece
+                {
+                    Description = "Auto scroll",
+                    Bindable = config.GetBindable<bool>(LyricSettings.AutoScrollToCurrent)
                 }
             });
         }

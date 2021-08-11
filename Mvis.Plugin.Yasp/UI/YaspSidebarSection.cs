@@ -26,13 +26,13 @@ namespace Mvis.Plugin.Yasp.UI
             {
                 new SettingsTogglePiece
                 {
-                    Description = "启用本插件",
+                    Description = "Enable",
                     Bindable = config.GetBindable<bool>(YaspSettings.EnablePlugin)
                 },
                 new SettingsSliderPiece<float>
                 {
                     Icon = FontAwesome.Solid.ExpandArrowsAlt,
-                    Description = "缩放",
+                    Description = "Zoom",
                     Bindable = config.GetBindable<float>(YaspSettings.Scale),
                     DisplayAsPercentage = true
                 }

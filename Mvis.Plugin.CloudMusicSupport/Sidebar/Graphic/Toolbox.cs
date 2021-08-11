@@ -31,6 +31,10 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
         };
 
         private readonly FillFlowContainer contentFillFlow;
+        private OsuTextBox textBox;
+
+        [Resolved]
+        private LyricPlugin plugin { get; set; }
 
         public Toolbox()
         {
@@ -75,7 +79,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                     Margin = new MarginPadding { Horizontal = 15, Top = 15 },
                     Font = OsuFont.GetFont(size: 20),
                     Colour = Color4.Black
-                },
+                }
             };
         }
 
@@ -116,19 +120,37 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                 bgBox.Colour = colourProvider.ActiveColor;
             }, true);
 
-            contentFillFlow.Add(
+            contentFillFlow.AddRange(new Drawable[]
+            {
                 new SettingsSlider<double>
                 {
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight,
                     Current = config.GetBindable<double>(LyricSettings.LyricOffset),
                     LabelText = "Global lyric offset",
-                    KeyboardStep = 100,
                     RelativeSizeAxes = Axes.None,
                     Width = 200 + 25,
                     Padding = new MarginPadding { Right = 10 },
                     Colour = Color4.Black
-                });
+                },
+                textBox = new OsuTextBox
+                {
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.TopRight,
+                    Width = 225,
+                    PlaceholderText = "Search lyric by ID"
+                }
+            });
+
+            textBox.OnCommit += (sender, isNewText) =>
+            {
+                if (int.TryParse(sender.Text, out var id))
+                    plugin.GetLyricFor(id);
+                else
+                {
+                    textBox.Text = "";
+                }
+            };
         }
     }
 }
