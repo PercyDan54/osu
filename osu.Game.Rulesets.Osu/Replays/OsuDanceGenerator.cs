@@ -28,8 +28,9 @@ namespace osu.Game.Rulesets.Osu.Replays
             {
                 HalfCircle => new HalfCircleMover(),
                 Flower => new FlowerMover(),
-                Momentum => new MomentumMover(),
                 Pippi => new PippiMover(),
+                AxisAligned => new AxisAlignedMover(),
+                Aggresive => new AggressiveMover(),
                 _ => new MomentumMover()
             };
 
@@ -191,6 +192,7 @@ namespace osu.Game.Rulesets.Osu.Replays
             float yf = baseSize.Y / 0.8f;
             float y0 = (baseSize.Y - yf) / 2f;
             float y1 = yf + y0;
+            mover.OnObjChange();
 
             for (int i = 0; i < Beatmap.HitObjects.Count - 1; i++)
             {

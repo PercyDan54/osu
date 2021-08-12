@@ -136,6 +136,8 @@ namespace osu.Game.Configuration
         Pippi,
         Momentum,
         Flower,
-        HalfCircle
+        HalfCircle,
+        AxisAligned,
+        Aggresive,
     }
 }
