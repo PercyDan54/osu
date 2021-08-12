@@ -26,11 +26,12 @@ namespace osu.Game.Rulesets.Osu.Replays
         public static DanceMover GetMover(OsuDanceMover mover) =>
             mover switch
             {
+                AxisAligned => new AxisAlignedMover(),
+                Aggresive => new AggressiveMover(),
+                Bezier => new BezierMover(),
                 HalfCircle => new HalfCircleMover(),
                 Flower => new FlowerMover(),
                 Pippi => new PippiMover(),
-                AxisAligned => new AxisAlignedMover(),
-                Aggresive => new AggressiveMover(),
                 _ => new MomentumMover()
             };
 
@@ -127,7 +128,6 @@ namespace osu.Game.Rulesets.Osu.Replays
                             var point = points[i];
                             var next = points[i + 1];
                             var duration = next.StartTime - point.StartTime;
-                            var rad = OsuHitObject.OBJECT_RADIUS * 1.2f * h.Scale;
 
                             for (double j = GetFrameDelay(point.StartTime); j < duration; j += GetFrameDelay(point.StartTime + j))
                             {

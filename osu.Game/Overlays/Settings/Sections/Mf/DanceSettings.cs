@@ -5,6 +5,8 @@ using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Localisation;
 using osu.Game.Configuration;
+using osu.Game.Graphics;
+using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 
 namespace osu.Game.Overlays.Settings.Sections.Mf
@@ -25,7 +27,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 },
                 new SettingsSlider<float, FramerateSlider>
                 {
-                    LabelText = "Autoplay framerate",
+                    LabelText = "Replay framerate",
                     Current = config.GetBindable<float>(MSetting.ReplayFramerate),
                     KeyboardStep = 30f
                 },
@@ -41,23 +43,11 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     Current = config.GetBindable<float>(MSetting.SpinnerRadiusEnd),
                     KeyboardStep = 5f,
                 },
-                new SettingsSlider<float, MultiplierSlider>
-                {
-                    LabelText = "Stream multiplier",
-                    Current = config.GetBindable<float>(MSetting.StreamMult),
-                    KeyboardStep = 0.1f
-                },
                 new SettingsSlider<float, AngleSlider>
                 {
                     LabelText = "Angle offset",
                     Current = config.GetBindable<float>(MSetting.AngleOffset),
                     KeyboardStep = 1f / 18f
-                },
-                new SettingsSlider<float>
-                {
-                    LabelText = "Restrict angle",
-                    Current = config.GetBindable<float>(MSetting.RestrictAngle),
-                    KeyboardStep = 1
                 },
                 new SettingsSlider<float, MultiplierSlider>
                 {
@@ -71,18 +61,6 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     Current = config.GetBindable<float>(MSetting.NextJumpMult),
                     KeyboardStep = 0.01f
                 },
-                new SettingsSlider<float, MultiplierSlider>
-                {
-                    LabelText = "Duration multiplier",
-                    Current = config.GetBindable<float>(MSetting.DurationMult),
-                    KeyboardStep = 0.05f
-                },
-                new SettingsSlider<float>
-                {
-                    LabelText = "Duration multiplier trigger",
-                    Current = config.GetBindable<float>(MSetting.DurationTrigger),
-                    KeyboardStep = 100f
-                },
                 new SettingsCheckbox
                 {
                     LabelText = "Slider dance",
@@ -92,16 +70,6 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 {
                     LabelText = "Skip stack angles",
                     Current = config.GetBindable<bool>(MSetting.SkipStackAngles)
-                },
-                new SettingsCheckbox
-                {
-                    LabelText = "Restrict invert",
-                    Current = config.GetBindable<bool>(MSetting.RestrictInvert)
-                },
-                new SettingsCheckbox
-                {
-                    LabelText = "Stream restrict",
-                    Current = config.GetBindable<bool>(MSetting.StreamRestrict)
                 },
                 new SettingsCheckbox
                 {
@@ -117,7 +85,66 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 {
                     LabelText = "Force pippi mover for streams",
                     Current = config.GetBindable<bool>(MSetting.PippiStream)
-                }
+                },
+                new OsuSpriteText
+                {
+                    Text = "Momentum mover settings",
+                    Margin = new MarginPadding { Vertical = 15, Left = SettingsPanel.CONTENT_MARGINS },
+                    Font = OsuFont.GetFont(weight: FontWeight.Bold)
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Restrict angle",
+                    Current = config.GetBindable<float>(MSetting.RestrictAngle),
+                    KeyboardStep = 1
+                },
+                new SettingsSlider<float, MultiplierSlider>
+                {
+                    LabelText = "Stream multiplier",
+                    Current = config.GetBindable<float>(MSetting.StreamMult),
+                    KeyboardStep = 0.1f
+                },
+                new SettingsSlider<float, MultiplierSlider>
+                {
+                    LabelText = "Duration multiplier",
+                    Current = config.GetBindable<float>(MSetting.DurationMult),
+                    KeyboardStep = 0.05f
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Duration multiplier trigger",
+                    Current = config.GetBindable<float>(MSetting.DurationTrigger),
+                    KeyboardStep = 100f
+                },
+
+                new SettingsCheckbox
+                {
+                    LabelText = "Restrict invert",
+                    Current = config.GetBindable<bool>(MSetting.RestrictInvert)
+                },
+                new SettingsCheckbox
+                {
+                    LabelText = "Stream restrict",
+                    Current = config.GetBindable<bool>(MSetting.StreamRestrict)
+                },
+                new OsuSpriteText
+                {
+                    Text = "Bezier mover settings",
+                    Margin = new MarginPadding { Vertical = 15, Left = SettingsPanel.CONTENT_MARGINS },
+                    Font = OsuFont.GetFont(weight: FontWeight.Bold)
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Aggressiveness",
+                    Current = config.GetBindable<float>(MSetting.BezierAggressiveness),
+                    KeyboardStep = 0.1f
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Slider aggressiveness",
+                    Current = config.GetBindable<float>(MSetting.BezierSliderAggressiveness),
+                    KeyboardStep = 0.5f
+                },
             };
         }
 

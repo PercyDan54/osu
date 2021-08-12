@@ -54,6 +54,13 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.AngleOffset, 0.45f, 0f, 2f, 0.01f);
             SetDefault(MSetting.JumpMult, 0.6f, 0f, 2f, 0.01f);
             SetDefault(MSetting.NextJumpMult, 0.25f, 0f, 2f, 0.01f);
+            SetDefault(MSetting.SkipStackAngles, false);
+            SetDefault(MSetting.SliderDance, true);
+            SetDefault(MSetting.BorderBounce, true);
+            SetDefault(MSetting.PippiSpinner, false);
+            SetDefault(MSetting.PippiStream, false);
+
+            //Momentum mover settings
             SetDefault(MSetting.DurationTrigger, 500f, 0f, 5000f, 1f);
             SetDefault(MSetting.DurationMult, 2f, 0f, 50f, 0.1f);
             SetDefault(MSetting.StreamMult, 0.7f, 0f, 50f, 0.1f);
@@ -61,11 +68,10 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.RestrictArea, 40f, 1f, 180f);
             SetDefault(MSetting.StreamRestrict, false);
             SetDefault(MSetting.RestrictInvert, true);
-            SetDefault(MSetting.SkipStackAngles, false);
-            SetDefault(MSetting.SliderDance, true);
-            SetDefault(MSetting.BorderBounce, true);
-            SetDefault(MSetting.PippiSpinner, false);
-            SetDefault(MSetting.PippiStream, false);
+
+            //Bezier mover settings
+            SetDefault(MSetting.BezierAggressiveness, 60f, 1f, 180f);
+            SetDefault(MSetting.BezierSliderAggressiveness, 3f, 1f, 20f);
 
             //Cursor settings
             SetDefault(MSetting.CursorTrailHueOverride, false);
@@ -101,10 +107,10 @@ namespace osu.Game.Configuration
         SamplePlaybackGain,
 
         //Dance settings
+        DanceMover,
         ReplayFramerate,
         SpinnerRadiusStart,
         SpinnerRadiusEnd,
-        DanceMover,
         AngleOffset,
         JumpMult,
         NextJumpMult,
@@ -113,6 +119,8 @@ namespace osu.Game.Configuration
         PippiSpinner,
         PippiStream,
         SliderDance,
+
+        //Momentum mover settings
         StreamMult,
         RestrictInvert,
         RestrictArea,
@@ -120,6 +128,10 @@ namespace osu.Game.Configuration
         StreamRestrict,
         DurationTrigger,
         DurationMult,
+
+        //Bezier mover settings
+        BezierAggressiveness,
+        BezierSliderAggressiveness,
 
         //Cursor settings
         CursorTrailDensity,
@@ -133,11 +145,12 @@ namespace osu.Game.Configuration
 
     public enum OsuDanceMover
     {
-        Pippi,
-        Momentum,
-        Flower,
-        HalfCircle,
         AxisAligned,
         Aggresive,
+        Bezier,
+        Flower,
+        HalfCircle,
+        Pippi,
+        Momentum
     }
 }
