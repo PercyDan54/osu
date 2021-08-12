@@ -2,9 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.Collections.Generic;
-using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 using static osu.Game.Rulesets.Osu.Replays.Movers.MoverUtilExtensions;
@@ -13,7 +10,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 {
     public class AggressiveMover : DanceMover
     {
-        private SliderPath path;
+        private BezierCurve curve;
         private float lastAngle;
 
         public override void OnObjChange()
@@ -24,25 +21,22 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             if (Start is Slider start)
                 newAngle = start.GetEndAngle();
 
-            var points = new List<PathControlPoint>
-            {
-                new PathControlPoint(StartPos, PathType.Bezier),
-                new PathControlPoint(V2FromRad(newAngle, scaledDistance) + StartPos),
-            };
+            var p1 = V2FromRad(newAngle, scaledDistance) + StartPos;
+            var p2 = Vector2.Zero;
 
             if (scaledDistance > 1)
-                lastAngle = points[1].Position.Value.AngleRV(EndPos);
+                lastAngle = p1.AngleRV(EndPos);
 
             if (End is Slider end)
             {
-                points.Add(new PathControlPoint(V2FromRad(end.GetStartAngle(), scaledDistance) + EndPos));
+                p2 = V2FromRad(end.GetStartAngle(), scaledDistance) + EndPos;
             }
 
-            points.Add(new PathControlPoint(EndPos));
-
-            path = new SliderPath(points.ToArray());
+            curve = new BezierCurve(StartPos, p1);
+            if (p2 != Vector2.Zero) curve.Points.Add(p2);
+            curve.Points.Add(EndPos);
         }
 
-        public override Vector2 Update(double time) => path.PositionAt(T(time));
+        public override Vector2 Update(double time) => curve.CalculatePoint(T(time));
     }
 }
