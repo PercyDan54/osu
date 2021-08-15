@@ -29,6 +29,11 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
     {
         private const int max_sprites = 2048;
 
+        /// <summary>
+        /// An exponentiating factor to ease the trail fade.
+        /// </summary>
+        protected virtual float FadeExponent => 1.7f;
+
         private readonly Bindable<bool> hueOverride = new BindableBool();
         private readonly Bindable<bool> hueShift = new BindableBool();
         private readonly Bindable<float> hue = new Bindable<float>();
@@ -157,21 +162,25 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
         protected override bool OnMouseMove(MouseMoveEvent e)
         {
-            Vector2 pos = e.ScreenSpaceMousePosition;
+            AddTrail(e.ScreenSpaceMousePosition);
+            return base.OnMouseMove(e);
+        }
 
-            if (lastPosition == null)
+        protected void AddTrail(Vector2 position)
+        {
+            if (InterpolateMovements)
             {
-                lastPosition = pos;
-                resampler.AddPosition(lastPosition.Value);
-                return base.OnMouseMove(e);
-            }
-
-            foreach (Vector2 pos2 in resampler.AddPosition(pos))
-            {
-                Trace.Assert(lastPosition.HasValue);
-
-                if (InterpolateMovements)
+                if (!lastPosition.HasValue)
                 {
+                    lastPosition = position;
+                    resampler.AddPosition(lastPosition.Value);
+                    return;
+                }
+
+                foreach (Vector2 pos2 in resampler.AddPosition(position))
+                {
+                    Trace.Assert(lastPosition.HasValue);
+
                     Vector2 pos1 = lastPosition.Value;
                     Vector2 diff = pos2 - pos1;
                     float distance = diff.Length;
@@ -185,14 +194,12 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
                         addPart(lastPosition.Value);
                     }
                 }
-                else
-                {
-                    lastPosition = pos2;
-                    addPart(lastPosition.Value);
-                }
             }
-
-            return base.OnMouseMove(e);
+            else
+            {
+                lastPosition = position;
+                addPart(lastPosition.Value);
+            }
         }
 
         private void addPart(Vector2 screenSpacePosition)
@@ -221,9 +228,10 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
             private Texture texture;
 
             private float time;
+            private float fadeExponent;
+
             private readonly TrailPart[] parts = new TrailPart[max_sprites];
             private Vector2 size;
-
             private Vector2 originPosition;
 
             private readonly QuadBatch<TexturedTrailVertex> vertexBatch = new QuadBatch<TexturedTrailVertex>(max_sprites, 1);
@@ -243,6 +251,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
                 size = Source.partSize;
                 time = Source.time;
                 hueOverride = Source.hueOverride.Value;
+                fadeExponent = Source.FadeExponent;
 
                 originPosition = Vector2.Zero;
 
@@ -265,6 +274,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
 
                 shader.Bind();
                 shader.GetUniform<float>("g_FadeClock").UpdateValue(ref time);
+                shader.GetUniform<float>("g_FadeExponent").UpdateValue(ref fadeExponent);
 
                 texture.TextureGL.Bind();
 
