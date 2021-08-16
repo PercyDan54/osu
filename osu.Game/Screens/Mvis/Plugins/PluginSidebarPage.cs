@@ -5,6 +5,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Logging;
 using osu.Game.Online.Placeholders;
 using osu.Game.Screens.Mvis.Plugins.Config;
+using osu.Game.Screens.Mvis.Plugins.Types;
 using osu.Game.Screens.Mvis.SideBar;
 using osuTK;
 using osuTK.Input;
@@ -22,7 +23,7 @@ namespace osu.Game.Screens.Mvis.Plugins
         {
         }
 
-        public virtual PluginBottomBarButton CreateBottomBarButton() => null;
+        public virtual IPluginFunctionProvider GetFunctionEntry() => null;
         public virtual Key ShortcutKey => Key.Unknown;
 
         private bool contentInit;
@@ -62,9 +63,6 @@ namespace osu.Game.Screens.Mvis.Plugins
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
             dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
-
-        [Resolved]
-        private CustomColourProvider colourProvider { get; set; }
 
         [BackgroundDependencyLoader]
         private void load()

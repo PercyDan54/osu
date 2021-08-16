@@ -3,9 +3,10 @@ using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Screens.Mvis;
 using osu.Game.Screens.Mvis.Misc;
 
-namespace osu.Game.Screens.Mvis.BottomBar
+namespace Mvis.Plugin.BottomBar
 {
     public class SongProgressBar : ProgressBar
     {
@@ -39,11 +40,11 @@ namespace osu.Game.Screens.Mvis.BottomBar
             {
                 songProgressIndicator = new Indicator
                 {
-                    Text = "歌曲进度"
+                    Text = "Progress"
                 },
                 indicator = new Indicator
                 {
-                    Text = "光标位置",
+                    Text = "Position",
                     IsMouseIndicator = true
                 }
             });

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using JetBrains.Annotations;
 using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -13,6 +14,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
+using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
@@ -25,24 +27,20 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Screens.Mvis.BottomBar;
-using osu.Game.Screens.Mvis.BottomBar.Buttons;
 using osu.Game.Screens.Mvis.Misc;
 using osu.Game.Screens.Mvis.Plugins;
+using osu.Game.Screens.Mvis.Plugins.Internal.FallbackFunctionBar;
 using osu.Game.Screens.Mvis.Plugins.Types;
 using osu.Game.Screens.Mvis.SideBar;
 using osu.Game.Screens.Mvis.SideBar.Settings;
 using osu.Game.Screens.Mvis.SideBar.Tabs;
-using osu.Game.Screens.Mvis.Skinning;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Select;
-using osu.Game.Skinning;
 using osu.Game.Users;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;
 using Sidebar = osu.Game.Screens.Mvis.SideBar.Sidebar;
-using SongProgressBar = osu.Game.Screens.Mvis.BottomBar.SongProgressBar;
 
 namespace osu.Game.Screens.Mvis
 {
@@ -61,9 +59,9 @@ namespace osu.Game.Screens.Mvis
 
         private bool okForHide => IsHovered
                                   && isIdle.Value
-                                  && !(bottomBar?.IsHovered ?? false)
-                                  && !(lockButton?.Value.Value ?? false)
-                                  && !lockChanges.Value
+                                  && !currentFunctionBarProvider.OkForHide()
+                                  && !(lockButton?.Bindable.Value ?? false)
+                                  && !(lockButton?.Bindable.Disabled ?? false)
                                   && inputManager?.DraggedDrawable == null
                                   && inputManager?.FocusedDrawable == null;
 
@@ -129,6 +127,27 @@ namespace osu.Game.Screens.Mvis
             if (runOnce) action.Invoke(Beatmap.Value);
         }
 
+        private readonly Dictionary<PluginKeybind, MvisPlugin> pluginKeyBindings = new Dictionary<PluginKeybind, MvisPlugin>();
+
+        public void RegisterKeybind(MvisPlugin plugin, PluginKeybind keybind)
+        {
+            if (pluginKeyBindings.Any(b => (b.Value == plugin && b.Key.Key == keybind.Key)))
+                throw new InvalidOperationException($"{plugin}已经注册过一个相同的{keybind}了");
+
+            keybind.Id = pluginKeyBindings.Count + 1;
+
+            pluginKeyBindings[keybind] = plugin;
+        }
+
+        private void unBindFor(MvisPlugin pl)
+        {
+            //查找插件是pl的绑定
+            var bindings = pluginKeyBindings.Where(b => b.Value == pl);
+
+            foreach (var bind in bindings)
+                pluginKeyBindings.Remove(bind.Key);
+        }
+
         /// <summary>
         /// 拖动下方进度条时调用<br/><br/>
         /// 传递: 拖动的目标时间
@@ -155,19 +174,31 @@ namespace osu.Game.Screens.Mvis
 
         #region 底栏
 
-        private BottomBarContainer bottomBar;
-        private SongProgressBar progressBar;
+        [CanBeNull]
+        private IFunctionBarProvider realFunctionBarProvider;
+
+        [NotNull]
+        private IFunctionBarProvider currentFunctionBarProvider
+        {
+            get => realFunctionBarProvider ?? fallbackFunctionBar;
+            set => realFunctionBarProvider = value;
+        }
+
+        private readonly FunctionBar fallbackFunctionBar = new FunctionBar();
+
+        private readonly List<IFunctionProvider> functionProviders = new List<IFunctionProvider>();
 
         //留着这些能让播放器在触发GlobalAction时会有更好的界面体验
-        private BottomBarButton soloButton;
-        private BottomBarButton prevButton;
-        private BottomBarButton nextButton;
-        private BottomBarButton sidebarToggleButton;
-        private BottomBarButton pluginButton;
+        private FakeButton soloButton;
+        private FakeButton prevButton;
+        private FakeButton nextButton;
+        private FakeButton pluginButton;
+        private FakeButton disableChangesButton;
+        private FakeButton sidebarToggleButton;
 
-        private BottomBarSwitchButton loopToggleButton;
-        private BottomBarOverlayLockSwitchButton lockButton;
-        private BottomBarSwitchButton songProgressButton;
+        private ToggleableFakeButton loopToggleButton;
+        private ToggleableFakeButton lockButton;
+        private ToggleableFakeButton songProgressButton;
 
         #endregion
 
@@ -178,10 +209,10 @@ namespace osu.Game.Screens.Mvis
 
         private Container background;
         private BgTrianglesContainer bgTriangles;
-        private FullScreenSkinnableComponent skinnableBbBackground;
 
         private Container foreground;
-        private FullScreenSkinnableComponent skinnableForeground;
+
+        private Container overlay;
 
         #endregion
 
@@ -206,6 +237,7 @@ namespace osu.Game.Screens.Mvis
         private readonly BindableBool useUnicode = new BindableBool();
         private readonly BindableBool allowProxy = new BindableBool();
         private Bindable<string> currentAudioControlProviderSetting;
+        private Bindable<string> currentFunctionbarSetting;
 
         #endregion
 
@@ -256,10 +288,8 @@ namespace osu.Game.Screens.Mvis
         private List<Mod> timeRateMod;
 
         private readonly Dictionary<GlobalAction, Action> keyBindings = new Dictionary<GlobalAction, Action>();
-        private readonly Dictionary<Key, Action> pluginKeyBindings = new Dictionary<Key, Action>();
 
         public bool OverlaysHidden { get; private set; }
-        private readonly BindableBool lockChanges = new BindableBool();
         private readonly IBindable<bool> isIdle = new BindableBool();
 
         private readonly Bindable<UserActivity> activity = new Bindable<UserActivity>();
@@ -272,11 +302,10 @@ namespace osu.Game.Screens.Mvis
         public Bindable<bool> HideScreenBackground = new Bindable<bool>();
 
         private IProvideAudioControlPlugin audioControlProvider;
-        public readonly OsuMusicControllerWrapper MusicControllerWrapper = new OsuMusicControllerWrapper();
         private SettingsButton songSelectButton;
         private PlayerSettings settingsScroll;
 
-        public float BottombarHeight => (bottomBar?.Height - bottomBar?.Y ?? 0) + 10 + 5;
+        public float BottombarHeight => currentFunctionBarProvider.GetSafeAreaPadding();
 
         #endregion
 
@@ -306,9 +335,10 @@ namespace osu.Game.Screens.Mvis
                 settingsScroll = new PlayerSettings(),
                 pluginsPage = new SidebarPluginsPage()
             });
+
             songSelectButton = new SettingsButton
             {
-                Text = "歌曲选择",
+                Text = "Song select",
                 Action = () => this.Push(new MvisSongSelect())
             };
 
@@ -321,11 +351,11 @@ namespace osu.Game.Screens.Mvis
             config.BindWith(MSetting.MvisEnableNightcoreBeat, nightcoreBeat);
             config.BindWith(MSetting.MvisStoryboardProxy, allowProxy);
             currentAudioControlProviderSetting = config.GetBindable<string>(MSetting.MvisCurrentAudioProvider);
+            currentFunctionbarSetting = config.GetBindable<string>(MSetting.MvisCurrentFunctionBar);
 
             InternalChildren = new Drawable[]
             {
                 colourProvider,
-                MusicControllerWrapper,
                 nightcoreBeatContainer = new NightcoreBeatContainer
                 {
                     Alpha = 0
@@ -345,16 +375,7 @@ namespace osu.Game.Screens.Mvis
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre
                 },
-                skinnableForeground = new FullScreenSkinnableComponent("MPlayer-foreground", confineMode: ConfineMode.ScaleToFill, defaultImplementation: _ => new PlaceHolder())
-                {
-                    Name = "前景图",
-                    RelativeSizeAxes = Axes.Both,
-                    Anchor = Anchor.TopCentre,
-                    Origin = Anchor.TopCentre,
-                    Alpha = 0,
-                    OverrideChildAnchor = true
-                },
-                new Container
+                overlay = new Container
                 {
                     Name = "Overlay Layer",
                     RelativeSizeAxes = Axes.Both,
@@ -362,22 +383,6 @@ namespace osu.Game.Screens.Mvis
                     Padding = new MarginPadding { Horizontal = HORIZONTAL_OVERFLOW_PADDING },
                     Children = new Drawable[]
                     {
-                        skinnableBbBackground = new FullScreenSkinnableComponent("MBottomBar-background",
-                            confineMode: ConfineMode.ScaleToFill,
-                            masking: false,
-                            defaultImplementation: _ => new PlaceHolder())
-                        {
-                            Name = "底栏背景图",
-                            Anchor = Anchor.BottomCentre,
-                            Origin = Anchor.BottomCentre,
-                            RelativeSizeAxes = Axes.X,
-                            Height = 100,
-                            ChildAnchor = Anchor.BottomCentre,
-                            ChildOrigin = Anchor.BottomCentre,
-                            Alpha = 0,
-                            CentreComponent = false,
-                            OverrideChildAnchor = true
-                        },
                         sidebar,
                         tabHeader,
                         loadingSpinner = new LoadingSpinner(true, true)
@@ -385,129 +390,118 @@ namespace osu.Game.Screens.Mvis
                             Anchor = Anchor.BottomCentre,
                             Origin = Anchor.BottomCentre,
                             Margin = new MarginPadding(115)
-                        },
-                        bottomBar = new BottomBarContainer
-                        {
-                            LeftContent = new Drawable[]
-                            {
-                                new BottomBarButton
-                                {
-                                    ButtonIcon = FontAwesome.Solid.ArrowLeft,
-                                    Action = this.Exit,
-                                    TooltipText = "Exit",
-                                },
-                                new BottomBarButton
-                                {
-                                    ButtonIcon = FontAwesome.Regular.QuestionCircle,
-                                    Action = () => game?.OpenUrlExternally("https://matrix-feather.github.io/mfosu/mfosu_mp_manual/"),
-                                    TooltipText = "User manual"
-                                }
-                            },
-                            CentreContent = new Drawable[]
-                            {
-                                prevButton = new NextPrevButton
-                                {
-                                    Size = new Vector2(50, 30),
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    ButtonIcon = FontAwesome.Solid.StepBackward,
-                                    Action = prevTrack,
-                                    TooltipText = "Previous",
-                                },
-                                songProgressButton = new SongProgressButton
-                                {
-                                    TooltipText = "Pause",
-                                    Action = togglePause,
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre
-                                },
-                                nextButton = new NextPrevButton
-                                {
-                                    Size = new Vector2(50, 30),
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    ButtonIcon = FontAwesome.Solid.StepForward,
-                                    Action = nextTrack,
-                                    TooltipText = "Next",
-                                },
-                            },
-                            RightContent = new Drawable[]
-                            {
-                                pluginButton = new BottomBarButton
-                                {
-                                    ButtonIcon = FontAwesome.Solid.Plug,
-                                    TooltipText = "View plugins",
-                                    Action = () => updateSidebarState(pluginsPage)
-                                },
-                                new BottomBarButton
-                                {
-                                    ButtonIcon = FontAwesome.Solid.Desktop,
-                                    Action = () =>
-                                    {
-                                        //隐藏界面，锁定更改并隐藏锁定按钮
-                                        lockChanges.Value = false;
-                                        hideOverlays(true);
-
-                                        updateSidebarState(null);
-
-                                        //防止手机端无法恢复界面
-                                        lockChanges.Value = RuntimeInfo.IsDesktop;
-                                        lockButton.Value.Value = !RuntimeInfo.IsDesktop;
-                                    },
-                                    TooltipText = "Hide and lock overlay"
-                                },
-                                loopToggleButton = new ToggleLoopButton
-                                {
-                                    ButtonIcon = FontAwesome.Solid.Undo,
-                                    Action = () => CurrentTrack.Looping = loopToggleButton.Value.Value,
-                                    TooltipText = "Toggle track loop"
-                                },
-                                soloButton = new BottomBarButton
-                                {
-                                    ButtonIcon = FontAwesome.Solid.User,
-                                    Action = presentBeatmap,
-                                    TooltipText = "View in song selection"
-                                },
-                                sidebarToggleButton = new BottomBarButton
-                                {
-                                    ButtonIcon = FontAwesome.Solid.Cog,
-                                    Action = () => updateSidebarState(settingsScroll),
-                                    TooltipText = "Player settings"
-                                }
-                            }
-                        },
-                        progressBar = new SongProgressBar
-                        {
-                            OnSeek = SeekTo
                         }
                     }
                 }
             };
 
-            //后期设置
-            bottomBar.PluginEntriesFillFlow.Add(lockButton = new BottomBarOverlayLockSwitchButton
+            functionProviders.AddRange(new IFunctionProvider[]
             {
-                TooltipText = "Lock changes",
-                Action = showPluginEntriesTemporary
-            });
+                new FakeButton
+                {
+                    Icon = FontAwesome.Solid.ArrowLeft,
+                    Action = this.Exit,
+                    Description = "Exit",
+                    Type = FunctionType.Base
+                },
+                new FakeButton
+                {
+                    Icon = FontAwesome.Regular.QuestionCircle,
+                    Action = () => game?.OpenUrlExternally("https://matrix-feather.github.io/mfosu/mfosu_mp_manual/"),
+                    Description = "User manual",
+                    Type = FunctionType.Base
+                },
+                prevButton = new FakeButton
+                {
+                    Size = new Vector2(50, 30),
+                    Icon = FontAwesome.Solid.StepBackward,
+                    Action = prevTrack,
+                    Description = "Previous",
+                    Type = FunctionType.Audio
+                },
+                songProgressButton = new ToggleableFakeButton
+                {
+                    Description = "Pause",
+                    Action = togglePause,
+                    Type = FunctionType.ProgressDisplay
+                },
+                nextButton = new FakeButton
+                {
+                    Size = new Vector2(50, 30),
+                    Icon = FontAwesome.Solid.StepForward,
+                    Action = nextTrack,
+                    Description = "Next",
+                    Type = FunctionType.Audio,
+                },
+                pluginButton = new FakeButton
+                {
+                    Icon = FontAwesome.Solid.Plug,
+                    Description = "View plugins",
+                    Action = () => updateSidebarState(pluginsPage),
+                    Type = FunctionType.Misc
+                },
+                disableChangesButton = new FakeButton
+                {
+                    Icon = FontAwesome.Solid.Desktop,
+                    Action = () =>
+                    {
+                        bool disabledBefore = lockButton.Bindable.Disabled;
+                        lockButton.Bindable.Disabled = false;
 
-            //todo: 找出为啥audioControlProvider会在被赋值前访问
-            audioControlProvider = MusicControllerWrapper;
+                        //隐藏界面，锁定更改并隐藏锁定按钮
+                        hideOverlays(true);
+
+                        updateSidebarState(null);
+
+                        //防止手机端无法恢复界面
+                        lockButton.Bindable.Value = RuntimeInfo.IsDesktop;
+                        lockButton.Bindable.Disabled = RuntimeInfo.IsDesktop && !disabledBefore;
+                    },
+                    Description = "Hide and lock overlay",
+                    Type = FunctionType.Misc
+                },
+                loopToggleButton = new ToggleableFakeButton
+                {
+                    Icon = FontAwesome.Solid.Undo,
+                    Action = () => CurrentTrack.Looping = loopToggleButton.Bindable.Value,
+                    Description = "Toggle track loop",
+                    Type = FunctionType.Misc
+                },
+                soloButton = new FakeButton
+                {
+                    Icon = FontAwesome.Solid.User,
+                    Action = presentBeatmap,
+                    Description = "View in song select",
+                    Type = FunctionType.Misc
+                },
+                sidebarToggleButton = new FakeButton
+                {
+                    Icon = FontAwesome.Solid.List,
+                    Action = () => updateSidebarState(settingsScroll),
+                    Description = "Player settings",
+                    Type = FunctionType.Misc
+                },
+                lockButton = new ToggleableFakeButton
+                {
+                    Description = "Lock changes",
+                    Action = showPluginEntriesTemporary,
+                    Type = FunctionType.Plugin,
+                    Icon = FontAwesome.Solid.Lock
+                }
+            });
         }
 
         protected override void LoadComplete()
         {
+            //todo: 找出为啥audioControlProvider会在被赋值前访问
+            audioControlProvider = pluginManager.DefaultAudioController;
+
             //各种BindValueChanged
             //这部分放load会导致当前屏幕为主界面时，播放器会在后台相应设置变动
             loadList.BindCollectionChanged(onLoadListChanged);
             useUnicode.BindValueChanged(v => activity.Value = new UserActivity.InMvis(Beatmap.Value.BeatmapInfo, v.NewValue));
             bgBlur.BindValueChanged(v => updateBackground(Beatmap.Value));
             idleBgDim.BindValueChanged(_ => updateIdleVisuals());
-            lockChanges.BindValueChanged(v =>
-            {
-                lockButton.Disabled = v.NewValue;
-            });
-
             musicSpeed.BindValueChanged(_ => applyTrackAdjustments());
             adjustFreq.BindValueChanged(_ => applyTrackAdjustments());
             nightcoreBeat.BindValueChanged(v =>
@@ -525,7 +519,7 @@ namespace osu.Game.Screens.Mvis
 
             inputManager = GetContainingInputManager();
 
-            songProgressButton.Value.BindTo(trackRunning);
+            songProgressButton.Bindable.BindTo(trackRunning);
 
             allowProxy.BindValueChanged(v =>
             {
@@ -587,30 +581,30 @@ namespace osu.Game.Screens.Mvis
                     if (pluginSidebarPage != null)
                     {
                         sidebar.Add(pluginSidebarPage);
-                        var btn = pluginSidebarPage.CreateBottomBarButton();
+                        var btn = pluginSidebarPage.GetFunctionEntry();
 
                         //如果插件的侧边栏页面有入口按钮
                         if (btn != null)
                         {
                             btn.Action = () => updateSidebarState(pluginSidebarPage);
-                            btn.TooltipText += $" ({pluginSidebarPage.ShortcutKey})";
+                            btn.Description += $" ({pluginSidebarPage.ShortcutKey})";
 
-                            bottomBar.PluginEntriesFillFlow.Add(btn);
+                            functionProviders.Add(btn);
                         }
 
                         //如果插件的侧边栏页面有调用快捷键
                         if (pluginSidebarPage.ShortcutKey != Key.Unknown)
                         {
-                            pluginKeyBindings[pluginSidebarPage.ShortcutKey] = () =>
+                            RegisterKeybind(pl, new PluginKeybind(pluginSidebarPage.ShortcutKey, () =>
                             {
-                                if (!pl.Disabled.Value) btn?.TriggerClick();
-                            };
+                                if (!pl.Disabled.Value) btn?.Active();
+                            }));
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    Logger.Error(e, $"在添加 {pl.Name} 时出现问题, 请联系你的插件提供方");
+                    Logger.Error(e, $"在添加 {pl.Name} 时出现问题, 请联系你的插件提供方: {e.Message}");
                 }
             }
 
@@ -620,52 +614,85 @@ namespace osu.Game.Screens.Mvis
                 Action = () => this.Push(new MvisSongSelect())
             });
 
-            //把lockButton放在中间
-            bottomBar.CentreBotton(lockButton);
-
             //更新当前音乐控制插件
             currentAudioControlProviderSetting.BindValueChanged(v =>
             {
                 //获取与新值匹配的控制插件
-                var pl = (IProvideAudioControlPlugin)pluginManager.GetAllPlugins(false).FirstOrDefault(p => v.NewValue == $"{p.GetType().Namespace}+{p.GetType().Name}");
+                var pl = pluginManager.GetAudioControlByPath(v.NewValue);
                 changeAudioControlProvider(pl);
             }, true);
 
-            bottomBar.MoveToY(bottomBar.Height + 10).FadeOut();
-            progressBar.MoveToY(5);
+            //更新当前功能条
+            currentFunctionbarSetting.BindValueChanged(v =>
+            {
+                //获取与新值匹配的控制插件
+                var pl = pluginManager.GetFunctionBarProviderByPath(v.NewValue);
+                changeFunctionBarProvider(pl);
+            }, true);
 
+            currentFunctionBarProvider.Hide();
             base.LoadComplete();
         }
 
         private void changeAudioControlProvider(IProvideAudioControlPlugin pacp)
         {
             //如果没找到(为null)，则解锁Beatmap.Disabled
-            Beatmap.Disabled = pacp != null;
+            Beatmap.Disabled = (pacp != null) && (pacp != pluginManager.DefaultAudioController);
 
             //设置当前控制插件IsCurrent为false
             audioControlProvider.IsCurrent = false;
 
             //切换并设置当前控制插件IsCurrent为true
-            audioControlProvider = pacp ?? MusicControllerWrapper;
+            audioControlProvider = pacp ?? pluginManager.DefaultAudioController;
             audioControlProvider.IsCurrent = true;
 
-            songSelectButton.Enabled.Value = audioControlProvider == MusicControllerWrapper;
+            songSelectButton.Enabled.Value = audioControlProvider == pluginManager.DefaultAudioController;
+            //Logger.Log($"更改控制插件到{audioControlProvider}");
+        }
+
+        private void onFunctionBarPluginDisable() => changeFunctionBarProvider(null);
+
+        private void changeFunctionBarProvider(IFunctionBarProvider target)
+        {
+            //找到旧的Functionbar
+            var targetDrawable = overlay.FirstOrDefault(d => d is IFunctionBarProvider);
+
+            //移除
+            if (targetDrawable != null)
+                overlay.Remove(targetDrawable);
+
+            //不要在此功能条禁用时再调用onFunctionBarPluginDisable
+            currentFunctionBarProvider.OnDisable -= onFunctionBarPluginDisable;
+
+            //如果新的目标是null，则使用后备功能条
+            var newProvider = target ?? fallbackFunctionBar;
+
+            //更新控制按钮
+            newProvider.SetFunctionControls(functionProviders);
+            newProvider.OnDisable += onFunctionBarPluginDisable;
+
+            //更新currentFunctionBarProvider
+            currentFunctionBarProvider = newProvider;
+
+            //添加新的功能条
+            overlay.Add((Drawable)currentFunctionBarProvider);
+            //Logger.Log($"更改底栏到{currentFunctionBarProvider}");
         }
 
         private void setupKeyBindings()
         {
-            keyBindings[GlobalAction.MvisMusicPrev] = () => prevButton.TriggerClick();
-            keyBindings[GlobalAction.MvisMusicNext] = () => nextButton.TriggerClick();
-            keyBindings[GlobalAction.MvisOpenInSongSelect] = () => soloButton.TriggerClick();
-            keyBindings[GlobalAction.MvisToggleOverlayLock] = () => lockButton.TriggerClick();
-            keyBindings[GlobalAction.MvisTogglePluginPage] = () => pluginButton.TriggerClick();
-            keyBindings[GlobalAction.MvisTogglePause] = () => songProgressButton.TriggerClick();
-            keyBindings[GlobalAction.MvisToggleTrackLoop] = () => loopToggleButton.TriggerClick();
-            keyBindings[GlobalAction.MvisTogglePlayList] = () => sidebarToggleButton.TriggerClick();
-            keyBindings[GlobalAction.MvisForceLockOverlayChanges] = () => lockChanges.Toggle();
+            keyBindings[GlobalAction.MvisMusicPrev] = prevButton.Active;
+            keyBindings[GlobalAction.MvisMusicNext] = nextButton.Active;
+            keyBindings[GlobalAction.MvisOpenInSongSelect] = soloButton.Active;
+            keyBindings[GlobalAction.MvisToggleOverlayLock] = lockButton.Active;
+            keyBindings[GlobalAction.MvisTogglePluginPage] = pluginButton.Active;
+            keyBindings[GlobalAction.MvisTogglePause] = songProgressButton.Active;
+            keyBindings[GlobalAction.MvisToggleTrackLoop] = loopToggleButton.Active;
+            keyBindings[GlobalAction.MvisTogglePlayList] = sidebarToggleButton.Active;
+            keyBindings[GlobalAction.MvisForceLockOverlayChanges] = disableChangesButton.Active;
             keyBindings[GlobalAction.Back] = () =>
             {
-                if (sidebar.IsPresent && sidebar.IsVisible.Value)
+                if (sidebar.IsPresent && sidebar.State.Value == Visibility.Visible)
                 {
                     sidebar.Hide();
                     return;
@@ -673,8 +700,8 @@ namespace osu.Game.Screens.Mvis
 
                 if (OverlaysHidden)
                 {
-                    lockChanges.Value = false;
-                    lockButton.Value.Value = false;
+                    lockButton.Bindable.Disabled = false;
+                    lockButton.Bindable.Value = false;
                     showOverlays(true);
                 }
                 else
@@ -684,6 +711,8 @@ namespace osu.Game.Screens.Mvis
 
         private void onPluginUnLoad(MvisPlugin pl)
         {
+            unBindFor(pl); //移除快捷键
+
             //查找与pl对应的侧边栏页面
             foreach (var sc in sidebar.Components)
             {
@@ -691,23 +720,23 @@ namespace osu.Game.Screens.Mvis
                 if (sc is PluginSidebarPage plsp && plsp.Plugin == pl)
                 {
                     sidebar.Remove(plsp); //移除这个页面
-                    pluginKeyBindings.Remove(plsp.ShortcutKey); //移除快捷键
 
                     //查找与plsp对应的底栏入口
-                    foreach (var d in bottomBar.PluginEntriesFillFlow)
+                    foreach (var d in currentFunctionBarProvider.GetAllPluginFunctionButton())
                     {
                         //同上
-                        if (d is PluginBottomBarButton btn && btn.Page == plsp)
+                        if (d is IPluginFunctionProvider btn && btn.SourcePage == plsp)
                         {
-                            btn.FadeTo(0.01f, 300, Easing.OutQuint).Then().Schedule(() =>
-                            {
-                                btn.Expire();
-                                bottomBar.CentreBotton(lockButton);
-                            });
+                            functionProviders.Remove(d);
+                            currentFunctionBarProvider.Remove(d);
+                            break;
                         }
                     }
                 }
             }
+
+            if ((MvisPlugin)currentFunctionBarProvider == pl)
+                changeFunctionBarProvider(null);
         }
 
         internal bool RemovePluginFromLoadList(MvisPlugin pl)
@@ -729,11 +758,11 @@ namespace osu.Game.Screens.Mvis
         [Resolved]
         private DialogOverlay dialog { get; set; }
 
-        public void RequestAudioControl(IProvideAudioControlPlugin pacp, string message, Action onDeny, Action onAllow)
+        public void RequestAudioControl(IProvideAudioControlPlugin pacp, LocalisableString message, Action onDeny, Action onAllow)
         {
             if (!(pacp is MvisPlugin mpl)) return;
 
-            dialog.Push(new ConfirmDialog($"插件\"{mpl}\"\n请求接手音频控制。\n原因是: {message}",
+            dialog.Push(new ConfirmDialog($"Plugin \"{mpl}\"\n requested audio control \n Reason: {message}",
                 () =>
                 {
                     changeAudioControlProvider(pacp);
@@ -774,8 +803,6 @@ namespace osu.Game.Screens.Mvis
             base.Update();
 
             trackRunning.Value = CurrentTrack.IsRunning;
-            progressBar.CurrentTime = CurrentTrack.CurrentTime;
-            progressBar.EndTime = CurrentTrack.Length;
         }
 
         public override void OnEntering(IScreen last)
@@ -793,7 +820,6 @@ namespace osu.Game.Screens.Mvis
 
             //非背景层的动画
             foreground.ScaleTo(0f).Then().ScaleTo(1f, duration, Easing.OutQuint);
-            skinnableForeground.FadeIn(duration, Easing.OutQuint);
 
             //触发一次onBeatmapChanged和onTrackRunningToggle
             Beatmap.BindValueChanged(onBeatmapChanged, true);
@@ -812,12 +838,11 @@ namespace osu.Game.Screens.Mvis
             Mods.Value = originalMods;
 
             //锁定变更
-            lockChanges.Value = true;
+            lockButton.Bindable.Disabled = true;
 
             //非背景层的动画
             foreground.ScaleTo(0, duration, Easing.OutQuint);
-            bottomBar.MoveToY(bottomBar.Height + 10, duration, Easing.OutQuint).FadeOut(duration, Easing.OutExpo);
-            progressBar.MoveToY(3.5f, duration, Easing.OutQuint).FadeTo(0.1f, duration, Easing.OutExpo);
+            currentFunctionBarProvider.Hide();
 
             this.FadeOut(500, Easing.OutQuint);
 
@@ -856,7 +881,7 @@ namespace osu.Game.Screens.Mvis
 
             Mods.Value = timeRateMod;
 
-            Beatmap.Disabled = audioControlProvider != null && audioControlProvider != MusicControllerWrapper;
+            Beatmap.Disabled = audioControlProvider != null && audioControlProvider != pluginManager.DefaultAudioController;
             this.FadeIn(duration * 0.6f)
                 .ScaleTo(1, duration * 0.6f, Easing.OutQuint);
 
@@ -892,8 +917,8 @@ namespace osu.Game.Screens.Mvis
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
-            //查找插件按键绑定
-            pluginKeyBindings.FirstOrDefault(b => b.Key == e.Key).Value?.Invoke();
+            //查找插件按键绑定并执行
+            pluginKeyBindings.FirstOrDefault(b => b.Key.Key == e.Key).Key?.Action?.Invoke();
 
             return base.OnKeyDown(e);
         }
@@ -901,8 +926,8 @@ namespace osu.Game.Screens.Mvis
         //当有弹窗或游戏失去焦点时要进行的动作
         protected override void OnHoverLost(HoverLostEvent e)
         {
-            if (lockButton.Value.Value && OverlaysHidden)
-                lockButton.Toggle();
+            if (lockButton.Bindable.Value && OverlaysHidden && !lockButton.Bindable.Disabled)
+                lockButton.Bindable.Toggle();
 
             showOverlays(false);
             base.OnHoverLost(e);
@@ -914,17 +939,12 @@ namespace osu.Game.Screens.Mvis
             game?.PresentBeatmap(Beatmap.Value.BeatmapSetInfo);
 
         private void showPluginEntriesTemporary() =>
-            bottomBar.PluginEntriesFillFlow.FadeIn(500, Easing.OutQuint).Then().Delay(2000).FadeOut(500, Easing.OutQuint);
+            currentFunctionBarProvider.ShowFunctionControlTemporary();
 
         private void hideOverlays(bool force)
         {
             if (!force && !okForHide)
                 return;
-
-            skinnableBbBackground.MoveToY(bottomBar.Height, duration, Easing.OutQuint)
-                                 .FadeOut(duration, Easing.OutQuint);
-
-            progressBar.MoveToY(4f, duration, Easing.OutQuint);
 
             OverlaysHidden = true;
             updateIdleVisuals();
@@ -934,7 +954,7 @@ namespace osu.Game.Screens.Mvis
         private void showOverlays(bool force)
         {
             //在有锁并且悬浮界面已隐藏或悬浮界面可见的情况下显示悬浮锁
-            if (!force && ((lockButton.Value.Value && OverlaysHidden) || !OverlaysHidden || lockChanges.Value))
+            if (!force && ((lockButton.Bindable.Value && OverlaysHidden) || !OverlaysHidden || lockButton.Bindable.Disabled))
             {
                 showPluginEntriesTemporary();
                 return;
@@ -942,10 +962,7 @@ namespace osu.Game.Screens.Mvis
 
             foreground.FadeTo(1, duration, Easing.OutQuint);
 
-            skinnableBbBackground.MoveToY(0, duration, Easing.OutQuint)
-                                 .FadeIn(duration, Easing.OutQuint);
-
-            progressBar.MoveToY(0, duration, Easing.OutQuint);
+            currentFunctionBarProvider.Show();
 
             OverlaysHidden = false;
 
@@ -985,7 +1002,7 @@ namespace osu.Game.Screens.Mvis
         private void applyTrackAdjustments()
         {
             CurrentTrack.ResetSpeedAdjustments();
-            CurrentTrack.Looping = loopToggleButton.Value.Value;
+            CurrentTrack.Looping = loopToggleButton.Bindable.Value;
             CurrentTrack.RestartPoint = 0;
             CurrentTrack.AddAdjustment(adjustFreq.Value ? AdjustableProperty.Frequency : AdjustableProperty.Tempo, musicSpeed);
 

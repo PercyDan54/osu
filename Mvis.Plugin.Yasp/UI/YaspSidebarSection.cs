@@ -32,7 +32,7 @@ namespace Mvis.Plugin.Yasp.UI
                 new SettingsSliderPiece<float>
                 {
                     Icon = FontAwesome.Solid.ExpandArrowsAlt,
-                    Description = "Zoom",
+                    Description = "Scale",
                     Bindable = config.GetBindable<float>(YaspSettings.Scale),
                     DisplayAsPercentage = true
                 }

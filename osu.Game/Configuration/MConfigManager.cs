@@ -44,7 +44,8 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.MvisInterfaceGreen, 119f, 0, 255f);
             SetDefault(MSetting.MvisInterfaceBlue, 255f, 0, 255f);
             SetDefault(MSetting.MvisTabControlPosition, TabControlPosition.Right);
-            SetDefault(MSetting.MvisCurrentAudioProvider, "osu.Game.Screens.Mvis.Plugins+OsuMusicControllerWrapper");
+            SetDefault(MSetting.MvisCurrentAudioProvider, "a@b");
+            SetDefault(MSetting.MvisCurrentFunctionBar, "LegacyBottomBar@Mvis.Plugin.BottomBar");
 
             //Dance settings
             SetDefault(MSetting.DanceMover, OsuDanceMover.Momentum);
@@ -103,6 +104,7 @@ namespace osu.Game.Configuration
         MvisInterfaceRed,
         MvisInterfaceGreen,
         MvisInterfaceBlue,
+        MvisCurrentFunctionBar,
         MvisCurrentAudioProvider,
         SamplePlaybackGain,
 

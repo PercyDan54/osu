@@ -40,11 +40,11 @@ namespace Mvis.Plugin.Sandbox.Config
             SetDefault(SandboxSetting.BarWidthB, 3.0, 1, 20);
             SetDefault(SandboxSetting.BarCountB, 120, 10, 3500);
             SetDefault(SandboxSetting.LinearBarType, LinearBarType.Basic);
-            SetDefault(SandboxSetting.ShowBeatmapInfo, true);
 
             //插件
             SetDefault(SandboxSetting.EnableRulesetPanel, true);
             SetDefault(SandboxSetting.IdleAlpha, 1f, 0, 1f);
+            SetDefault(SandboxSetting.ShowBeatmapInfo, true);
         }
 
         protected override string ConfigName => "RulesetPanel";
@@ -55,6 +55,9 @@ namespace Mvis.Plugin.Sandbox.Config
         //插件
         EnableRulesetPanel,
         IdleAlpha,
+
+        //Type B
+        ShowBeatmapInfo,
 
         //上游
         // Visualizer
@@ -82,8 +85,7 @@ namespace Mvis.Plugin.Sandbox.Config
         SmoothnessB,
         BarWidthB,
         BarCountB,
-        LinearBarType,
-        ShowBeatmapInfo
+        LinearBarType
     }
 
     //上游

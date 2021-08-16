@@ -61,6 +61,24 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 {
                     Description = "Auto scroll",
                     Bindable = config.GetBindable<bool>(LyricSettings.AutoScrollToCurrent)
+                },
+                new SettingsAnchorPiece
+                {
+                    Description = "Anchor",
+                    Icon = FontAwesome.Solid.Anchor,
+                    Bindable = config.GetBindable<Anchor>(LyricSettings.LyricDirection)
+                },
+                new SettingsSliderPiece<float>
+                {
+                    Description = "X position",
+                    Bindable = config.GetBindable<float>(LyricSettings.LyricPositionX),
+                    DisplayAsPercentage = true
+                },
+                new SettingsSliderPiece<float>
+                {
+                    Description = "Y position",
+                    Bindable = config.GetBindable<float>(LyricSettings.LyricPositionY),
+                    DisplayAsPercentage = true
                 }
             });
         }

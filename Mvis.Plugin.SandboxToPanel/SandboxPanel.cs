@@ -1,4 +1,4 @@
-using Mvis.Plugin.RulesetPanel.Components;
+using Mvis.Plugin.Sandbox.Components;
 using Mvis.Plugin.Sandbox.Config;
 using Mvis.Plugin.Sandbox.UI;
 using osu.Framework.Allocation;
@@ -14,16 +14,16 @@ using osuTK;
 namespace Mvis.Plugin.Sandbox
 {
     [Cached]
-    public class RulesetPanel : BindableControlledPlugin
+    public class SandboxPanel : BindableControlledPlugin
     {
         public override TargetLayer Target => TargetLayer.Foreground;
-        public override int Version => 5;
+        public override int Version => 6;
         public Bindable<WorkingBeatmap> CurrentBeatmap = new Bindable<WorkingBeatmap>();
 
-        public RulesetPanel()
+        public SandboxPanel()
         {
             Name = "Sandbox";
-            Description = "Maybe the best osu! music visualization";
+            Description = "可能是最好的osu!音乐可视化";
             Author = "EVAST9919; mf-osu";
 
             Flags.AddRange(new[]
@@ -46,7 +46,9 @@ namespace Mvis.Plugin.Sandbox
             idleAlpha.BindValueChanged(onIdleAlphaChanged);
 
             var config = (SandboxConfigManager)Dependencies.Get<MvisPluginManager>().GetConfigManager(this);
+
             config.BindWith(SandboxSetting.EnableRulesetPanel, Value);
+            config.BindWith(SandboxSetting.IdleAlpha, idleAlpha);
 
             if (MvisScreen != null)
             {
@@ -60,6 +62,8 @@ namespace Mvis.Plugin.Sandbox
                     MvisScreen?.OnBeatmapChanged(onBeatmapChanged, this, true);
                 };
             }
+
+            AddInternal(new Particles());
         }
 
         private void onIdleAlphaChanged(ValueChangedEvent<float> v)

@@ -14,10 +14,10 @@ namespace osu.Game.Screens.Mvis.SideBar.Settings.Items
         public LocalisableString TooltipText
         {
             get => tooltip;
-            set => tooltip = value + " (点击重置)";
+            set => tooltip = value + "(Click to reset)";
         }
 
-        private string tooltip = "点击重置";
+        private string tooltip = "Click to reset";
 
         public bool DisplayAsPercentage;
         public bool TransferValueOnCommit;

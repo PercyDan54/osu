@@ -19,7 +19,7 @@ namespace osu.Game.Screens.Mvis.SideBar.Settings
             AutoSizeAxes = Axes.Both,
             Anchor = Anchor.TopRight,
             Origin = Anchor.TopRight,
-            Spacing = new Vector2(10),
+            Spacing = new Vector2(5),
             Direction = FillDirection.Vertical
         };
 

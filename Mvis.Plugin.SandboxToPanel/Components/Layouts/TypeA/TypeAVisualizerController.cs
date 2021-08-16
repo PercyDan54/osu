@@ -1,7 +1,7 @@
 ﻿using System;
-using Mvis.Plugin.RulesetPanel.Components.MusicHelpers;
-using Mvis.Plugin.RulesetPanel.Components.Visualizers;
-using Mvis.Plugin.RulesetPanel.Components.Visualizers.Circular;
+using Mvis.Plugin.Sandbox.Components.MusicHelpers;
+using Mvis.Plugin.Sandbox.Components.Visualizers;
+using Mvis.Plugin.Sandbox.Components.Visualizers.Circular;
 using Mvis.Plugin.Sandbox.Config;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -87,6 +87,9 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeA
         {
             switch (type.Value)
             {
+                default:
+                    return new BasicMusicVisualizerDrawable();
+
                 case CircularBarType.Rounded:
                     return new RoundedMusicVisualizerDrawable();
 
@@ -95,9 +98,6 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeA
 
                 case CircularBarType.Dots:
                     return new DotsMusicVisualizerDrawable();
-
-                default:
-                    return new BasicMusicVisualizerDrawable();
             }
         }
 

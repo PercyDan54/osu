@@ -1,12 +1,13 @@
-﻿using Mvis.Plugin.RulesetPanel.Components.MusicHelpers;
-using Mvis.Plugin.RulesetPanel.Components.Visualizers;
-using Mvis.Plugin.RulesetPanel.Components.Visualizers.Linear;
+﻿using Mvis.Plugin.Sandbox.Components.MusicHelpers;
+using Mvis.Plugin.Sandbox.Components.Visualizers;
+using Mvis.Plugin.Sandbox.Components.Visualizers.Linear;
 using Mvis.Plugin.Sandbox.Config;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osuTK.Graphics;
@@ -90,7 +91,7 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeB
 
             Beatmap.BindValueChanged(b =>
             {
-                text.Text = b.NewValue.Metadata.ToRomanisableString(false);
+                text.Text = b.NewValue.BeatmapInfo.ToRomanisableString();
             }, true);
 
             type.BindValueChanged(t =>

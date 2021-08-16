@@ -25,7 +25,6 @@ namespace osu.Game.Screens.Mvis.SideBar
         private const float duration = 400;
         private TabControlItem prevTab;
 
-        public BindableBool IsVisible = new BindableBool();
         public Bindable<Drawable> CurrentDisplay = new Bindable<Drawable>();
 
         private readonly Container<Drawable> contentContainer;
@@ -120,7 +119,7 @@ namespace osu.Game.Screens.Mvis.SideBar
             if (CurrentDisplay.Value == d)
             {
                 //如果要显示的是当前正在显示的内容，则中断
-                if (IsVisible.Value)
+                if (State.Value == Visibility.Visible)
                 {
                     if (allowHide) Hide();
 
@@ -202,8 +201,6 @@ namespace osu.Game.Screens.Mvis.SideBar
                             .MoveToY(70, duration, Easing.OutQuint);
 
             prevTab?.MakeInActive();
-
-            IsVisible.Value = false;
         }
 
         protected override void PopIn()
@@ -216,8 +213,6 @@ namespace osu.Game.Screens.Mvis.SideBar
 
             contentContainer.FadeIn(duration, Easing.OutQuint)
                             .MoveToY(0, duration, Easing.OutQuint);
-
-            IsVisible.Value = true;
         }
     }
 }

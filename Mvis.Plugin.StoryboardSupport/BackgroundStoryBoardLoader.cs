@@ -23,7 +23,6 @@ namespace Mvis.Plugin.StoryboardSupport
     public class BackgroundStoryBoardLoader : BindableControlledPlugin
     {
         public const float STORYBOARD_FADEIN_DURATION = 750;
-        public const float STORYBOARD_FADEOUT_DURATION = STORYBOARD_FADEIN_DURATION / 2;
 
         ///<summary>
         ///用于内部确定故事版是否已加载
@@ -148,7 +147,7 @@ namespace Mvis.Plugin.StoryboardSupport
             return true;
         }
 
-        public override int Version => 5;
+        public override int Version => 6;
 
         private Drawable prevProxy;
 

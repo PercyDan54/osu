@@ -1,4 +1,4 @@
-﻿using Mvis.Plugin.RulesetPanel.Components.MusicHelpers;
+﻿using Mvis.Plugin.Sandbox.Components.MusicHelpers;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -13,6 +13,12 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeA
     public class CircularBeatmapLogo : CurrentBeatmapProvider
     {
         private const int base_size = 350;
+
+        public new Color4 Colour
+        {
+            get => progress.Colour;
+            set => progress.Colour = value;
+        }
 
         public new Bindable<int> Size = new Bindable<int>(base_size);
 

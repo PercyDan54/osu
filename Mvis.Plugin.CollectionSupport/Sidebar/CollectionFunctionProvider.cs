@@ -1,0 +1,28 @@
+using System;
+using osu.Framework.Graphics.Sprites;
+using osu.Framework.Localisation;
+using osu.Game.Screens.Mvis.Plugins;
+using osu.Game.Screens.Mvis.Plugins.Types;
+using osuTK;
+
+namespace Mvis.Plugin.CollectionSupport.Sidebar
+{
+    public class CollectionFunctionProvider : IPluginFunctionProvider
+    {
+        public Vector2 Size { get; set; } = new Vector2(30);
+        public Action Action { get; set; }
+        public IconUsage Icon { get; set; } = FontAwesome.Solid.Check;
+        public LocalisableString Title { get; set; }
+        public LocalisableString Description { get; set; } = "View collections";
+        public FunctionType Type { get; set; } = FunctionType.Plugin;
+
+        public void Active() => Action?.Invoke();
+
+        public PluginSidebarPage SourcePage { get; set; }
+
+        public CollectionFunctionProvider(PluginSidebarPage page)
+        {
+            SourcePage = page;
+        }
+    }
+}

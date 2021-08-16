@@ -7,17 +7,17 @@ using Mvis.Plugin.CloudMusicSupport.Misc;
 using Mvis.Plugin.CloudMusicSupport.Sidebar;
 using Mvis.Plugin.CloudMusicSupport.UI;
 using osu.Framework.Allocation;
-using osu.Framework.Audio.Track;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Audio;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
-using osu.Game.Configuration;
-using osu.Game.Overlays;
 using osu.Game.Screens.Mvis.Plugins;
 using osu.Game.Screens.Mvis.Plugins.Config;
 using osu.Game.Screens.Mvis.Plugins.Types;
+using osu.Framework.Audio.Track;
+using osu.Framework.Bindables;
+using osu.Framework.Graphics.Audio;
+using osu.Game.Configuration;
+using osu.Game.Overlays;
 
 namespace Mvis.Plugin.CloudMusicSupport
 {
@@ -40,15 +40,15 @@ namespace Mvis.Plugin.CloudMusicSupport
         public override PluginSidebarSettingsSection CreateSidebarSettingsSection()
             => new LyricSidebarSection(this);
 
-        public override int Version => 5;
+        public override int Version => 6;
 
         private WorkingBeatmap currentWorkingBeatmap;
-        private LyricLine lrcLine;
+        private LyricLineHandler lrcLine;
 
         /// <summary>
         /// 请参阅 <see cref="MvisPlugin.CreateContent()"/>
         /// </summary>
-        protected override Drawable CreateContent() => lrcLine = new LyricLine();
+        protected override Drawable CreateContent() => lrcLine = new LyricLineHandler();
 
         private readonly LyricProcessor processor = new LyricProcessor();
 
@@ -106,7 +106,7 @@ namespace Mvis.Plugin.CloudMusicSupport
         {
             Name = "Lyrics";
             Description = "Get lyrics from Netease";
-            Author = "MATRIX-夜翎";
+            Author = "MATRIX-FEATHER";
             Depth = -1;
 
             Flags.AddRange(new[]
@@ -115,8 +115,7 @@ namespace Mvis.Plugin.CloudMusicSupport
                 PluginFlags.CanUnload
             });
 
-            RelativeSizeAxes = Axes.X;
-            Height = 300;
+            RelativeSizeAxes = Axes.Both;
             Anchor = Origin = Anchor.BottomCentre;
         }
 
@@ -222,7 +221,7 @@ namespace Mvis.Plugin.CloudMusicSupport
         {
             base.Update();
 
-            Margin = new MarginPadding { Bottom = (MvisScreen?.BottombarHeight ?? 0) + 20 };
+            Padding = new MarginPadding { Bottom = (MvisScreen?.BottombarHeight ?? 0) + 20 };
 
             if (ContentLoaded)
             {

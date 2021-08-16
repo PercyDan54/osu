@@ -1,6 +1,7 @@
 using Mvis.Plugin.CloudMusicSupport.Config;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Sprites;
 using osu.Game.Overlays.Settings;
 using osu.Game.Screens.Mvis.Plugins;
 using osu.Game.Screens.Mvis.Plugins.Config;
@@ -64,6 +65,23 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                     LabelText = "Auto scroll",
                     Current = config.GetBindable<bool>(LyricSettings.AutoScrollToCurrent)
                 },
+                new SettingsDropdown<Anchor>
+                {
+                    LabelText = "Anchor",
+                    Current = config.GetBindable<Anchor>(LyricSettings.LyricDirection)
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "X position",
+                    Current = config.GetBindable<float>(LyricSettings.LyricPositionX),
+                    DisplayAsPercentage = true
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Y position",
+                    Current = config.GetBindable<float>(LyricSettings.LyricPositionY),
+                    DisplayAsPercentage = true
+                }
             };
         }
     }

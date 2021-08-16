@@ -21,18 +21,17 @@ namespace Mvis.Plugin.Yasp.UI
 
             Children = new Drawable[]
             {
+                new SettingsSlider<float>
+                {
+                    LabelText = "Scale",
+                    Current = config.GetBindable<float>(YaspSettings.Scale),
+                    DisplayAsPercentage = true
+                },
                 new SettingsCheckbox
                 {
                     LabelText = "Enable",
                     Current = config.GetBindable<bool>(YaspSettings.EnablePlugin)
-                },
-                new SettingsSlider<float>
-                {
-                    LabelText = "Zoom",
-                    Current = config.GetBindable<float>(YaspSettings.Scale),
-                    DisplayAsPercentage = true
                 }
-
             };
         }
     }

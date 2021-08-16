@@ -9,8 +9,7 @@ using osu.Game.Collections;
 using osu.Game.Graphics.Containers;
 using osu.Game.Screens.Mvis;
 using osu.Game.Screens.Mvis.Plugins;
-using osu.Game.Screens.Mvis.Skinning;
-using osu.Game.Skinning;
+using osu.Game.Screens.Mvis.Plugins.Types;
 using osuTK;
 using osuTK.Input;
 
@@ -48,7 +47,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
             dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
 
-        public override PluginBottomBarButton CreateBottomBarButton() => new CollectionSupportEntryButton(this);
+        public override IPluginFunctionProvider GetFunctionEntry() => new CollectionFunctionProvider(this);
         public override Key ShortcutKey => Key.Period;
 
         [BackgroundDependencyLoader]
@@ -58,23 +57,9 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
 
             Children = new Drawable[]
             {
-                new SkinnableComponent(
-                    "MSidebar-Collection-background",
-                    confineMode: ConfineMode.ScaleToFill,
-                    defaultImplementation: _ => new PlaceHolder())
-                {
-                    Name = "收藏夹背景",
-                    Anchor = Anchor.BottomRight,
-                    Origin = Anchor.BottomRight,
-                    ChildAnchor = Anchor.BottomRight,
-                    ChildOrigin = Anchor.BottomRight,
-                    RelativeSizeAxes = Axes.Both,
-                    CentreComponent = false,
-                    OverrideChildAnchor = true,
-                },
                 new Container
                 {
-                    Name = "Collection selection",
+                    Name = "Collection select",
                     RelativeSizeAxes = Axes.Both,
                     Width = 0.3f,
                     Anchor = Anchor.TopLeft,
