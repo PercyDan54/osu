@@ -103,10 +103,11 @@ namespace Mvis.Plugin.FakeEditor
             Seek(beatmap.Track.CurrentTime);
 
             beatDivisor.Value = beatmap.BeatmapInfo.BeatDivisor;
+            var ruleset = beatmap.BeatmapInfo.Ruleset;
 
-            if (EditorClock == null)
+            if (EditorClock == null && ruleset != null)
             {
-                AddInternal(EditorClock = new EditorClock(beatmap.GetPlayableBeatmap(beatmap.BeatmapInfo.Ruleset), beatDivisor)
+                AddInternal(EditorClock = new EditorClock(beatmap.GetPlayableBeatmap(ruleset), beatDivisor)
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,

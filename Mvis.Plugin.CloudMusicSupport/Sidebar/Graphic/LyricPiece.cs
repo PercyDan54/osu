@@ -1,4 +1,5 @@
 using System;
+using M.Resources.Localisation.Mvis.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Config;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 using osu.Framework.Allocation;
@@ -26,7 +27,12 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
         private LyricConfigManager config { get; set; }
 
         public MenuItem[] ContextMenuItems => new MenuItem[]
-            { new OsuMenuItem("Adjust offset to this line", MenuItemType.Standard, () => config.SetValue(LyricSettings.LyricOffset, Value.Time - mvisScreen.CurrentTrack.CurrentTime)) };
+        {
+            new OsuMenuItem(
+                CloudMusicStrings.AdjustOffsetToLyric.ToString(),
+                MenuItemType.Standard,
+                () => config.SetValue(LyricSettings.LyricOffset, Value.Time - mvisScreen.CurrentTrack.CurrentTime))
+        };
 
         private Box hoverBox;
         private OsuSpriteText contentText;
@@ -128,15 +134,12 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
             contentText.Text = lyric.Content;
             translateText.Text = lyric.TranslatedString;
 
+            var timeSpan = TimeSpan.FromMilliseconds(lyric.Time);
+            timeText.Text = TooltipText = $"{timeSpan:mm\\:ss\\.fff}";
+
             Colour = string.IsNullOrEmpty(lyric.Content)
                 ? Color4Extensions.FromHex(@"555")
                 : Color4.White;
-        }
-
-        protected override void Update()
-        {
-            var timeSpan = TimeSpan.FromMilliseconds(Value.Time - config.Get<double>(LyricSettings.LyricOffset));
-            timeText.Text = TooltipText = $"{timeSpan:mm\\:ss\\.fff}";
         }
 
         protected override bool OnClick(ClickEvent e)

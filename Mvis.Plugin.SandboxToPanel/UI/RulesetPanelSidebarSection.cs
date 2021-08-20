@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using M.Resources.Localisation.Mvis;
+using M.Resources.Localisation.Mvis.Plugins;
 using Mvis.Plugin.Sandbox.Config;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -35,34 +37,34 @@ namespace Mvis.Plugin.Sandbox.UI
             {
                 new SettingsTogglePiece
                 {
-                    Description = "Enable Mvis panel",
+                    Description = MvisGenericStrings.EnablePlugin,
                     Bindable = config.GetBindable<bool>(SandboxSetting.EnableRulesetPanel)
                 },
                 new SettingsSliderPiece<float>
                 {
-                    Description = "Alpha when idle",
+                    Description = StpStrings.AlphaOnIdle,
                     Bindable = config.GetBindable<float>(SandboxSetting.IdleAlpha),
                     DisplayAsPercentage = true
                 },
                 new SettingsTogglePiece
                 {
-                    Description = "Show particles",
+                    Description = StpStrings.ShowParticles,
                     Bindable = config.GetBindable<bool>(SandboxSetting.ShowParticles)
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Particle amount",
+                    Description = StpStrings.ParticleCount,
                     TransferValueOnCommit = true,
                     Bindable = config.GetBindable<int>(SandboxSetting.ParticleCount)
                 },
                 new SettingsEnumPiece<VisualizerLayout>
                 {
-                    Description = "Layout type",
+                    Description = StpStrings.VisualizerLayoutType,
                     Bindable = layoutType
                 },
                 new SettingsTogglePiece
                 {
-                    Description = "Show beatmap info",
+                    Description = StpStrings.ShowBeatmapInfo,
                     Bindable = config.GetBindable<bool>(SandboxSetting.ShowBeatmapInfo)
                 },
             });
@@ -73,53 +75,53 @@ namespace Mvis.Plugin.Sandbox.UI
             {
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Radius",
+                    Description = StpStrings.Radius,
                     Bindable = config.GetBindable<int>(SandboxSetting.Radius)
                 },
                 new SettingsEnumPiece<CircularBarType>
                 {
-                    Description = "Bar type",
+                    Description = StpStrings.BarType,
                     Bindable = config.GetBindable<CircularBarType>(SandboxSetting.CircularBarType)
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Rotation",
+                    Description = StpStrings.Rotation,
                     Bindable = config.GetBindable<int>(SandboxSetting.Rotation)
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Decay",
+                    Description = StpStrings.DecayTime,
                     Bindable = config.GetBindable<int>(SandboxSetting.DecayA)
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Height multiplier",
+                    Description = StpStrings.HeightMultiplier,
                     Bindable = config.GetBindable<int>(SandboxSetting.MultiplierA)
                 },
                 new SettingsTogglePiece
                 {
-                    Description = "Symmetry",
+                    Description = StpStrings.Symmetry,
                     Bindable = config.GetBindable<bool>(SandboxSetting.Symmetry)
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Smoothness",
+                    Description = StpStrings.Smoothness,
                     Bindable = config.GetBindable<int>(SandboxSetting.SmoothnessA)
                 },
                 new SettingsSliderPiece<double>
                 {
-                    Description = "Bar width",
+                    Description = StpStrings.BarWidth,
                     Bindable = config.GetBindable<double>(SandboxSetting.BarWidthA)
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Visualizer amount",
+                    Description = StpStrings.VisualizerAmount,
                     Bindable = config.GetBindable<int>(SandboxSetting.VisualizerAmount),
                     TransferValueOnCommit = true
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Bars per visual",
+                    Description = StpStrings.BarsPerVisual,
                     Bindable = config.GetBindable<int>(SandboxSetting.BarsPerVisual),
                     TransferValueOnCommit = true
                 }
@@ -129,32 +131,32 @@ namespace Mvis.Plugin.Sandbox.UI
             {
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Decay",
+                    Description = StpStrings.DecayTime,
                     Bindable = config.GetBindable<int>(SandboxSetting.DecayB),
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Height multiplier",
+                    Description = StpStrings.HeightMultiplier,
                     Bindable = config.GetBindable<int>(SandboxSetting.MultiplierB),
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Smoothness",
+                    Description = StpStrings.Smoothness,
                     Bindable = config.GetBindable<int>(SandboxSetting.SmoothnessB),
                 },
                 new SettingsSliderPiece<double>
                 {
-                    Description = "Bar width",
+                    Description = StpStrings.BarWidth,
                     Bindable = config.GetBindable<double>(SandboxSetting.BarWidthB),
                 },
                 new SettingsSliderPiece<int>
                 {
-                    Description = "Bar count",
+                    Description = StpStrings.BarCount,
                     Bindable = config.GetBindable<int>(SandboxSetting.BarCountB),
                 },
                 new SettingsEnumPiece<LinearBarType>
                 {
-                    Description = "Bar type",
+                    Description = StpStrings.BarType,
                     Bindable = config.GetBindable<LinearBarType>(SandboxSetting.LinearBarType)
                 },
             });

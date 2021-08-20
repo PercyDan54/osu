@@ -43,4 +43,7 @@
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\M.Resources\M.Resources.csproj" />
+  </ItemGroup>
 </Project>

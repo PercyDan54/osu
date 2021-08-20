@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using M.Resources.Localisation.Mvis.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 using Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic;
 using osu.Framework.Allocation;
@@ -45,21 +46,21 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             new IconButton
             {
                 Icon = FontAwesome.Solid.IceCream,
-                TooltipText = "Add lyric at current time",
+                TooltipText = CloudMusicStrings.InsertNewLine,
                 Size = new Vector2(45),
                 Action = () => addNewLyricAt(Plugin.GetCurrentTrack().CurrentTime)
             },
             new IconButton
             {
                 Icon = FontAwesome.Solid.Backward,
-                TooltipText = "Seek to last beat",
+                TooltipText = CloudMusicStrings.SeekToPrev,
                 Action = () => seek(-1),
                 Size = new Vector2(45)
             },
             new IconButton
             {
                 Icon = FontAwesome.Solid.Forward,
-                TooltipText = "Seek to next beat",
+                TooltipText = CloudMusicStrings.SeekToNext,
                 Action = () => seek(1),
                 Size = new Vector2(45)
             },
@@ -67,13 +68,13 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             {
                 Icon = FontAwesome.Solid.AngleDown,
                 Size = new Vector2(45),
-                TooltipText = "Scroll to current line",
+                TooltipText = CloudMusicStrings.ScrollToCurrent,
                 Action = ScrollToCurrent
             },
             new IconButton
             {
                 Icon = FontAwesome.Solid.Save,
-                TooltipText = "Save",
+                TooltipText = CloudMusicStrings.Save,
                 Action = applyChanges,
                 Size = new Vector2(45)
             }

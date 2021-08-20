@@ -1,3 +1,5 @@
+using M.Resources.Localisation.Mvis;
+using M.Resources.Localisation.Mvis.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Config;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
@@ -19,64 +21,65 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
             {
                 new SettingsTogglePiece
                 {
-                    Description = "Enable lyrics",
+                    Description = MvisGenericStrings.EnablePlugin,
                     Bindable = config.GetBindable<bool>(LyricSettings.EnablePlugin)
                 },
                 new SettingsTogglePiece
                 {
                     Icon = FontAwesome.Solid.SwimmingPool,
-                    Description = "Use DrawablePool",
+                    Description = CloudMusicStrings.UseDrawablePool,
+                    TooltipText = CloudMusicStrings.ExperimentalWarning,
                     Bindable = config.GetBindable<bool>(LyricSettings.UseDrawablePool)
                 },
                 new SettingsTogglePiece
                 {
                     Icon = FontAwesome.Solid.Save,
-                    Description = "Save lyrics",
+                    Description = CloudMusicStrings.SaveLyricOnDownloadedMain,
                     Bindable = config.GetBindable<bool>(LyricSettings.SaveLrcWhenFetchFinish),
-                    TooltipText = "Lyrics will be saved at \"custom/lyrics/beatmap-{ID}.json\""
+                    TooltipText = CloudMusicStrings.SaveLyricOnDownloadedSub
                 },
                 new SettingsTogglePiece
                 {
                     Icon = FontAwesome.Solid.FillDrip,
-                    Description = "Disable shadow",
-                    Bindable = config.GetBindable<bool>(LyricSettings.NoExtraShadow),
+                    Description = CloudMusicStrings.DisableShader,
+                    Bindable = config.GetBindable<bool>(LyricSettings.NoExtraShadow)
                 },
                 new SettingsSliderPiece<double>
                 {
-                    Description = "Global lyric offset",
-                    Bindable = config.GetBindable<double>(LyricSettings.LyricOffset),
-                    TooltipText = "Try change this when the lyric desyncs"
+                    Description = CloudMusicStrings.GlobalOffsetMain,
+                    Bindable = config.GetBindable<double>(LyricSettings.LyricOffset)
                 },
                 new SettingsSliderPiece<float>
                 {
-                    Description = "Fade in duration",
+                    Description = CloudMusicStrings.LyricFadeInDuration,
                     Bindable = config.GetBindable<float>(LyricSettings.LyricFadeInDuration)
                 },
                 new SettingsSliderPiece<float>
                 {
-                    Description = "Fade out duration",
+                    Description = CloudMusicStrings.LyricFadeOutDuration,
                     Bindable = config.GetBindable<float>(LyricSettings.LyricFadeOutDuration)
                 },
                 new SettingsTogglePiece
                 {
-                    Description = "Auto scroll",
+                    Description = CloudMusicStrings.LyricAutoScrollMain,
+                    TooltipText = CloudMusicStrings.LyricAutoScrollSub,
                     Bindable = config.GetBindable<bool>(LyricSettings.AutoScrollToCurrent)
                 },
                 new SettingsAnchorPiece
                 {
-                    Description = "Anchor",
+                    Description = CloudMusicStrings.LocationDirection,
                     Icon = FontAwesome.Solid.Anchor,
                     Bindable = config.GetBindable<Anchor>(LyricSettings.LyricDirection)
                 },
                 new SettingsSliderPiece<float>
                 {
-                    Description = "X position",
+                    Description = CloudMusicStrings.PositionX,
                     Bindable = config.GetBindable<float>(LyricSettings.LyricPositionX),
                     DisplayAsPercentage = true
                 },
                 new SettingsSliderPiece<float>
                 {
-                    Description = "Y position",
+                    Description = CloudMusicStrings.PositionY,
                     Bindable = config.GetBindable<float>(LyricSettings.LyricPositionY),
                     DisplayAsPercentage = true
                 }

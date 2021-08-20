@@ -39,15 +39,12 @@ namespace Mvis.Plugin.StoryboardSupport
         [Resolved]
         private MusicController music { get; set; }
 
-        [Resolved]
-        private Bindable<WorkingBeatmap> currentBeatmap { get; set; }
-
         public BackgroundStoryBoardLoader()
         {
             RelativeSizeAxes = Axes.Both;
 
-            Name = "Storyboard loader";
-            Description = "Show storyboards when playing";
+            Name = "Storyboard";
+            Description = "Show storyboard when playing";
             Author = "mf-osu";
 
             Flags.AddRange(new[]

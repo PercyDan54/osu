@@ -1,4 +1,5 @@
 using System;
+using M.Resources.Localisation.Mvis.Plugins;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Screens.Mvis.Plugins;
@@ -13,7 +14,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         public Action Action { get; set; }
         public IconUsage Icon { get; set; } = FontAwesome.Solid.Check;
         public LocalisableString Title { get; set; }
-        public LocalisableString Description { get; set; } = "View collections";
+        public LocalisableString Description { get; set; } = CollectionStrings.EntryTooltip;
         public FunctionType Type { get; set; } = FunctionType.Plugin;
 
         public void Active() => Action?.Invoke();

@@ -78,6 +78,7 @@ namespace osu.Game.Users
                 Room = room;
             }
         }
+
         public class InMvis : UserActivity
         {
             public BeatmapInfo Beatmap { get; }
@@ -88,7 +89,8 @@ namespace osu.Game.Users
                 Beatmap = info;
                 Unicode = useUnicode;
             }
-            public override string Status => $@"Listening to {(Unicode ? Beatmap.BeatmapSet.Metadata.TitleUnicode : Beatmap.BeatmapSet.Metadata.Title)} - {(Unicode ? Beatmap.BeatmapSet.Metadata.ArtistUnicode : Beatmap.BeatmapSet.Metadata.Artist)}";
+
+            public override string Status => $@"Listening to {(Unicode || string.IsNullOrEmpty(Beatmap.BeatmapSet.Metadata.Title) ? Beatmap.BeatmapSet.Metadata.TitleUnicode : Beatmap.BeatmapSet.Metadata.Title)} - {(Unicode || string.IsNullOrEmpty(Beatmap.BeatmapSet.Metadata.Title) ? Beatmap.BeatmapSet.Metadata.ArtistUnicode : Beatmap.BeatmapSet.Metadata.Artist)}";
         }
     }
 }

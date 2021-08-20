@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using JetBrains.Annotations;
+using M.Resources.Localisation.Mvis;
 using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
+using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Audio;
 using osu.Framework.Graphics.Containers;
@@ -317,7 +319,7 @@ namespace osu.Game.Screens.Mvis
         }
 
         [BackgroundDependencyLoader]
-        private void load(MConfigManager config, IdleTracker idleTracker)
+        private void load(MConfigManager config, FrameworkConfigManager frameworkConfig, IdleTracker idleTracker)
         {
             //早期设置
             var iR = config.Get<float>(MSetting.MvisInterfaceRed);
@@ -350,6 +352,7 @@ namespace osu.Game.Screens.Mvis
             config.BindWith(MSetting.MvisAdjustMusicWithFreq, adjustFreq);
             config.BindWith(MSetting.MvisEnableNightcoreBeat, nightcoreBeat);
             config.BindWith(MSetting.MvisStoryboardProxy, allowProxy);
+            frameworkConfig.BindWith(FrameworkSetting.ShowUnicode, useUnicode);
             currentAudioControlProviderSetting = config.GetBindable<string>(MSetting.MvisCurrentAudioProvider);
             currentFunctionbarSetting = config.GetBindable<string>(MSetting.MvisCurrentFunctionBar);
 
@@ -401,14 +404,14 @@ namespace osu.Game.Screens.Mvis
                 {
                     Icon = FontAwesome.Solid.ArrowLeft,
                     Action = this.Exit,
-                    Description = "Exit",
+                    Description = MvisBaseStrings.Exit,
                     Type = FunctionType.Base
                 },
                 new FakeButton
                 {
                     Icon = FontAwesome.Regular.QuestionCircle,
                     Action = () => game?.OpenUrlExternally("https://matrix-feather.github.io/mfosu/mfosu_mp_manual/"),
-                    Description = "User manual",
+                    Description = MvisBaseStrings.Manual,
                     Type = FunctionType.Base
                 },
                 prevButton = new FakeButton
@@ -416,12 +419,12 @@ namespace osu.Game.Screens.Mvis
                     Size = new Vector2(50, 30),
                     Icon = FontAwesome.Solid.StepBackward,
                     Action = prevTrack,
-                    Description = "Previous",
+                    Description = MvisBaseStrings.PrevOrRestart,
                     Type = FunctionType.Audio
                 },
                 songProgressButton = new ToggleableFakeButton
                 {
-                    Description = "Pause",
+                    Description = MvisBaseStrings.TogglePause,
                     Action = togglePause,
                     Type = FunctionType.ProgressDisplay
                 },
@@ -430,13 +433,13 @@ namespace osu.Game.Screens.Mvis
                     Size = new Vector2(50, 30),
                     Icon = FontAwesome.Solid.StepForward,
                     Action = nextTrack,
-                    Description = "Next",
+                    Description = MvisBaseStrings.Next,
                     Type = FunctionType.Audio,
                 },
                 pluginButton = new FakeButton
                 {
                     Icon = FontAwesome.Solid.Plug,
-                    Description = "View plugins",
+                    Description = MvisBaseStrings.ViewPlugins,
                     Action = () => updateSidebarState(pluginsPage),
                     Type = FunctionType.Misc
                 },
@@ -457,33 +460,33 @@ namespace osu.Game.Screens.Mvis
                         lockButton.Bindable.Value = RuntimeInfo.IsDesktop;
                         lockButton.Bindable.Disabled = RuntimeInfo.IsDesktop && !disabledBefore;
                     },
-                    Description = "Hide and lock overlay",
+                    Description = MvisBaseStrings.HideAndLockInterface,
                     Type = FunctionType.Misc
                 },
                 loopToggleButton = new ToggleableFakeButton
                 {
                     Icon = FontAwesome.Solid.Undo,
                     Action = () => CurrentTrack.Looping = loopToggleButton.Bindable.Value,
-                    Description = "Toggle track loop",
+                    Description = MvisBaseStrings.ToggleLoop,
                     Type = FunctionType.Misc
                 },
                 soloButton = new FakeButton
                 {
                     Icon = FontAwesome.Solid.User,
                     Action = presentBeatmap,
-                    Description = "View in song select",
+                    Description = MvisBaseStrings.ViewInSongSelect,
                     Type = FunctionType.Misc
                 },
                 sidebarToggleButton = new FakeButton
                 {
                     Icon = FontAwesome.Solid.List,
                     Action = () => updateSidebarState(settingsScroll),
-                    Description = "Player settings",
+                    Description = MvisBaseStrings.OpenSidebar,
                     Type = FunctionType.Misc
                 },
                 lockButton = new ToggleableFakeButton
                 {
-                    Description = "Lock changes",
+                    Description = MvisBaseStrings.LockInterface,
                     Action = showPluginEntriesTemporary,
                     Type = FunctionType.Plugin,
                     Icon = FontAwesome.Solid.Lock
@@ -500,6 +503,7 @@ namespace osu.Game.Screens.Mvis
             //这部分放load会导致当前屏幕为主界面时，播放器会在后台相应设置变动
             loadList.BindCollectionChanged(onLoadListChanged);
             useUnicode.BindValueChanged(v => activity.Value = new UserActivity.InMvis(Beatmap.Value.BeatmapInfo, v.NewValue));
+
             bgBlur.BindValueChanged(v => updateBackground(Beatmap.Value));
             idleBgDim.BindValueChanged(_ => updateIdleVisuals());
             musicSpeed.BindValueChanged(_ => applyTrackAdjustments());
@@ -762,7 +766,11 @@ namespace osu.Game.Screens.Mvis
         {
             if (!(pacp is MvisPlugin mpl)) return;
 
-            dialog.Push(new ConfirmDialog($"Plugin \"{mpl}\"\n requested audio control \n Reason: {message}",
+            dialog.Push(new ConfirmDialog(
+                mpl.ToString()
+                + MvisBaseStrings.AudioControlRequestedMain
+                + "\n"
+                + MvisBaseStrings.AudioControlRequestedSub(message.ToString()),
                 () =>
                 {
                     changeAudioControlProvider(pacp);

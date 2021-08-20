@@ -1,3 +1,4 @@
+using M.Resources.Localisation.Mvis.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Config;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 using Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic;
@@ -32,17 +33,17 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             {
                 Icon = FontAwesome.Solid.Undo,
                 Size = new Vector2(45),
-                TooltipText = "Refresh",
+                TooltipText = CloudMusicStrings.Refresh,
                 Action = () => plugin.RefreshLyric()
             },
             new IconButton
             {
                 Icon = FontAwesome.Solid.CloudDownloadAlt,
                 Size = new Vector2(45),
-                TooltipText = "Get lyrics",
+                TooltipText = CloudMusicStrings.RefetchLyric,
                 Action = () => dialog.Push
                 (
-                    new ConfirmDialog("Get lyrics again?",
+                    new ConfirmDialog(CloudMusicStrings.RefetchLyric.ToString(),
                         () => plugin.RefreshLyric(true))
                 )
             },
@@ -50,14 +51,14 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             {
                 Icon = FontAwesome.Solid.Edit,
                 Size = new Vector2(45),
-                TooltipText = "Edit",
+                TooltipText = CloudMusicStrings.Edit,
                 Action = pushEditScreen
             },
             new IconButton
             {
                 Icon = FontAwesome.Solid.AngleDown,
                 Size = new Vector2(45),
-                TooltipText = "Scroll to current",
+                TooltipText = CloudMusicStrings.ScrollToCurrent,
                 Action = ScrollToCurrent
             }
         };
@@ -71,7 +72,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
         {
             Icon = FontAwesome.Solid.Save,
             Size = new Vector2(45),
-            TooltipText = "Save as .lrc"
+            TooltipText = CloudMusicStrings.Save
         };
 
         [Resolved]

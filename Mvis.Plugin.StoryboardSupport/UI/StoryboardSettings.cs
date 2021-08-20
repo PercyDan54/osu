@@ -1,3 +1,4 @@
+using M.Resources.Localisation.Mvis;
 using Mvis.Plugin.StoryboardSupport.Config;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
@@ -23,7 +24,7 @@ namespace Mvis.Plugin.StoryboardSupport.UI
             {
                 new SettingsCheckbox
                 {
-                    LabelText = "Enable storyboard",
+                    LabelText = MvisGenericStrings.EnablePlugin,
                     Current = config.GetBindable<bool>(SbLoaderSettings.EnableStoryboard)
                 },
             };

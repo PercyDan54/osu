@@ -3,6 +3,7 @@
 
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
+using osu.Framework.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.Game.Overlays.Settings.Sections.Mf;
 
@@ -15,7 +16,7 @@ namespace osu.Game.Overlays
             Icon = FontAwesome.Regular.PlayCircle
         };
 
-        public override string Header => "M-vis Player";
+        public override LocalisableString Header => "M-vis Player";
 
         public MfMvisSection()
         {

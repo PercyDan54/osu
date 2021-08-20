@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
+using M.Resources.Localisation.Mvis.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Config;
 using Mvis.Plugin.CloudMusicSupport.Helper;
 using Mvis.Plugin.CloudMusicSupport.Misc;
@@ -70,13 +71,10 @@ namespace Mvis.Plugin.CloudMusicSupport
         [Resolved]
         private MusicController controller { get; set; }
 
-        [Resolved]
-        private MConfigManager mConfig { get; set; }
-
         public void RequestControl(Action onAllow)
         {
             MvisScreen.RequestAudioControl(this,
-                "Disable song switch to edit lyrics",
+                CloudMusicStrings.AudioControlRequest,
                 () => IsEditing = false,
                 onAllow);
         }

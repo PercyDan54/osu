@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Humanizer;
+using M.Resources.Localisation.Mvis.Plugins;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -11,7 +11,6 @@ using osu.Game.Collections;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Screens.Mvis;
 using osuTK;
 
 namespace Mvis.Plugin.CollectionSupport.Sidebar
@@ -22,9 +21,6 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         private OsuSpriteText collectionBeatmapCount;
         private readonly Bindable<BeatmapCollection> collection = new Bindable<BeatmapCollection>();
         private readonly List<BeatmapSetInfo> beatmapSets = new List<BeatmapSetInfo>();
-
-        [Resolved]
-        private CustomColourProvider colourProvider { get; set; }
 
         private BeatmapList beatmapList;
         private readonly BindableBool isCurrentCollection = new BindableBool();
@@ -76,12 +72,15 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                                             collectionName = new OsuSpriteText
                                             {
                                                 Font = OsuFont.GetFont(size: 50),
-                                                Text = "No collection selected",
+                                                //RelativeSizeAxes = Axes.X,
+                                                Text = CollectionStrings.NoCollectionSelected,
+                                                //Truncate = true
                                             },
                                             collectionBeatmapCount = new OsuSpriteText
                                             {
                                                 Font = OsuFont.GetFont(size: 38),
-                                                Text = "Select a collection first!"
+                                                //RelativeSizeAxes = Axes.X,
+                                                Text = CollectionStrings.SelectOneFirst,
                                             }
                                         }
                                     }
@@ -142,7 +141,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             }
 
             collectionName.Text = c.Name.Value;
-            collectionBeatmapCount.Text = $"{"song".ToQuantity(beatmapSets.Count)}";
+            collectionBeatmapCount.Text = CollectionStrings.SongCount(beatmapSets.Count);
 
             refreshBeatmapSetList();
         }
@@ -198,8 +197,8 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         {
             beatmapSets.Clear();
             beatmapList.ClearList();
-            collectionName.Text = "No collection selected";
-            collectionBeatmapCount.Text = "Select a collection first!";
+            collectionName.Text = CollectionStrings.NoCollectionSelected;
+            collectionBeatmapCount.Text = CollectionStrings.SelectOneFirst;
         }
     }
 }

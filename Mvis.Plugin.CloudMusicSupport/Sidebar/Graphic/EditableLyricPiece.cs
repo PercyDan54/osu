@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using M.Resources.Localisation.Mvis.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
@@ -69,21 +70,21 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                             Height = 40,
                             RelativeSizeAxes = Axes.X,
                             Width = 0.5f,
-                            PlaceholderText = "Time",
+                            PlaceholderText = CloudMusicStrings.LyricTime,
                             CommitOnFocusLost = true
                         },
                         contentTextBox = new OsuTextBox
                         {
                             Height = 40,
                             RelativeSizeAxes = Axes.X,
-                            PlaceholderText = "Original line",
+                            PlaceholderText = CloudMusicStrings.LyricRaw,
                             CommitOnFocusLost = true
                         },
                         translationTextBox = new OsuTextBox
                         {
                             Height = 40,
                             RelativeSizeAxes = Axes.X,
-                            PlaceholderText = "Translation",
+                            PlaceholderText = CloudMusicStrings.LyricTranslated,
                             CommitOnFocusLost = true,
                         },
                         new FillFlowContainer
@@ -95,7 +96,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                             {
                                 new OsuButton
                                 {
-                                    Text = "Remove this line",
+                                    Text = CloudMusicStrings.Delete,
                                     Size = new Vector2(90, 40),
                                     Action = () =>
                                     {
@@ -106,7 +107,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                                 },
                                 new OsuButton
                                 {
-                                    Text = "Set time to current time",
+                                    Text = CloudMusicStrings.LyricTimeToTrack,
                                     Size = new Vector2(120, 40),
                                     Action = () =>
                                     {
@@ -118,7 +119,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                                 },
                                 new OsuButton
                                 {
-                                    Text = "Go to lyric time",
+                                    Text = CloudMusicStrings.TrackTimeToLyric,
                                     Size = new Vector2(120, 40),
                                     Action = () => mvisScreen.SeekTo(Value.Time)
                                 }

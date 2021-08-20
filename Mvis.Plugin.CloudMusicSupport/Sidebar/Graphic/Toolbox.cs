@@ -1,4 +1,5 @@
 using System;
+using M.Resources.Localisation.Mvis.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Config;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
@@ -127,7 +128,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight,
                     Current = config.GetBindable<double>(LyricSettings.LyricOffset),
-                    LabelText = "Global lyric offset",
+                    LabelText = CloudMusicStrings.GlobalOffsetMain,
                     RelativeSizeAxes = Axes.None,
                     Width = 200 + 25,
                     Padding = new MarginPadding { Right = 10 },
@@ -138,7 +139,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight,
                     Width = 225,
-                    PlaceholderText = "Search lyric by ID"
+                    PlaceholderText = "按网易云ID搜索歌词"
                 }
             });
 

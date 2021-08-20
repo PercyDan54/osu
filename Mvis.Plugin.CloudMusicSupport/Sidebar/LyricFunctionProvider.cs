@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using M.Resources.Localisation.Mvis.Plugins;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Screens.Mvis.Plugins;
@@ -16,7 +17,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
         public Action Action { get; set; }
         public IconUsage Icon { get; set; } = FontAwesome.Solid.Music;
         public LocalisableString Title { get; set; }
-        public LocalisableString Description { get; set; } = "Show lyrics";
+        public LocalisableString Description { get; set; } = CloudMusicStrings.EntryTooltip;
         public void Active() => Action?.Invoke();
         public FunctionType Type { get; set; } = FunctionType.Plugin;
 
