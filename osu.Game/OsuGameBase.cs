@@ -9,7 +9,6 @@ using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Cursor;
 using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
@@ -320,11 +319,7 @@ namespace osu.Game
                 globalBindings = new GlobalActionContainer(this)
             };
 
-            MenuCursorContainer.Child = new PopoverContainer
-            {
-                RelativeSizeAxes = Axes.Both,
-                Child = content = new OsuTooltipContainer(MenuCursorContainer.Cursor) { RelativeSizeAxes = Axes.Both }
-            };
+            MenuCursorContainer.Child = content = new OsuTooltipContainer(MenuCursorContainer.Cursor) { RelativeSizeAxes = Axes.Both };
 
             base.Content.Add(CreateScalingContainer().WithChildren(mainContent));
 
