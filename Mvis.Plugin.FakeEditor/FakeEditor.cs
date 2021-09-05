@@ -111,7 +111,8 @@ namespace Mvis.Plugin.FakeEditor
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    IsCoupled = true
+                    IsCoupled = true,
+                    DisableSourceAdjustment = true
                 });
 
                 dependencies.CacheAs(EditorClock);

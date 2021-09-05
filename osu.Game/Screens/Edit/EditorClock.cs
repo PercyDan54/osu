@@ -219,6 +219,12 @@ namespace osu.Game.Screens.Edit
             set => underlyingClock.Rate = value;
         }
 
+        public bool DisableSourceAdjustment
+        {
+            get => underlyingClock.DisableSourceAdjustment;
+            set => underlyingClock.DisableSourceAdjustment = value;
+        }
+
         double IClock.Rate => underlyingClock.Rate;
 
         public bool IsRunning => underlyingClock.IsRunning;
