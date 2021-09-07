@@ -27,7 +27,6 @@ using osuTK;
 using osuTK.Graphics;
 using osu.Game.Online.API;
 using osu.Game.Utils;
-using osu.Game.Screens.Ranking;
 
 namespace osu.Game.Online.Leaderboards
 {
@@ -202,7 +201,6 @@ namespace osu.Game.Online.Leaderboards
                                             Current = scoreManager.GetBindableTotalScoreString(score),
                                             Font = OsuFont.Numeric.With(size: 23),
                                         },
-                                        new ReplayDownloadButton(score),
                                         RankContainer = new Container
                                         {
                                             Size = new Vector2(40f, 20f),

@@ -38,7 +38,6 @@ namespace osu.Game.Database
         private readonly List<ArchiveDownloadRequest<TModel>> currentDownloads = new List<ArchiveDownloadRequest<TModel>>();
 
         private readonly MutableDatabaseBackedStoreWithFileIncludes<TModel, TFileModel> modelStore;
-        private readonly Storage storage;
 
         protected DownloadableArchiveModelManager(Storage storage, IDatabaseContextFactory contextFactory, IAPIProvider api, MutableDatabaseBackedStoreWithFileIncludes<TModel, TFileModel> modelStore,
                                                   IIpcHost importHost = null)
@@ -46,7 +45,6 @@ namespace osu.Game.Database
         {
             this.api = api;
             this.modelStore = modelStore;
-            this.storage = storage;
         }
 
         /// <summary>
@@ -62,14 +60,14 @@ namespace osu.Game.Database
         /// Begin a download for the requested <typeparamref name="TModel"/>.
         /// </summary>
         /// <param name="model">The <typeparamref name="TModel"/> to be downloaded.</param>
-        /// <param name="UseSayobot">Decides whether to use sayobot to download</param>
+        /// <param name="useSayobot">Decides whether to use sayobot to download</param>
         /// <param name="minimiseDownloadSize">Whether this download should be optimised for slow connections. Generally means extras are not included in the download bundle.</param>
         /// <returns>Whether the download was started.</returns>
-        public bool Download(TModel model, bool UseSayobot, bool minimiseDownloadSize = false)
+        public bool Download(TModel model, bool useSayobot, bool minimiseDownloadSize = false)
         {
             if (!canDownload(model)) return false;
 
-            var request = CreateDownloadRequest(model, UseSayobot, minimiseDownloadSize);
+            var request = CreateDownloadRequest(model, useSayobot, minimiseDownloadSize);
 
             DownloadNotification notification = new DownloadNotification
             {
@@ -86,13 +84,6 @@ namespace osu.Game.Database
             {
                 Task.Factory.StartNew(async () =>
                 {
-                    if (filename.EndsWith(".osr", StringComparison.Ordinal))
-                    {
-                        var path = storage.GetFullPath("replay");
-                        if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-                        File.Copy(filename, Path.Combine(path, Path.GetFileName(model + ".osr")));
-                    }
-
                     // This gets scheduled back to the update thread, but we want the import to run in the background.
                     var imported = await Import(notification, new ImportTask(filename)).ConfigureAwait(false);
 

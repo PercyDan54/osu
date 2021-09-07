@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Game.Configuration;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
@@ -31,8 +32,9 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public static bool IsStream(params OsuHitObject[] hitObjects)
         {
-            const float min = 50f;
-            const float max = 10000f;
+            var config = MConfigManager.Instance;
+            var max = config.Get<float>(MSetting.StreamMaximum);
+            var min = config.Get<float>(MSetting.StreamMinimum);
 
             var h = hitObjects[0];
             var isStream = false;

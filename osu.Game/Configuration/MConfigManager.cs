@@ -49,9 +49,9 @@ namespace osu.Game.Configuration
 
             //Dance settings
             SetDefault(MSetting.DanceMover, OsuDanceMover.Momentum);
-            SetDefault(MSetting.ReplayFramerate, 120f, 15f, 240f, 1f);
-            SetDefault(MSetting.SpinnerRadiusStart, 235f, 10f, 350f, 1f);
-            SetDefault(MSetting.SpinnerRadiusEnd, 15f, 10f, 250f, 1f);
+            SetDefault(MSetting.ReplayFramerate, 120f, 15f, 1000f, 1f);
+            SetDefault(MSetting.SpinnerRadiusStart, 50, 5f, 350f, 1f);
+            SetDefault(MSetting.SpinnerRadiusEnd, 50, 5f, 350f, 1f);
             SetDefault(MSetting.AngleOffset, 0.45f, 0f, 2f, 0.01f);
             SetDefault(MSetting.JumpMult, 0.6f, 0f, 2f, 0.01f);
             SetDefault(MSetting.NextJumpMult, 0.25f, 0f, 2f, 0.01f);
@@ -69,6 +69,17 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.RestrictArea, 40f, 1f, 180f);
             SetDefault(MSetting.StreamRestrict, false);
             SetDefault(MSetting.RestrictInvert, true);
+
+            //Momentum extra
+            SetDefault(MSetting.EqualPosBounce, 0f, 0, 100f, 0.1f);
+            SetDefault(MSetting.RestrictAngleAdd, 90f, 0, 100f);
+            SetDefault(MSetting.RestrictAngleSub, 90f, 0, 100f);
+            SetDefault(MSetting.StreamArea, 40f, 0, 100);
+            SetDefault(MSetting.StreamMaximum, 10000f, 0, 50000f);
+            SetDefault(MSetting.StreamMinimum, 50f, 0, 1000f);
+            SetDefault(MSetting.InterpolateAngles, true);
+            SetDefault(MSetting.InvertAngleInterpolation, false);
+            SetDefault(MSetting.SliderPredict, false);
 
             //Bezier mover settings
             SetDefault(MSetting.BezierAggressiveness, 60f, 1f, 180f);
@@ -130,6 +141,17 @@ namespace osu.Game.Configuration
         StreamRestrict,
         DurationTrigger,
         DurationMult,
+
+        //Momentum extra
+        EqualPosBounce,
+        SliderPredict,
+        InterpolateAngles,
+        InvertAngleInterpolation,
+        RestrictAngleAdd,
+        RestrictAngleSub,
+        StreamArea,
+        StreamMinimum,
+        StreamMaximum,
 
         //Bezier mover settings
         BezierAggressiveness,

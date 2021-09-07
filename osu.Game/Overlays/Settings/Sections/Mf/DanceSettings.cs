@@ -29,7 +29,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 {
                     LabelText = "Replay framerate",
                     Current = config.GetBindable<float>(MSetting.ReplayFramerate),
-                    KeyboardStep = 30f
+                    KeyboardStep = 10f
                 },
                 new SettingsSlider<float>
                 {
@@ -98,6 +98,18 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     Current = config.GetBindable<float>(MSetting.RestrictAngle),
                     KeyboardStep = 1
                 },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Restrict angle add",
+                    Current = config.GetBindable<float>(MSetting.RestrictAngleAdd),
+                    KeyboardStep = 100f
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Restrict angle sub",
+                    Current = config.GetBindable<float>(MSetting.RestrictAngleSub),
+                    KeyboardStep = 100f
+                },
                 new SettingsSlider<float, MultiplierSlider>
                 {
                     LabelText = "Stream multiplier",
@@ -116,7 +128,27 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     Current = config.GetBindable<float>(MSetting.DurationTrigger),
                     KeyboardStep = 100f
                 },
-
+                new SettingsSlider<float>
+                {
+                    LabelText = "Stream area",
+                    Current = config.GetBindable<float>(MSetting.StreamArea),
+                    KeyboardStep = 100f
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Minimum stream distance",
+                    Current = config.GetBindable<float>(MSetting.StreamMinimum)
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Maximum stream distance",
+                    Current = config.GetBindable<float>(MSetting.StreamMaximum)
+                },
+                new SettingsSlider<float>
+                {
+                    LabelText = "Bounce on equal pos",
+                    Current = config.GetBindable<float>(MSetting.EqualPosBounce)
+                },
                 new SettingsCheckbox
                 {
                     LabelText = "Restrict invert",
@@ -126,6 +158,21 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 {
                     LabelText = "Stream restrict",
                     Current = config.GetBindable<bool>(MSetting.StreamRestrict)
+                },
+                new SettingsCheckbox
+                {
+                    LabelText = "Slider predict",
+                    Current = config.GetBindable<bool>(MSetting.SliderPredict)
+                },
+                new SettingsCheckbox
+                {
+                    LabelText = "Interpolate angles",
+                    Current = config.GetBindable<bool>(MSetting.InterpolateAngles)
+                },
+                new SettingsCheckbox
+                {
+                    LabelText = "Invert angle interpolation",
+                    Current = config.GetBindable<bool>(MSetting.InvertAngleInterpolation)
                 },
                 new OsuSpriteText
                 {
