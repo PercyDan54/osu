@@ -53,6 +53,11 @@ namespace osu.Game
         public const int SAMPLE_CONCURRENCY = 6;
 
         /// <summary>
+        /// Length of debounce (in milliseconds) for commonly occuring sample playbacks that could stack.
+        /// </summary>
+        public const int SAMPLE_DEBOUNCE_TIME = 20;
+
+        /// <summary>
         /// The maximum volume at which audio tracks should playback. This can be set lower than 1 to create some head-room for sound effects.
         /// </summary>
         internal const double GLOBAL_TRACK_VOLUME_ADJUST = 0.8;
@@ -123,7 +128,7 @@ namespace osu.Game
 
         private RulesetConfigCache rulesetConfigCache;
 
-        public virtual string Version => "2021.828.0-lazer";
+        public virtual string Version => "2021.907.0-lazer";
 
         private SpectatorClient spectatorClient;
 
@@ -154,7 +159,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "1461f3199f9368e1775e50d167e549fb";
+            VersionHash = "af42ca64c71d40f53fddcb10112b820a";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -178,31 +183,7 @@ namespace osu.Game
             dependencies.Cache(MConfig);
             dependencies.Cache(new CustomStore(Storage, this));
 
-            AddFont(Resources, @"Fonts/osuFont");
-
-            AddFont(Resources, @"Fonts/Torus/Torus-Regular");
-            AddFont(Resources, @"Fonts/Torus/Torus-Light");
-            AddFont(Resources, @"Fonts/Torus/Torus-SemiBold");
-            AddFont(Resources, @"Fonts/Torus/Torus-Bold");
-
-            AddFont(Resources, @"Fonts/Inter/Inter-Regular");
-            AddFont(Resources, @"Fonts/Inter/Inter-RegularItalic");
-            AddFont(Resources, @"Fonts/Inter/Inter-Light");
-            AddFont(Resources, @"Fonts/Inter/Inter-LightItalic");
-            AddFont(Resources, @"Fonts/Inter/Inter-SemiBold");
-            AddFont(Resources, @"Fonts/Inter/Inter-SemiBoldItalic");
-            AddFont(Resources, @"Fonts/Inter/Inter-Bold");
-            AddFont(Resources, @"Fonts/Inter/Inter-BoldItalic");
-
-            AddFont(Resources, @"Fonts/Noto/Noto-Basic");
-            AddFont(Resources, @"Fonts/Noto/Noto-Hangul");
-            AddFont(Resources, @"Fonts/Noto/Noto-CJK-Basic");
-            AddFont(Resources, @"Fonts/Noto/Noto-CJK-Compatibility");
-            AddFont(Resources, @"Fonts/Noto/Noto-Thai");
-
-            AddFont(Resources, @"Fonts/Venera/Venera-Light");
-            AddFont(Resources, @"Fonts/Venera/Venera-Bold");
-            AddFont(Resources, @"Fonts/Venera/Venera-Black");
+            InitialiseFonts();
 
             Audio.Samples.PlaybackConcurrency = SAMPLE_CONCURRENCY;
 
@@ -240,7 +221,7 @@ namespace osu.Game
             dependencies.Cache(fileStore = new FileStore(contextFactory, Storage));
 
             // ordering is important here to ensure foreign keys rules are not broken in ModelStore.Cleanup()
-            dependencies.Cache(ScoreManager = new ScoreManager(RulesetStore, () => BeatmapManager, Storage, API, contextFactory, Host, () => difficultyCache, LocalConfig));
+            dependencies.Cache(ScoreManager = new ScoreManager(RulesetStore, () => BeatmapManager, Storage, API, contextFactory, Scheduler, Host, () => difficultyCache, LocalConfig));
             dependencies.Cache(BeatmapManager = new BeatmapManager(Storage, contextFactory, RulesetStore, API, Audio, Resources, Host, defaultBeatmap, true));
 
             // this should likely be moved to ArchiveModelManager when another case appears where it is necessary
@@ -324,10 +305,7 @@ namespace osu.Game
             base.Content.Add(CreateScalingContainer().WithChildren(mainContent));
 
             KeyBindingStore = new RealmKeyBindingStore(realmFactory);
-            KeyBindingStore.Register(globalBindings);
-
-            foreach (var r in RulesetStore.AvailableRulesets)
-                KeyBindingStore.Register(r);
+            KeyBindingStore.Register(globalBindings, RulesetStore.AvailableRulesets);
 
             dependencies.Cache(globalBindings);
 
@@ -339,6 +317,35 @@ namespace osu.Game
             dependencies.CacheAs(MusicController);
 
             Ruleset.BindValueChanged(onRulesetChanged);
+        }
+
+        protected virtual void InitialiseFonts()
+        {
+            AddFont(Resources, @"Fonts/osuFont");
+
+            AddFont(Resources, @"Fonts/Torus/Torus-Regular");
+            AddFont(Resources, @"Fonts/Torus/Torus-Light");
+            AddFont(Resources, @"Fonts/Torus/Torus-SemiBold");
+            AddFont(Resources, @"Fonts/Torus/Torus-Bold");
+
+            AddFont(Resources, @"Fonts/Inter/Inter-Regular");
+            AddFont(Resources, @"Fonts/Inter/Inter-RegularItalic");
+            AddFont(Resources, @"Fonts/Inter/Inter-Light");
+            AddFont(Resources, @"Fonts/Inter/Inter-LightItalic");
+            AddFont(Resources, @"Fonts/Inter/Inter-SemiBold");
+            AddFont(Resources, @"Fonts/Inter/Inter-SemiBoldItalic");
+            AddFont(Resources, @"Fonts/Inter/Inter-Bold");
+            AddFont(Resources, @"Fonts/Inter/Inter-BoldItalic");
+
+            AddFont(Resources, @"Fonts/Noto/Noto-Basic");
+            AddFont(Resources, @"Fonts/Noto/Noto-Hangul");
+            AddFont(Resources, @"Fonts/Noto/Noto-CJK-Basic");
+            AddFont(Resources, @"Fonts/Noto/Noto-CJK-Compatibility");
+            AddFont(Resources, @"Fonts/Noto/Noto-Thai");
+
+            AddFont(Resources, @"Fonts/Venera/Venera-Light");
+            AddFont(Resources, @"Fonts/Venera/Venera-Bold");
+            AddFont(Resources, @"Fonts/Venera/Venera-Black");
         }
 
         private IDisposable blocking;
