@@ -16,6 +16,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
     public class LegacyCursorTrail : CursorTrail
     {
         private readonly ISkin skin;
+        private readonly BindableBool forceLong = new BindableBool();
         private const double disjoint_trail_time_separation = 1000 / 60.0;
 
         private bool disjointTrail;
@@ -30,10 +31,24 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
         }
 
         [BackgroundDependencyLoader]
-        private void load(OsuConfigManager config)
+        private void load(OsuConfigManager config, MConfigManager mConfig)
         {
             Texture = skin.GetTexture("cursortrail");
-            disjointTrail = skin.GetTexture("cursormiddle") == null;
+            forceLong.BindTo(mConfig.GetBindable<bool>(MSetting.CursorTrailForceLong));
+            forceLong.BindValueChanged(_ => updateDisjoint(), true);
+
+            if (Texture != null)
+            {
+                // stable "magic ratio". see OsuPlayfieldAdjustmentContainer for full explanation.
+                Texture.ScaleAdjust *= 1.6f;
+            }
+
+            cursorSize = config.GetBindable<float>(OsuSetting.GameplayCursorSize).GetBoundCopy();
+        }
+
+        private void updateDisjoint()
+        {
+            disjointTrail = skin.GetTexture("cursormiddle") == null && !forceLong.Value;
 
             if (disjointTrail)
             {
@@ -46,14 +61,6 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
             {
                 Blending = BlendingParameters.Additive;
             }
-
-            if (Texture != null)
-            {
-                // stable "magic ratio". see OsuPlayfieldAdjustmentContainer for full explanation.
-                Texture.ScaleAdjust *= 1.6f;
-            }
-
-            cursorSize = config.GetBindable<float>(OsuSetting.GameplayCursorSize).GetBoundCopy();
         }
 
         protected override double FadeDuration => disjointTrail ? 150 : 500;

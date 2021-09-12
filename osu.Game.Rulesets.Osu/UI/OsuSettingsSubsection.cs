@@ -22,10 +22,9 @@ namespace osu.Game.Rulesets.Osu.UI
         }
 
         [BackgroundDependencyLoader]
-        private void load()
+        private void load(MConfigManager mConfig)
         {
             var config = (OsuRulesetConfigManager)Config;
-            var mconfig = MConfigManager.Instance;
 
             Children = new Drawable[]
             {
@@ -46,38 +45,43 @@ namespace osu.Game.Rulesets.Osu.UI
                 },
                 new SettingsCheckbox
                 {
+                    LabelText = "Force long cursor trail",
+                    Current = mConfig.GetBindable<bool>(MSetting.CursorTrailForceLong)
+                },
+                new SettingsCheckbox
+                {
                     LabelText = "Cursor trail hue override",
-                    Current = mconfig.GetBindable<bool>(MSetting.CursorTrailHueOverride)
+                    Current = mConfig.GetBindable<bool>(MSetting.CursorTrailHueOverride)
                 },
                 new SettingsCheckbox
                 {
                     LabelText = "Cursor trail hue shifting",
-                    Current = mconfig.GetBindable<bool>(MSetting.CursorTrailHueShift)
+                    Current = mConfig.GetBindable<bool>(MSetting.CursorTrailHueShift)
                 },
                 new SettingsSlider<float>
                 {
                     LabelText = "Cursor trail hue",
-                    Current = mconfig.GetBindable<float>(MSetting.CursorTrailHue)
+                    Current = mConfig.GetBindable<float>(MSetting.CursorTrailHue)
                 },
                 new SettingsSlider<float>
                 {
                     LabelText = "Cursor trail hue speed",
-                    Current = mconfig.GetBindable<float>(MSetting.CursorTrailHueSpeed)
+                    Current = mConfig.GetBindable<float>(MSetting.CursorTrailHueSpeed)
                 },
                 new SettingsSlider<float, DanceSettings.MultiplierSlider>
                 {
                     LabelText = "Cursor trail size",
-                    Current = mconfig.GetBindable<float>(MSetting.CursorTrailSize)
+                    Current = mConfig.GetBindable<float>(MSetting.CursorTrailSize)
                 },
                 new SettingsSlider<float, DanceSettings.MultiplierSlider>
                 {
                     LabelText = "Cursor trail density",
-                    Current = mconfig.GetBindable<float>(MSetting.CursorTrailDensity)
+                    Current = mConfig.GetBindable<float>(MSetting.CursorTrailDensity)
                 },
                 new SettingsSlider<float>
                 {
                     LabelText = "Cursor trail fade duration",
-                    Current = mconfig.GetBindable<float>(MSetting.CursorTrailFadeDuration)
+                    Current = mConfig.GetBindable<float>(MSetting.CursorTrailFadeDuration)
                 },
                 new SettingsEnumDropdown<PlayfieldBorderStyle>
                 {
