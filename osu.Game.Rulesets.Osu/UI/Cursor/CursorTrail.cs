@@ -19,6 +19,7 @@ using osu.Framework.Input.Events;
 using osu.Framework.Layout;
 using osu.Framework.Timing;
 using osu.Game.Configuration;
+using osu.Game.Rulesets.Osu.Skinning.Legacy;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Graphics.ES30;
@@ -94,7 +95,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            resetTime();
+            ResetTime();
         }
 
         private Texture texture = Texture.WhitePixel;
@@ -134,7 +135,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
             time = (float)((Time.Current - timeOffset) / FadeDuration);
         }
 
-        private void resetTime()
+        protected void ResetTime()
         {
             for (int i = 0; i < parts.Length; ++i)
             {
@@ -207,7 +208,7 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
         private void addPart(Vector2 screenSpacePosition)
         {
             parts[currentIndex].Position = screenSpacePosition;
-            parts[currentIndex].Time = time + fadeDuration.Value / (float)FadeDuration;
+            parts[currentIndex].Time = time + fadeDuration.Value / (this is LegacyCursorTrail ? 500 : (float)FadeDuration);
             ++parts[currentIndex].InvalidationID;
 
             currentIndex = (currentIndex + 1) % max_sprites;

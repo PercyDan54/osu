@@ -34,7 +34,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
         private void load(OsuConfigManager config, MConfigManager mConfig)
         {
             Texture = skin.GetTexture("cursortrail");
-            forceLong.BindTo(mConfig.GetBindable<bool>(MSetting.CursorTrailForceLong));
+            mConfig.BindWith(MSetting.CursorTrailForceLong, forceLong);
             forceLong.BindValueChanged(_ => updateDisjoint(), true);
 
             if (Texture != null)
@@ -48,6 +48,7 @@ namespace osu.Game.Rulesets.Osu.Skinning.Legacy
 
         private void updateDisjoint()
         {
+            ResetTime();
             disjointTrail = skin.GetTexture("cursormiddle") == null && !forceLong.Value;
 
             if (disjointTrail)
