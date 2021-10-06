@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Textures;
@@ -75,7 +76,6 @@ namespace osu.Game.Tests.Visual.Navigation
             typeof(FileStore),
             typeof(ScoreManager),
             typeof(BeatmapManager),
-            typeof(SettingsStore),
             typeof(RulesetConfigCache),
             typeof(OsuColour),
             typeof(IBindable<WorkingBeatmap>),
@@ -97,9 +97,6 @@ namespace osu.Game.Tests.Visual.Navigation
         {
             AddStep("create game", () =>
             {
-                game = new OsuGame();
-                game.SetHost(host);
-
                 Children = new Drawable[]
                 {
                     new Box
@@ -107,8 +104,9 @@ namespace osu.Game.Tests.Visual.Navigation
                         RelativeSizeAxes = Axes.Both,
                         Colour = Color4.Black,
                     },
-                    game
                 };
+
+                AddGame(game = new OsuGame());
             });
 
             AddUntilStep("wait for load", () => game.IsLoaded);
@@ -124,6 +122,13 @@ namespace osu.Game.Tests.Visual.Navigation
 
             AddAssert("ruleset still valid", () => Ruleset.Value.Available);
             AddAssert("ruleset unchanged", () => ReferenceEquals(Ruleset.Value, ruleset));
+        }
+
+        [Test]
+        public void TestSwitchThreadExecutionMode()
+        {
+            AddStep("Change thread mode to multi threaded", () => { game.Dependencies.Get<FrameworkConfigManager>().SetValue(FrameworkSetting.ExecutionMode, ExecutionMode.MultiThreaded); });
+            AddStep("Change thread mode to single thread", () => { game.Dependencies.Get<FrameworkConfigManager>().SetValue(FrameworkSetting.ExecutionMode, ExecutionMode.SingleThread); });
         }
 
         [Test]

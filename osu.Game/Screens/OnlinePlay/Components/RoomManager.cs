@@ -66,7 +66,7 @@ namespace osu.Game.Screens.OnlinePlay.Components
 
             req.Failure += exception =>
             {
-                onError?.Invoke(req.Result?.Error ?? exception.Message);
+                onError?.Invoke(req.Response?.Error ?? exception.Message);
             };
 
             api.Queue(req);
@@ -87,9 +87,10 @@ namespace osu.Game.Screens.OnlinePlay.Components
 
             currentJoinRoomRequest.Failure += exception =>
             {
-                if (!(exception is OperationCanceledException))
-                    Logger.Log($"Failed to join room: {exception}", level: LogLevel.Important);
-                onError?.Invoke(exception.ToString());
+                if (exception is OperationCanceledException)
+                    return;
+
+                onError?.Invoke(exception.Message);
             };
 
             api.Queue(currentJoinRoomRequest);

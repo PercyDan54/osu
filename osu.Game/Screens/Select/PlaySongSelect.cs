@@ -43,7 +43,7 @@ namespace osu.Game.Screens.Select
         private void openMvis() => this.Push(new MvisScreen());
 
         protected void PresentScore(ScoreInfo score) =>
-            FinaliseSelection(score.Beatmap, score.Ruleset, () => this.Push(new SoloResultsScreen(score, false)));
+            FinaliseSelection(score.BeatmapInfo, score.Ruleset, () => this.Push(new SoloResultsScreen(score, false)));
 
         protected override BeatmapDetailArea CreateBeatmapDetailArea() => new PlayBeatmapDetailArea();
 

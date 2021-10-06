@@ -36,7 +36,7 @@ namespace osu.Game.Rulesets.Osu.Mods
                 ScoreInfo = new ScoreInfo
                 {
                     User = new User { Username = CursorDance.Value ? "danser" : "Autoplay" },
-                    Beatmap = beatmap.BeatmapInfo,
+                    BeatmapInfo = beatmap.BeatmapInfo,
                     BeatmapInfoID = beatmap.BeatmapInfo.Metadata.ID,
                     Date = DateTime.UtcNow,
                     Mods = mods.ToArray()

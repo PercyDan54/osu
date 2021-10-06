@@ -9,7 +9,7 @@ namespace osu.Game.Screens.Mvis.Plugins.Internal
     {
         public DummyFunctionBar()
         {
-            Name = "无";
+            Name = "None";
         }
 
         protected override Drawable CreateContent()

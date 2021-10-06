@@ -8,6 +8,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Localisation;
+using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osuTK.Graphics;
@@ -91,7 +92,7 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeB
 
             Beatmap.BindValueChanged(b =>
             {
-                text.Text = b.NewValue.BeatmapInfo.ToRomanisableString();
+                text.Text = b.NewValue.BeatmapInfo.Metadata.GetDisplayTitleRomanisable(true);
             }, true);
 
             type.BindValueChanged(t =>

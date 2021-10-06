@@ -47,10 +47,10 @@ namespace osu.Game.Screens.Mvis.Misc.PluginResolvers
         }
 
         internal bool RemoveFunctionBarProvider(IFunctionBarProvider functionBarProvider)
-            => functionBarDictionary.Remove(ToPath(functionBarProvider), out functionBarProvider);
+            => functionBarDictionary.Remove(ToPath(functionBarProvider), out _);
 
         internal bool RemoveAudioControlProvider(IProvideAudioControlPlugin provideAudioControlPlugin)
-            => audioPluginDictionary.Remove(ToPath(provideAudioControlPlugin), out provideAudioControlPlugin);
+            => audioPluginDictionary.Remove(ToPath(provideAudioControlPlugin), out _);
 
         private readonly ConcurrentDictionary<string, IProvideAudioControlPlugin> audioPluginDictionary = new ConcurrentDictionary<string, IProvideAudioControlPlugin>();
         private readonly ConcurrentDictionary<string, IFunctionBarProvider> functionBarDictionary = new ConcurrentDictionary<string, IFunctionBarProvider>();
@@ -58,8 +58,7 @@ namespace osu.Game.Screens.Mvis.Misc.PluginResolvers
         [CanBeNull]
         internal IProvideAudioControlPlugin GetAudioControlPluginByPath(string path)
         {
-            IProvideAudioControlPlugin result;
-            if (audioPluginDictionary.TryGetValue(path, out result))
+            if (audioPluginDictionary.TryGetValue(path, out var result))
                 return result;
 
             return null;
@@ -68,8 +67,7 @@ namespace osu.Game.Screens.Mvis.Misc.PluginResolvers
         [CanBeNull]
         internal IFunctionBarProvider GetFunctionBarProviderByPath(string path)
         {
-            IFunctionBarProvider result;
-            if (functionBarDictionary.TryGetValue(path, out result))
+            if (functionBarDictionary.TryGetValue(path, out var result))
                 return result;
 
             return null;
