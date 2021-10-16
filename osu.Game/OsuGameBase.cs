@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
@@ -62,6 +64,8 @@ namespace osu.Game
         internal const double GLOBAL_TRACK_VOLUME_ADJUST = 0.8;
 
         public bool UseDevelopmentServer { get; }
+
+        public virtual Version AssemblyVersion => Assembly.GetEntryAssembly()?.GetName().Version ?? new Version();
 
         protected MConfigManager MConfig;
 
@@ -125,7 +129,7 @@ namespace osu.Game
 
         private RulesetConfigCache rulesetConfigCache;
 
-        public virtual string Version => "2021.1006.1-lazer";
+        public virtual string Version => "2021.1016.0-lazer";
 
         private SpectatorClient spectatorClient;
 
@@ -154,15 +158,13 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "a8fd8f002673cf2ef512ad296240f262";
+            VersionHash = "c44701ad9eec368798082316ff8c7d64";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
             dependencies.Cache(contextFactory = new DatabaseContextFactory(Storage));
 
             dependencies.Cache(realmFactory = new RealmContextFactory(Storage, "client"));
-
-            AddInternal(realmFactory);
 
             dependencies.CacheAs(Storage);
 
@@ -390,10 +392,27 @@ namespace osu.Game
         {
             Logger.Log($@"Migrating osu! data from ""{Storage.GetFullPath(string.Empty)}"" to ""{path}""...");
 
-            using (realmFactory.BlockAllOperations())
+            IDisposable realmBlocker = null;
+
+            try
             {
-                contextFactory.FlushConnections();
+                ManualResetEventSlim readyToRun = new ManualResetEventSlim();
+
+                Scheduler.Add(() =>
+                {
+                    realmBlocker = realmFactory.BlockAllOperations();
+                    contextFactory.FlushConnections();
+
+                    readyToRun.Set();
+                }, false);
+
+                readyToRun.Wait();
+
                 (Storage as OsuStorage)?.Migrate(Host.GetStorage(path));
+            }
+            finally
+            {
+                realmBlocker?.Dispose();
             }
 
             Logger.Log(@"Migration complete!");
@@ -491,6 +510,7 @@ namespace osu.Game
             LocalConfig?.Dispose();
 
             contextFactory?.FlushConnections();
+            realmFactory?.Dispose();
         }
     }
 }

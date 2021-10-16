@@ -1,4 +1,4 @@
-version: 2021.1006.{build}
+version: 2021.1016.{build}
 pull_requests:
   do_not_increment_build_number: true
 skip_tags: true
@@ -8,7 +8,7 @@ cache:
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
-  version: 2021.1006.1
+  version: 2021.1016.0
 build_script:
 - cmd: >-
     dotnet build osu.Desktop -c Release -r win-x64
@@ -22,7 +22,7 @@ artifacts:
   name: osu-linux
 deploy:
 - provider: GitHub
-  tag: 2021.1006.1
+  tag: 2021.1016.0
   auth_token:
     secure: wBUeC7f0SGZTu01Bl50RTSas9yizhxdAeqofugDSTpOoZFXOyzvP+X2OOAnaqIWz
   repository: PercyDan54/osu

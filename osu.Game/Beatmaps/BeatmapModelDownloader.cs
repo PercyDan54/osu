@@ -13,7 +13,7 @@ namespace osu.Game.Beatmaps
         protected override ArchiveDownloadRequest<BeatmapSetInfo> CreateDownloadRequest(BeatmapSetInfo set, bool useSayobot, bool minimiseDownloadSize) =>
             new DownloadBeatmapSetRequest(set, useSayobot, minimiseDownloadSize);
 
-        public BeatmapModelDownloader(BeatmapModelManager beatmapModelManager, IAPIProvider api, GameHost host = null)
+        public BeatmapModelDownloader(IBeatmapModelManager beatmapModelManager, IAPIProvider api, GameHost host = null)
             : base(beatmapModelManager, api, host)
         {
         }
