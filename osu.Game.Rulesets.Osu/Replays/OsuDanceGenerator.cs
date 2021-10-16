@@ -23,7 +23,7 @@ namespace osu.Game.Rulesets.Osu.Replays
 {
     public class OsuDanceGenerator : OsuAutoGeneratorBase
     {
-        public static DanceMover GetMover(OsuDanceMover mover) =>
+        public static Mover GetMover(OsuDanceMover mover) =>
             mover switch
             {
                 AxisAligned => new AxisAlignedMover(),
@@ -37,7 +37,7 @@ namespace osu.Game.Rulesets.Osu.Replays
 
         public new OsuBeatmap Beatmap => (OsuBeatmap)base.Beatmap;
         private readonly bool[] objectsDuring;
-        private readonly DanceMover mover;
+        private readonly Mover mover;
         private readonly float spinRadiusStart;
         private readonly float spinRadiusEnd;
         private readonly bool sliderDance;

@@ -7,7 +7,7 @@ using static osu.Game.Rulesets.Osu.Replays.Movers.MoverUtilExtensions;
 
 namespace osu.Game.Rulesets.Osu.Replays.Movers
 {
-    public class PippiMover : DanceMover
+    public class PippiMover : Mover
     {
         public override Vector2 Update(double time) => ApplyPippiOffset(Interpolation.ValueAt(time, StartPos, EndPos, StartTime, EndTime), time, -1);
     }

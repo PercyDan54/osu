@@ -8,7 +8,7 @@ using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Replays.Movers
 {
-    public abstract class DanceMover
+    public abstract class Mover
     {
         protected double StartTime => Start.GetEndTime();
         protected double EndTime => End.StartTime;
@@ -28,6 +28,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
         public int ObjectIndex { set; protected get; }
         public OsuBeatmap Beatmap { set; protected get; }
 
+        //This hack should be removed
         public Vector2 LastPos;
 
         public OsuHitObject Start
