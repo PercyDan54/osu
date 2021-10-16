@@ -40,6 +40,11 @@ namespace osu.Game.Rulesets.Osu.UI
                 },
                 new SettingsCheckbox
                 {
+                    LabelText = "Hide 300s",
+                    Current = config.GetBindable<bool>(OsuRulesetSetting.NoDraw300)
+                },
+                new SettingsCheckbox
+                {
                     LabelText = "Cursor trail",
                     Current = config.GetBindable<bool>(OsuRulesetSetting.ShowCursorTrail)
                 },
