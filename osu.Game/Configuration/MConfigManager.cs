@@ -56,10 +56,14 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.JumpMult, 0.6f, 0f, 2f, 0.01f);
             SetDefault(MSetting.NextJumpMult, 0.25f, 0f, 2f, 0.01f);
             SetDefault(MSetting.SkipStackAngles, false);
+            SetDefault(MSetting.SkipShortSlider, false);
             SetDefault(MSetting.SliderDance, true);
             SetDefault(MSetting.BorderBounce, true);
             SetDefault(MSetting.PippiSpinner, false);
             SetDefault(MSetting.PippiStream, false);
+
+            //Linear mover settings
+            SetDefault(MSetting.WaitForPreempt, true);
 
             //Momentum mover settings
             SetDefault(MSetting.DurationTrigger, 500f, 0f, 5000f, 1f);
@@ -133,6 +137,10 @@ namespace osu.Game.Configuration
         PippiSpinner,
         PippiStream,
         SliderDance,
+        SkipShortSlider,
+
+        //Linear mover settings
+        WaitForPreempt,
 
         //Momentum mover settings
         StreamMult,
@@ -166,7 +174,7 @@ namespace osu.Game.Configuration
         CursorTrailForceLong,
         CursorTrailSize,
         CursorTrailHue,
-        CursorTrailHueOverride
+        CursorTrailHueOverride,
     }
 
     public enum OsuDanceMover
@@ -177,6 +185,7 @@ namespace osu.Game.Configuration
         Flower,
         HalfCircle,
         Pippi,
+        Linear,
         Momentum
     }
 }

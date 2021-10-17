@@ -1,6 +1,8 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System.Collections.Generic;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Objects;
@@ -27,6 +29,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public int ObjectIndex { set; protected get; }
         public OsuBeatmap Beatmap { set; protected get; }
+        public IReadOnlyList<IApplicableToRate> TimeAffectingMods { set; protected get; }
 
         //This hack should be removed
         public Vector2 LastPos;

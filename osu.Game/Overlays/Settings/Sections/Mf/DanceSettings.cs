@@ -68,6 +68,11 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 },
                 new SettingsCheckbox
                 {
+                    LabelText = "Skip short sliders",
+                    Current = config.GetBindable<bool>(MSetting.SkipShortSlider)
+                },
+                new SettingsCheckbox
+                {
                     LabelText = "Skip stack angles",
                     Current = config.GetBindable<bool>(MSetting.SkipStackAngles)
                 },
@@ -85,6 +90,17 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                 {
                     LabelText = "Force pippi mover for streams",
                     Current = config.GetBindable<bool>(MSetting.PippiStream)
+                },
+                new OsuSpriteText
+                {
+                    Text = "Linear mover settings",
+                    Margin = new MarginPadding { Vertical = 15, Left = SettingsPanel.CONTENT_MARGINS },
+                    Font = OsuFont.GetFont(weight: FontWeight.Bold)
+                },
+                new SettingsCheckbox
+                {
+                    LabelText = "Wait for preempt",
+                    Current = config.GetBindable<bool>(MSetting.WaitForPreempt)
                 },
                 new OsuSpriteText
                 {
