@@ -129,7 +129,7 @@ namespace osu.Game
 
         private RulesetConfigCache rulesetConfigCache;
 
-        public virtual string Version => "2021.1016.0-lazer";
+        public virtual string Version => "2021.1028.0-lazer";
 
         private SpectatorClient spectatorClient;
 
@@ -158,7 +158,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            VersionHash = "c44701ad9eec368798082316ff8c7d64";
+            VersionHash = "8e4974f0338c7fa0ba28c47d058df340";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 

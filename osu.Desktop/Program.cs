@@ -23,17 +23,17 @@ namespace osu.Desktop
 
         {
             // Back up the cwd before DesktopGameHost changes it
-            var cwd = Environment.CurrentDirectory;
+            string cwd = Environment.CurrentDirectory;
 
             string gameName = base_game_name;
             bool tournamentClient = false;
 
-            foreach (var arg in args)
+            foreach (string arg in args)
             {
-                var split = arg.Split('=');
+                string[] split = arg.Split('=');
 
-                var key = split[0];
-                var val = split.Length > 1 ? split[1] : string.Empty;
+                string key = split[0];
+                string val = split.Length > 1 ? split[1] : string.Empty;
 
                 switch (key)
                 {
@@ -63,7 +63,7 @@ namespace osu.Desktop
                     {
                         var importer = new ArchiveImportIPCChannel(host);
 
-                        foreach (var file in args)
+                        foreach (string file in args)
                         {
                             Console.WriteLine(@"Importing {0}", file);
                             if (!importer.ImportAsync(Path.GetFullPath(file, cwd)).Wait(3000))
