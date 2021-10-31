@@ -14,16 +14,20 @@ build_script:
     dotnet build osu.Desktop -c Release -r win-x64
 
     dotnet build osu.Desktop -c Release -r linux-x64
+
+    dotnet build osu.Desktop -c Release -r linux-arm
 test: off
 artifacts:
 - path: ./osu.Desktop/bin/Release/net5.0/win-x64
   name: osu-windows
 - path: ./osu.Desktop/bin/Release/net5.0/linux-x64
-  name: osu-linux
+  name: osu-linux-x64
+- path: ./osu.Desktop/bin/Release/net5.0/linux-arm
+  name: osu-linux-arm
 deploy:
 - provider: GitHub
   tag: 2021.1028.0
   auth_token:
     secure: wBUeC7f0SGZTu01Bl50RTSas9yizhxdAeqofugDSTpOoZFXOyzvP+X2OOAnaqIWz
   repository: PercyDan54/osu
-  artifact: osu-windows, osu-linux
+  artifact: osu-windows, osu-linux-x64, osu-linux-arm
