@@ -92,7 +92,7 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeB
 
             Beatmap.BindValueChanged(b =>
             {
-                text.Text = b.NewValue.BeatmapInfo.Metadata.GetDisplayTitleRomanisable(true);
+                text.Text = b.NewValue.BeatmapInfo.Metadata.GetDisplayTitleRomanisable(false);
             }, true);
 
             type.BindValueChanged(t =>
