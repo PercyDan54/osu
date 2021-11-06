@@ -1,3 +1,4 @@
+using M.Resources.Localisation.LLin.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 using Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic;
 using osu.Framework.Allocation;
@@ -5,10 +6,12 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
+using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
+using osu.Game.Screens.LLin;
 using osuTK;
 
 namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
@@ -16,10 +19,22 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
     public class LyricViewScreenWithDrawablePool : LyricScreenWithDrawablePool<LyricPiece>
     {
         [Resolved]
+        private IImplementLLin mvisScreen { get; set; }
+
+        [Resolved]
         private LyricPlugin plugin { get; set; }
 
         [Resolved]
         private DialogOverlay dialog { get; set; }
+
+        [Resolved]
+        private GameHost host { get; set; }
+
+        [Resolved]
+        private Storage storage { get; set; }
+
+        [Resolved]
+        private LyricSidebarSectionContainer sectionContainer { get; set; }
 
         protected override LyricPiece CreateDrawableLyric(Lyric lyric)
             => new LyricPiece(lyric);
@@ -31,17 +46,17 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             {
                 Icon = FontAwesome.Solid.Undo,
                 Size = new Vector2(45),
-                TooltipText = "Refresh",
+                TooltipText = CloudMusicStrings.Refresh,
                 Action = () => plugin.RefreshLyric()
             },
             new IconButton
             {
                 Icon = FontAwesome.Solid.CloudDownloadAlt,
                 Size = new Vector2(45),
-                TooltipText = "Get lyrics",
+                TooltipText = CloudMusicStrings.RefetchLyric,
                 Action = () => dialog.Push
                 (
-                    new ConfirmDialog("Get lyrics again?",
+                    new ConfirmDialog(CloudMusicStrings.RefetchLyric.ToString(),
                         () => plugin.RefreshLyric(true))
                 )
             },
@@ -49,7 +64,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             {
                 Icon = FontAwesome.Solid.AngleDown,
                 Size = new Vector2(45),
-                TooltipText = "Scroll to current",
+                TooltipText = CloudMusicStrings.ScrollToCurrent,
                 Action = ScrollToCurrent
             }
         };
@@ -63,7 +78,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
         {
             Icon = FontAwesome.Solid.Save,
             Size = new Vector2(45),
-            TooltipText = "Save as .lrc"
+            TooltipText = CloudMusicStrings.Save
         };
 
         protected override void LoadComplete()

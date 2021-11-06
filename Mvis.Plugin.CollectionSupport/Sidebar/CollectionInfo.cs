@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using M.Resources.Localisation.Mvis.Plugins;
+using M.Resources.Localisation.LLin.Plugins;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -11,16 +11,23 @@ using osu.Game.Collections;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Screens.LLin;
 using osuTK;
 
 namespace Mvis.Plugin.CollectionSupport.Sidebar
 {
     public class CollectionInfo : CompositeDrawable
     {
+        [Resolved]
+        private BeatmapManager beatmaps { get; set; }
+
         private OsuSpriteText collectionName;
         private OsuSpriteText collectionBeatmapCount;
         private readonly Bindable<BeatmapCollection> collection = new Bindable<BeatmapCollection>();
         private readonly List<BeatmapSetInfo> beatmapSets = new List<BeatmapSetInfo>();
+
+        [Resolved]
+        private CustomColourProvider colourProvider { get; set; }
 
         private BeatmapList beatmapList;
         private readonly BindableBool isCurrentCollection = new BindableBool();
@@ -114,10 +121,10 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         {
             base.LoadComplete();
 
-            collection.BindValueChanged(onCollectionChanged);
+            collection.BindValueChanged(OnCollectionChanged);
         }
 
-        private void onCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
+        private void OnCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
         {
             var c = v.NewValue;
 

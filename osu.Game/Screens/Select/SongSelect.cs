@@ -690,6 +690,7 @@ namespace osu.Game.Screens.Select
 
         private BeatmapSetInfo oldBeatmapSet;
         protected bool BeatmapSetChanged = true;
+
         /// <summary>
         /// Allow components in SongSelect to update their loaded beatmap details.
         /// This is a debounced call (unlike directly binding to WorkingBeatmap.ValueChanged).

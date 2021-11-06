@@ -100,12 +100,12 @@ namespace osu.Game.Users
             }
         }
 
-        public class InMvis : UserActivity
+        public class InLLin : UserActivity
         {
             public BeatmapInfo Beatmap { get; }
             public bool Unicode { get; }
 
-            public InMvis(BeatmapInfo info, bool useUnicode)
+            public InLLin(BeatmapInfo info, bool useUnicode = true)
             {
                 Beatmap = info;
                 Unicode = useUnicode;

@@ -8,7 +8,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Localisation;
-using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osuTK.Graphics;
@@ -92,7 +91,9 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeB
 
             Beatmap.BindValueChanged(b =>
             {
-                text.Text = b.NewValue.BeatmapInfo.Metadata.GetDisplayTitleRomanisable(false);
+                text.Text = new RomanisableString(
+                    $"{b.NewValue.Metadata.ArtistUnicode ?? b.NewValue.Metadata.Artist} - {b.NewValue.Metadata.TitleUnicode ?? b.NewValue.Metadata.Title}",
+                    $"{b.NewValue.Metadata.Artist} - {b.NewValue.Metadata.Title}");
             }, true);
 
             type.BindValueChanged(t =>
@@ -102,6 +103,7 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeB
                 switch (t.NewValue)
                 {
                     default:
+                    case LinearBarType.Basic:
                         drawable = new BasicLinearMusicVisualizerDrawable();
                         break;
 

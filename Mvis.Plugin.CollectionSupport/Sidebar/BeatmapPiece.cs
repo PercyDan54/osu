@@ -14,8 +14,8 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Screens.Mvis;
-using osu.Game.Screens.Mvis.Misc;
+using osu.Game.Screens.LLin;
+using osu.Game.Screens.LLin.Misc;
 
 namespace Mvis.Plugin.CollectionSupport.Sidebar
 {
@@ -160,7 +160,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                 }
             };
 
-            Active.BindValueChanged(onActiveChanged, true);
+            Active.BindValueChanged(OnActiveChanged, true);
             colourProvider.HueColour.BindValueChanged(_ =>
             {
                 maskBox.Colour = colourProvider.Dark3.Opacity(0.65f);
@@ -210,7 +210,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             }
         }
 
-        private void onActiveChanged(ValueChangedEvent<bool> v)
+        private void OnActiveChanged(ValueChangedEvent<bool> v)
         {
             switch (v.NewValue)
             {

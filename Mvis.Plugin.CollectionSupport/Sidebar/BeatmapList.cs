@@ -10,7 +10,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
-using osu.Game.Screens.Mvis;
+using osu.Game.Screens.LLin;
 using osuTK;
 
 namespace Mvis.Plugin.CollectionSupport.Sidebar
@@ -62,7 +62,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             };
 
             addBeatmapSets();
-            working.BindValueChanged(onBeatmapChanged);
+            working.BindValueChanged(OnBeatmapChanged);
             IsCurrent.BindValueChanged(v =>
             {
                 foreach (var d in fillFlow)
@@ -100,7 +100,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             if (!scrollCache.IsValid) scrollToCurrent();
         }
 
-        private void onBeatmapChanged(ValueChangedEvent<WorkingBeatmap> v)
+        private void OnBeatmapChanged(ValueChangedEvent<WorkingBeatmap> v)
         {
             currentPiece?.InActive();
             currentPiece = null;

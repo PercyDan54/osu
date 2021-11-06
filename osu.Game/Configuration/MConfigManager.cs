@@ -3,7 +3,7 @@
 
 using osu.Framework.Configuration;
 using osu.Framework.Platform;
-using osu.Game.Screens.Mvis.SideBar.Tabs;
+using osu.Game.Screens.LLin.SideBar.Tabs;
 
 namespace osu.Game.Configuration
 {

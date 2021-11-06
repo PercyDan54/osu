@@ -10,7 +10,7 @@ using osu.Framework;
 using osu.Framework.IO.Stores;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
-using osu.Game.Screens.Mvis.Plugins;
+using osu.Game.Screens.LLin.Plugins;
 
 namespace osu.Game.Screens
 {
@@ -22,7 +22,7 @@ namespace osu.Game.Screens
         private readonly Dictionary<Assembly, Type> loadedMvisPluginAssemblies = new Dictionary<Assembly, Type>();
         private readonly Dictionary<Assembly, Type> loadedFontAssemblies = new Dictionary<Assembly, Type>();
 
-        public List<MvisPluginProvider> LoadedPluginProviders = new List<MvisPluginProvider>();
+        public List<LLinPluginProvider> LoadedPluginProviders = new List<LLinPluginProvider>();
 
         private Storage storage;
 
@@ -75,14 +75,14 @@ namespace osu.Game.Screens
             //从程序根目录加载
             if (RuntimeInfo.IsDesktop)
             {
-                foreach (var file in Directory.GetFiles(RuntimeInfo.StartupDirectory, "Mvis.Plugin.*.dll"))
+                foreach (string file in Directory.GetFiles(RuntimeInfo.StartupDirectory, "Mvis.Plugin.*.dll"))
                     loadAssembly(Assembly.LoadFrom(file));
             }
 
-            foreach (var assembly in assemblies)
+            foreach (string assembly in assemblies)
             {
                 //获取完整路径
-                var fullPath = customStorage.GetFullPath(assembly);
+                string fullPath = customStorage.GetFullPath(assembly);
 
                 //Logger.Log($"加载 {fullPath}");
                 loadAssembly(Assembly.LoadFrom(fullPath));
@@ -98,7 +98,7 @@ namespace osu.Game.Screens
             if (loadedAssemblies.Any(a => a.Key.FullName == assembly.FullName))
                 return;
 
-            var name = Path.GetFileNameWithoutExtension(assembly.Location);
+            string name = Path.GetFileNameWithoutExtension(assembly.Location);
             if (loadedAssemblies.Values.Any(t => Path.GetFileNameWithoutExtension(t.Assembly.Location) == name))
                 return;
 
@@ -106,7 +106,7 @@ namespace osu.Game.Screens
             {
                 foreach (var type in assembly.GetTypes())
                 {
-                    if (type.IsSubclassOf(typeof(MvisPluginProvider)))
+                    if (type.IsSubclassOf(typeof(LLinPluginProvider)))
                     {
                         loadedMvisPluginAssemblies[assembly] = type;
                         loadedAssemblies[assembly] = type;
@@ -138,7 +138,7 @@ namespace osu.Game.Screens
 
             try
             {
-                var providerInstance = (MvisPluginProvider)Activator.CreateInstance(pluginType);
+                var providerInstance = (LLinPluginProvider)Activator.CreateInstance(pluginType);
                 LoadedPluginProviders.Add(providerInstance);
                 //Logger.Log($"[OK] 载入 {fullName}");
             }

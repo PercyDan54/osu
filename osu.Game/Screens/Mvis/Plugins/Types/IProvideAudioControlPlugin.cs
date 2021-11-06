@@ -1,19 +1,9 @@
-using osu.Framework.Graphics.Audio;
+using System;
 
 namespace osu.Game.Screens.Mvis.Plugins.Types
 {
-    public interface IProvideAudioControlPlugin
+    [Obsolete("原Mvis播放器现已移动至LLin(osu.Game.Screens.LLin)")]
+    public interface IProvideAudioControlPlugin : osu.Game.Screens.LLin.Plugins.Types.IProvideAudioControlPlugin
     {
-        public void NextTrack();
-
-        public void PrevTrack();
-
-        public void TogglePause();
-
-        public void Seek(double position);
-
-        public DrawableTrack GetCurrentTrack();
-
-        bool IsCurrent { get; set; }
     }
 }

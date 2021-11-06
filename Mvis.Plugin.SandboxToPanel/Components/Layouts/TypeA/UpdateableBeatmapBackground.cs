@@ -1,5 +1,4 @@
-﻿using System;
-using Mvis.Plugin.Sandbox.Components.MusicHelpers;
+﻿using Mvis.Plugin.Sandbox.Components.MusicHelpers;
 using Mvis.Plugin.Sandbox.Config;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -202,8 +201,8 @@ namespace Mvis.Plugin.Sandbox.Components.Layouts.TypeA
                     }
                 }
 
-                if (newTitle.EndsWith(" ", StringComparison.Ordinal))
-                    newTitle = newTitle[..^1];
+                if (newTitle.EndsWith(" "))
+                    newTitle = newTitle[0..^1];
 
                 return newTitle;
             }

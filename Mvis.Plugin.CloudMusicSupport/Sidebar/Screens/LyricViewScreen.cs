@@ -1,4 +1,4 @@
-using M.Resources.Localisation.Mvis.Plugins;
+using M.Resources.Localisation.LLin.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Config;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 using Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic;
@@ -7,10 +7,12 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
+using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
+using osu.Game.Screens.LLin;
 using osuTK;
 
 namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
@@ -18,10 +20,22 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
     public class LyricViewScreen : LyricScreen
     {
         [Resolved]
+        private IImplementLLin mvisScreen { get; set; }
+
+        [Resolved]
         private LyricPlugin plugin { get; set; }
 
         [Resolved]
         private DialogOverlay dialog { get; set; }
+
+        [Resolved]
+        private GameHost host { get; set; }
+
+        [Resolved]
+        private Storage storage { get; set; }
+
+        [Resolved]
+        private LyricSidebarSectionContainer sectionContainer { get; set; }
 
         protected override DrawableLyric CreateDrawableLyric(Lyric lyric)
             => new LyricPiece(lyric);

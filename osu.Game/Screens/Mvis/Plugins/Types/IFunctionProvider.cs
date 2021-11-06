@@ -1,39 +1,23 @@
 using System;
-using osu.Framework.Bindables;
-using osu.Framework.Graphics.Sprites;
-using osu.Framework.Localisation;
-using osuTK;
 
 namespace osu.Game.Screens.Mvis.Plugins.Types
 {
-    public interface IFunctionProvider
+    [Obsolete("原Mvis播放器现已移动至LLin(osu.Game.Screens.LLin)")]
+    public interface IFunctionProvider : osu.Game.Screens.LLin.Plugins.Types.IFunctionProvider
     {
-        public Vector2 Size { get; set; }
-        public Action Action { get; set; }
-
-        public IconUsage Icon { get; set; }
-
-        public LocalisableString Title { get; set; }
-
-        public LocalisableString Description { get; set; }
-
-        public FunctionType Type { get; set; }
-
-        public void Active();
-
-        public string ToString() => $"{Title} - {Description}";
     }
 
-    public interface IToggleableFunctionProvider : IFunctionProvider
+    [Obsolete("原Mvis播放器现已移动至LLin(osu.Game.Screens.LLin)")]
+    public interface IToggleableFunctionProvider : osu.Game.Screens.LLin.Plugins.Types.IToggleableFunctionProvider
     {
-        public BindableBool Bindable { get; set; }
     }
 
-    public interface IPluginFunctionProvider : IFunctionProvider
+    [Obsolete("原Mvis播放器现已移动至LLin(osu.Game.Screens.LLin)")]
+    public interface IPluginFunctionProvider : osu.Game.Screens.LLin.Plugins.Types.IPluginFunctionProvider
     {
-        public PluginSidebarPage SourcePage { get; set; }
     }
 
+    [Obsolete("原Mvis播放器现已移动至LLin(osu.Game.Screens.LLin)")]
     public enum FunctionType
     {
         Base,

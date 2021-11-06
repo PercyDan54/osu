@@ -11,6 +11,7 @@ using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
+using osu.Game.Screens.LLin;
 using osu.Game.Screens.Mvis;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Ranking;
@@ -40,7 +41,7 @@ namespace osu.Game.Screens.Select
             ((PlayBeatmapDetailArea)BeatmapDetails).Leaderboard.ScoreSelected += PresentScore;
         }
 
-        private void openMvis() => this.Push(new MvisScreen());
+        private void openMvis() => this.Push(new LLinScreen());
 
         protected void PresentScore(ScoreInfo score) =>
             FinaliseSelection(score.BeatmapInfo, score.Ruleset, () => this.Push(new SoloResultsScreen(score, false)));

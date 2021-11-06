@@ -3,21 +3,12 @@ using osuTK.Input;
 
 namespace osu.Game.Screens.Mvis.Plugins
 {
-    public class PluginKeybind
+    [Obsolete("原Mvis播放器现已移动至LLin(osu.Game.Screens.LLin)")]
+    public class PluginKeybind : osu.Game.Screens.LLin.Plugins.PluginKeybind
     {
-        public readonly Key Key;
-        public readonly Action Action;
-        public string Name;
-
-        internal int Id;
-
         public PluginKeybind(Key key, Action action, string name = "???")
+            : base(key, action, name)
         {
-            Key = key;
-            Action = action;
-            Name = name;
         }
-
-        public override string ToString() => "按键 " + Key + $" 上的键位绑定(Id: {Id}, {Action})";
     }
 }

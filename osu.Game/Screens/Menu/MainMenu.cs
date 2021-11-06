@@ -19,7 +19,8 @@ using osu.Game.Screens.Edit;
 using osu.Game.Screens.OnlinePlay.Multiplayer;
 using osu.Game.Screens.OnlinePlay.Playlists;
 using osu.Game.Screens.Select;
-using osu.Game.Screens.Mvis;
+using osu.Game.Screens.Import;
+using osu.Game.Screens.LLin;
 using osuTK;
 using osuTK.Graphics;
 
@@ -38,7 +39,6 @@ namespace osu.Game.Screens.Menu
         public override bool AllowExternalScreenChange => true;
 
         private Screen songSelect;
-        private Screen mvisPlayer;
 
         private MenuSideFlashes sideFlashes;
 
@@ -72,7 +72,7 @@ namespace osu.Game.Screens.Menu
         private SongTicker songTicker;
 
         [BackgroundDependencyLoader(true)]
-        private void load(BeatmapListingOverlay beatmapListing, SettingsOverlay settings, RankingsOverlay rankings, OsuConfigManager config, SessionStatics statics)
+        private void load(BeatmapListingOverlay beatmapListing, SettingsOverlay settings, RankingsOverlay rankings, OsuConfigManager config, SessionStatics statics, MConfigManager mConfig)
         {
             holdDelay = config.GetBindable<float>(OsuSetting.UIHoldActivationDelay);
             loginDisplayed = statics.GetBindable<bool>(Static.LoginOverlayDisplayed);
@@ -105,10 +105,10 @@ namespace osu.Game.Screens.Menu
                                 Beatmap.SetDefault();
                                 this.Push(new EditorLoader());
                             },
+                            OnMvis = onMvis,
                             OnSolo = loadSoloSongSelect,
                             OnMultiplayer = () => this.Push(new Multiplayer()),
                             OnPlaylists = () => this.Push(new Playlists()),
-                            OnMvis = () => this.Push(consumeScreen(true)),
                             OnExit = confirmAndExit,
                         }
                     }
@@ -142,7 +142,7 @@ namespace osu.Game.Screens.Menu
             buttons.OnBeatmapListing = () => beatmapListing?.ToggleVisibility();
 
             LoadComponentAsync(background = new BackgroundScreenDefault());
-            preloadSongSelect();
+            preloadScreens();
         }
 
         [Resolved(canBeNull: true)]
@@ -156,23 +156,20 @@ namespace osu.Game.Screens.Menu
             game?.PerformFromScreen(menu => menu.Exit());
         }
 
-        private void preloadSongSelect()
+        private void preloadScreens()
         {
             if (songSelect == null)
                 LoadComponentAsync(songSelect = new PlaySongSelect());
-            if (mvisPlayer == null)
-                LoadComponentAsync(mvisPlayer = new MvisScreen());
         }
 
-        private void loadSoloSongSelect() => this.Push(consumeScreen(false));
+        private void loadSoloSongSelect() => this.Push(consumeSongSelect());
 
-        private Screen consumeScreen(bool mvis)
+        private void onMvis() => this.Push(new LLinScreen());
+
+        private Screen consumeSongSelect()
         {
-            var s = mvis ? mvisPlayer : songSelect;
-
-            if (mvis) mvisPlayer = null;
-            else songSelect = null;
-
+            var s = songSelect;
+            songSelect = null;
             return s;
         }
 
@@ -265,7 +262,7 @@ namespace osu.Game.Screens.Menu
             ApplyToBackground(b => (b as BackgroundScreenDefault)?.Next());
 
             // we may have consumed our preloaded instance, so let's make another.
-            preloadSongSelect();
+            preloadScreens();
 
             musicController.EnsurePlayingSomething();
         }

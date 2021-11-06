@@ -9,7 +9,7 @@ using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Localisation;
 using osu.Game.Configuration;
-using osu.Game.Screens.Mvis;
+using osu.Game.Screens.LLin;
 
 namespace osu.Game.Overlays.Settings.Sections.Mf
 {
@@ -87,7 +87,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
 
         private class ColourPreviewer : Container, IHasTooltip
         {
-            private readonly CustomColourProvider provider = new CustomColourProvider(0, 0, 0);
+            private readonly CustomColourProvider provider = new CustomColourProvider();
             private Box bg6;
             private Box bg5;
             private Box bg4;

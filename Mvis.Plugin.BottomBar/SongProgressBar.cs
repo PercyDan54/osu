@@ -3,8 +3,8 @@ using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Screens.Mvis;
-using osu.Game.Screens.Mvis.Misc;
+using osu.Game.Screens.LLin;
+using osu.Game.Screens.LLin.Misc;
 
 namespace Mvis.Plugin.BottomBar
 {
@@ -17,7 +17,7 @@ namespace Mvis.Plugin.BottomBar
         private CustomColourProvider colourProvider { get; set; }
 
         [Resolved]
-        private MvisScreen mvisScreen { get; set; }
+        private IImplementLLin mvis { get; set; }
 
         private const float idle_alpha = 0.5f;
 
@@ -40,11 +40,11 @@ namespace Mvis.Plugin.BottomBar
             {
                 songProgressIndicator = new Indicator
                 {
-                    Text = "Progress"
+                    Text = "歌曲进度"
                 },
                 indicator = new Indicator
                 {
-                    Text = "Position",
+                    Text = "光标位置",
                     IsMouseIndicator = true
                 }
             });
@@ -52,12 +52,12 @@ namespace Mvis.Plugin.BottomBar
 
         protected override void LoadComplete()
         {
-            mvisScreen.OnIdle += () =>
+            mvis.OnIdle += () =>
             {
                 if (IsHovered) showIndicators();
                 UpdateValue(Fill.Width);
             };
-            mvisScreen.OnResumeFromIdle += hideIndicators;
+            mvis.OnActive += hideIndicators;
 
             base.LoadComplete();
         }
@@ -89,7 +89,7 @@ namespace Mvis.Plugin.BottomBar
         {
             Fill.Width = value;
 
-            if (mvisScreen.OverlaysHidden)
+            if (mvis.InterfacesHidden)
             {
                 songProgressIndicator.MoveToX(
                     getFinalPosX(songProgressIndicator, (value * UsableWidth) - (songProgressIndicator.Width / 2)),
@@ -116,12 +116,12 @@ namespace Mvis.Plugin.BottomBar
 
         protected override void Update()
         {
-            if (mvisScreen.OverlaysHidden)
+            if (mvis.InterfacesHidden)
             {
-                var indicatorX = indicator.X - 5;
-                var indicatorEnd = indicatorX + indicator.Width + 5;
-                var songX = songProgressIndicator.X - 5;
-                var songEnd = songX + songProgressIndicator.Width + 5;
+                float indicatorX = indicator.X - 5;
+                float indicatorEnd = indicatorX + indicator.Width + 5;
+                float songX = songProgressIndicator.X - 5;
+                float songEnd = songX + songProgressIndicator.Width + 5;
 
                 overlap = (indicatorX >= songX && indicatorX <= songEnd)
                           || (indicatorEnd >= songX && indicatorEnd <= songEnd);
@@ -133,7 +133,7 @@ namespace Mvis.Plugin.BottomBar
         private float getFinalPosX(Indicator target, float xPos)
         {
             //DrawWidth: 总宽度, target.Width: 指示器宽度, 5: 右侧Margin
-            var rightMargin = DrawWidth - target.Width - 5;
+            float rightMargin = DrawWidth - target.Width - 5;
 
             if (xPos > rightMargin) return rightMargin;
             //5: 左侧Margin
@@ -144,7 +144,7 @@ namespace Mvis.Plugin.BottomBar
 
         private void showIndicators()
         {
-            if (!mvisScreen.OverlaysHidden) return;
+            if (!mvis.InterfacesHidden) return;
 
             indicator.Show();
             songProgressIndicator.Show();

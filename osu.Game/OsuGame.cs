@@ -53,10 +53,12 @@ using LogLevel = osu.Framework.Logging.LogLevel;
 using osu.Game.Database;
 using osu.Game.Extensions;
 using osu.Game.IO;
-using osu.Game.Screens.Mvis.Plugins;
 using osu.Game.Localisation;
 using osu.Game.Performance;
+using osu.Game.Screens.LLin;
+using osu.Game.Screens.LLin.Plugins;
 using osu.Game.Skinning.Editor;
+using MvisPluginManager = osu.Game.Screens.Mvis.Plugins.MvisPluginManager;
 
 namespace osu.Game
 {
@@ -678,7 +680,7 @@ namespace osu.Game
             BackButton.Receptor receptor;
 
             dependencies.CacheAs(idleTracker = new GameIdleTracker(6000));
-            dependencies.Cache(mvisPluginManager = new MvisPluginManager());
+            dependencies.Cache(mvisPluginManager = new LLinPluginManager());
             loadComponentSingleFile(mvisPluginManager, AddInternal);
 
             var sessionIdleTracker = new GameIdleTracker(300000);
@@ -1074,8 +1076,8 @@ namespace osu.Game
         {
         }
 
-        private MvisPluginManager mvisPluginManager;
-        
+        private LLinPluginManager mvisPluginManager;
+
         protected override bool OnExiting()
         {
             if (ScreenStack.CurrentScreen is Loader)

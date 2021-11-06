@@ -1,22 +1,26 @@
 using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
-using M.Resources.Localisation.Mvis.Plugins;
+using M.DBus.Tray;
+using M.Resources.Localisation.LLin.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Config;
+using Mvis.Plugin.CloudMusicSupport.DBus;
 using Mvis.Plugin.CloudMusicSupport.Helper;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 using Mvis.Plugin.CloudMusicSupport.Sidebar;
 using Mvis.Plugin.CloudMusicSupport.UI;
+using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
-using osu.Game.Screens.Mvis.Plugins;
-using osu.Game.Screens.Mvis.Plugins.Config;
-using osu.Game.Screens.Mvis.Plugins.Types;
+using osu.Game.Screens.LLin.Plugins;
+using osu.Game.Screens.LLin.Plugins.Config;
+using osu.Game.Screens.LLin.Plugins.Types;
 using osu.Framework.Audio.Track;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics.Audio;
+using osu.Game;
 using osu.Game.Configuration;
 using osu.Game.Overlays;
 
@@ -25,7 +29,7 @@ namespace Mvis.Plugin.CloudMusicSupport
     public class LyricPlugin : BindableControlledPlugin, IProvideAudioControlPlugin
     {
         /// <summary>
-        /// 请参阅 <see cref="MvisPlugin.TargetLayer"/>
+        /// 请参阅 <see cref="LLinPlugin.TargetLayer"/>
         /// </summary>
         public override TargetLayer Target => TargetLayer.Foreground;
 
@@ -41,13 +45,13 @@ namespace Mvis.Plugin.CloudMusicSupport
         public override PluginSidebarSettingsSection CreateSidebarSettingsSection()
             => new LyricSidebarSection(this);
 
-        public override int Version => 6;
+        public override int Version => 8;
 
         private WorkingBeatmap currentWorkingBeatmap;
         private LyricLineHandler lrcLine;
 
         /// <summary>
-        /// 请参阅 <see cref="MvisPlugin.CreateContent()"/>
+        /// 请参阅 <see cref="LLinPlugin.CreateContent()"/>
         /// </summary>
         protected override Drawable CreateContent() => lrcLine = new LyricLineHandler();
 
@@ -71,9 +75,12 @@ namespace Mvis.Plugin.CloudMusicSupport
         [Resolved]
         private MusicController controller { get; set; }
 
+        [Resolved]
+        private MConfigManager mConfig { get; set; }
+
         public void RequestControl(Action onAllow)
         {
-            MvisScreen.RequestAudioControl(this,
+            LLin.RequestAudioControl(this,
                 CloudMusicStrings.AudioControlRequest,
                 () => IsEditing = false,
                 onAllow);
@@ -90,7 +97,7 @@ namespace Mvis.Plugin.CloudMusicSupport
             set
             {
                 if (!value)
-                    MvisScreen.ReleaseAudioControlFrom(this);
+                    LLin.ReleaseAudioControlFrom(this);
             }
         }
 
@@ -102,9 +109,9 @@ namespace Mvis.Plugin.CloudMusicSupport
 
         public LyricPlugin()
         {
-            Name = "Lyrics";
-            Description = "Get lyrics from Netease";
-            Author = "MATRIX-FEATHER";
+            Name = "歌词";
+            Description = "从网易云音乐获取歌词信息";
+            Author = "MATRIX-夜翎";
             Depth = -1;
 
             Flags.AddRange(new[]
@@ -118,20 +125,44 @@ namespace Mvis.Plugin.CloudMusicSupport
         }
 
         /// <summary>
-        /// 请参阅 <see cref="MvisPlugin.OnContentLoaded(Drawable)"/>
+        /// 请参阅 <see cref="LLinPlugin.OnContentLoaded(Drawable)"/>
         /// </summary>
         protected override bool OnContentLoaded(Drawable content) => true;
+
+        [Resolved]
+        private OsuGame game { get; set; }
+
+        private readonly SimpleEntry lyricEntry = new SimpleEntry
+        {
+            Enabled = false
+        };
 
         [BackgroundDependencyLoader]
         private void load()
         {
-            var config = (LyricConfigManager)Dependencies.Get<MvisPluginManager>().GetConfigManager(this);
+            var config = (LyricConfigManager)Dependencies.Get<LLinPluginManager>().GetConfigManager(this);
 
             config.BindWith(LyricSettings.EnablePlugin, Value);
             config.BindWith(LyricSettings.LyricOffset, offset);
             autoSave = config.GetBindable<bool>(LyricSettings.SaveLrcWhenFetchFinish);
 
             AddInternal(processor);
+
+            PluginManager.RegisterDBusObject(dbusObject = new LyricDBusObject());
+
+            if (LLin != null)
+            {
+                LLin.Exiting += onMvisExiting;
+            }
+        }
+
+        private void onMvisExiting()
+        {
+            resetDBusMessage();
+            PluginManager.UnRegisterDBusObject(new LyricDBusObject());
+
+            if (!Disabled.Value)
+                PluginManager.RemoveDBusMenuEntry(lyricEntry);
         }
 
         public void WriteLyricToDisk()
@@ -196,6 +227,9 @@ namespace Mvis.Plugin.CloudMusicSupport
         {
             this.MoveToX(-10, 300, Easing.OutQuint).FadeOut(300, Easing.OutQuint);
 
+            resetDBusMessage();
+            PluginManager.RemoveDBusMenuEntry(lyricEntry);
+
             return base.Disable();
         }
 
@@ -205,21 +239,60 @@ namespace Mvis.Plugin.CloudMusicSupport
 
             this.MoveToX(0, 300, Easing.OutQuint).FadeIn(300, Easing.OutQuint);
 
-            MvisScreen?.OnBeatmapChanged(onBeatmapChanged, this, true);
+            LLin?.OnBeatmapChanged(onBeatmapChanged, this, true);
+
+            if (RuntimeInfo.OS == RuntimeInfo.Platform.Linux)
+            {
+                dbusObject.RawLyric = currentLine?.Content;
+                dbusObject.TranslatedLyric = currentLine?.TranslatedString;
+
+                PluginManager.AddDBusMenuEntry(lyricEntry);
+            }
 
             return result;
         }
 
+        private void resetDBusMessage()
+        {
+            if (RuntimeInfo.OS == RuntimeInfo.Platform.Linux)
+            {
+                dbusObject.RawLyric = string.Empty;
+                dbusObject.TranslatedLyric = string.Empty;
+            }
+        }
+
         protected override bool PostInit() => true;
 
-        public Lyric CurrentLine;
+        private Lyric currentLine;
+        private readonly Lyric emptyLine = new Lyric();
+
+        public Lyric CurrentLine
+        {
+            get => currentLine;
+            set
+            {
+                value ??= emptyLine;
+
+                currentLine = value;
+
+                if (RuntimeInfo.OS == RuntimeInfo.Platform.Linux)
+                {
+                    dbusObject.RawLyric = value.Content;
+                    dbusObject.TranslatedLyric = value.TranslatedString;
+
+                    lyricEntry.Label = value.Content + "\n" + value.TranslatedString;
+                }
+            }
+        }
+
         private readonly Lyric defaultLrc = new Lyric();
+        private LyricDBusObject dbusObject;
 
         protected override void Update()
         {
             base.Update();
 
-            Padding = new MarginPadding { Bottom = (MvisScreen?.BottombarHeight ?? 0) + 20 };
+            Padding = new MarginPadding { Bottom = (LLin?.BottomBarHeight ?? 0) + 20 };
 
             if (ContentLoaded)
             {

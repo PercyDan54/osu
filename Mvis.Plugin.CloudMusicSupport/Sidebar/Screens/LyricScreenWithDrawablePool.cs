@@ -20,6 +20,8 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
         [Resolved]
         private LyricPlugin plugin { get; set; }
 
+        protected LyricPlugin Plugin => plugin;
+
         protected readonly OsuScrollContainer<DrawableLyric> LyricScroll;
         private readonly DrawablePool<T> lyricPool = new DrawablePool<T>(100);
 
@@ -63,11 +65,11 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
         private (int first, int last) getRange()
         {
             dummyDrawableLyric.CurrentY = visibleTop - distanceLoadUnload;
-            var first = visibleLyrics.BinarySearch(dummyDrawableLyric);
+            int first = visibleLyrics.BinarySearch(dummyDrawableLyric);
             if (first < 0) first = ~first;
 
             dummyDrawableLyric.CurrentY = visibleBottom + distanceLoadUnload;
-            var last = visibleLyrics.BinarySearch(dummyDrawableLyric);
+            int last = visibleLyrics.BinarySearch(dummyDrawableLyric);
             if (last < 0) last = ~last;
 
             first = Math.Max(0, first - 1);
@@ -82,7 +84,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
         {
             visibleLyrics.Clear();
 
-            var currentY = 0;
+            int currentY = 0;
 
             foreach (var drawableLyric in AvaliableDrawableLyrics)
             {
@@ -167,7 +169,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
 
         protected virtual void ScrollToCurrent()
         {
-            var pos = AvaliableDrawableLyrics.FirstOrDefault(p =>
+            float pos = AvaliableDrawableLyrics.FirstOrDefault(p =>
                 p.Value.Equals(plugin.CurrentLine))?.CurrentY ?? 0;
 
             if (pos + DrawHeight > LyricScroll.ScrollContent.Height)
@@ -180,6 +182,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
         {
             LyricScroll.Clear();
             AvaliableDrawableLyrics.Clear();
+            //lyricPool.Clear();
 
             LyricScroll.ScrollToStart();
 

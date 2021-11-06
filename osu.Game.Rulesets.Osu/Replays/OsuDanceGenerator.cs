@@ -68,11 +68,11 @@ namespace osu.Game.Rulesets.Osu.Replays
             mover.Beatmap = Beatmap;
             mover.TimeAffectingMods = mods.OfType<IApplicableToRate>().ToList();
 
-            var objectsDuring = new bool[Beatmap.HitObjects.Count];
+            bool[] objectsDuring = new bool[Beatmap.HitObjects.Count];
 
             for (int i = 0; i < Beatmap.HitObjects.Count - 1; ++i)
             {
-                var e = Beatmap.HitObjects[i].GetEndTime();
+                double e = Beatmap.HitObjects[i].GetEndTime();
                 objectsDuring[i] = false;
 
                 for (int j = i + 1; j < Beatmap.HitObjects.Count; ++j)
@@ -141,11 +141,11 @@ namespace osu.Game.Rulesets.Osu.Replays
                         {
                             var point = points[i];
                             var next = points[i + 1];
-                            var duration = next.StartTime - point.StartTime;
+                            double duration = next.StartTime - point.StartTime;
 
                             for (double j = GetFrameDelay(point.StartTime); j < duration; j += GetFrameDelay(point.StartTime + j))
                             {
-                                var scaleFactor = j / duration;
+                                double scaleFactor = j / duration;
                                 pos = point.StackedPosition + (next.StackedPosition - point.StackedPosition) * (float)scaleFactor;
 
                                 addPippiFrame(new OsuReplayFrame(point.StartTime + j, pos, action), IsPippi ? -1 : 0);
@@ -174,9 +174,9 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                     for (double nextFrame = h.StartTime + GetFrameDelay(h.StartTime); nextFrame < spinner.EndTime; nextFrame += ApplyModsToRate(nextFrame, frameDelay))
                     {
-                        var t = ApplyModsToTimeDelta(previousFrame, nextFrame) * -1;
+                        double t = ApplyModsToTimeDelta(previousFrame, nextFrame) * -1;
                         angle += (float)t / 20;
-                        var r = nextFrame > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(nextFrame, radiusStart, spinRadiusEnd, spinner.StartTime, rEndTime, Easing.In);
+                        double r = nextFrame > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(nextFrame, radiusStart, spinRadiusEnd, spinner.StartTime, rEndTime, Easing.In);
                         pos = SPINNER_CENTRE + CirclePosition(angle, r);
                         addPippiFrame(new OsuReplayFrame((int)nextFrame, pos, action), pippiSpinner ? (float)r : 0);
 

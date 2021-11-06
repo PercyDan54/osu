@@ -6,7 +6,7 @@
         <PackageProjectUrl>https://github.com/matrix-feather/osu</PackageProjectUrl>
         <RepositoryUrl>https://github.com/matrix-feather/osu</RepositoryUrl>
         <PackageTags />
-        <Company> </Company>
+        <Company></Company>
     </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Fonts\**\*" />

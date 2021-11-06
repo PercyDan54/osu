@@ -1,6 +1,6 @@
 using System;
 using System.Globalization;
-using M.Resources.Localisation.Mvis.Plugins;
+using M.Resources.Localisation.LLin.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Misc;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
@@ -12,7 +12,7 @@ using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Screens.Mvis;
+using osu.Game.Screens.LLin;
 using osuTK;
 using osuTK.Graphics;
 
@@ -41,7 +41,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
         }
 
         [BackgroundDependencyLoader]
-        private void load(CustomColourProvider colourProvider, OsuColour osuColour, MvisScreen mvisScreen)
+        private void load(CustomColourProvider colourProvider, OsuColour osuColour, IImplementLLin mvisScreen)
         {
             CornerRadius = 5f;
             Masking = true;
@@ -107,7 +107,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                                 },
                                 new OsuButton
                                 {
-                                    Text = CloudMusicStrings.LyricTimeToTrack,
+                                    Text = CloudMusicStrings.TrackTimeToLyric,
                                     Size = new Vector2(120, 40),
                                     Action = () =>
                                     {
@@ -119,7 +119,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                                 },
                                 new OsuButton
                                 {
-                                    Text = CloudMusicStrings.TrackTimeToLyric,
+                                    Text = CloudMusicStrings.LyricTimeToTrack,
                                     Size = new Vector2(120, 40),
                                     Action = () => mvisScreen.SeekTo(Value.Time)
                                 }

@@ -11,10 +11,11 @@ using osu.Framework.Graphics.Textures;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Configuration;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Screens.Mvis;
-using osu.Game.Screens.Mvis.Plugins.Types;
+using osu.Game.Screens.LLin;
+using osu.Game.Screens.LLin.Plugins.Types;
 using osuTK;
 using osuTK.Graphics;
 
@@ -87,7 +88,7 @@ namespace Mvis.Plugin.BottomBar.Buttons
         }
 
         [BackgroundDependencyLoader]
-        private void load(MConfigManager config)
+        private void load()
         {
             InternalChildren = new Drawable[]
             {

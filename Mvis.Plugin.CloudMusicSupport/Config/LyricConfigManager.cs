@@ -1,7 +1,7 @@
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Framework.Platform;
-using osu.Game.Screens.Mvis.Plugins.Config;
+using osu.Game.Screens.LLin.Plugins.Config;
 
 namespace Mvis.Plugin.CloudMusicSupport.Config
 {
@@ -18,7 +18,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Config
         protected override void InitialiseDefaults()
         {
             SetDefault(LyricSettings.EnablePlugin, true);
-            SetDefault(LyricSettings.LyricOffset, 0, -50000d, 50000d, 10d);
+            SetDefault(LyricSettings.LyricOffset, 0, -3000d, 3000d);
             SetDefault(LyricSettings.LyricFadeInDuration, 200f, 0, 1000);
             SetDefault(LyricSettings.LyricFadeOutDuration, 200f, 0, 1000);
             SetDefault(LyricSettings.SaveLrcWhenFetchFinish, true);

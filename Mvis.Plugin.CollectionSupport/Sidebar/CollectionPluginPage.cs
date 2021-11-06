@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.Linq;
+using M.Resources.Localisation.LLin.Plugins;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -7,9 +8,9 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Game.Collections;
 using osu.Game.Graphics.Containers;
-using osu.Game.Screens.Mvis;
-using osu.Game.Screens.Mvis.Plugins;
-using osu.Game.Screens.Mvis.Plugins.Types;
+using osu.Game.Screens.LLin;
+using osu.Game.Screens.LLin.Plugins;
+using osu.Game.Screens.LLin.Plugins.Types;
 using osuTK;
 using osuTK.Input;
 
@@ -21,7 +22,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         private CollectionManager collectionManager { get; set; }
 
         [Resolved]
-        private MvisScreen mvisScreen { get; set; }
+        private IImplementLLin mvisScreen { get; set; }
 
         private readonly CollectionHelper collectionHelper;
 
@@ -34,7 +35,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         private OsuScrollContainer collectionScroll;
         private CollectionInfo info;
 
-        public CollectionPluginPage(MvisPlugin plugin)
+        public CollectionPluginPage(LLinPlugin plugin)
             : base(plugin)
         {
             Icon = FontAwesome.Solid.Check;
@@ -59,7 +60,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             {
                 new Container
                 {
-                    Name = "Collection select",
+                    Name = "收藏夹选择界面",
                     RelativeSizeAxes = Axes.Both,
                     Width = 0.3f,
                     Anchor = Anchor.TopLeft,
@@ -81,7 +82,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                 },
                 info = new CollectionInfo
                 {
-                    Name = "Collection information",
+                    Name = "收藏夹信息界面",
                     RelativeSizeAxes = Axes.Both,
                     Width = 0.7f,
                     Anchor = Anchor.TopRight,
@@ -96,15 +97,15 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         {
             base.LoadComplete();
 
-            collectionHelper.CurrentCollection.BindValueChanged(onCurrentCollectionChanged);
+            collectionHelper.CurrentCollection.BindValueChanged(OnCurrentCollectionChanged);
             selectedCollection.BindValueChanged(updateSelection);
             selectedPanel.BindValueChanged(updateSelectedPanel);
 
             RefreshCollectionList();
-            mvisScreen.OnScreenResuming += RefreshCollectionList;
+            mvisScreen.Resuming += RefreshCollectionList;
         }
 
-        private void onCurrentCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
+        private void OnCurrentCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
         {
             if (v.NewValue == null) return;
 
@@ -199,7 +200,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             if (!requestedOnce)
             {
                 requestedOnce = true;
-                mvisScreen?.RequestAudioControl((CollectionHelper)Plugin, "激活以确保插件可以发挥功能\n本提示在本次会话中不会出现第二次。", null, null);
+                mvisScreen?.RequestAudioControl((CollectionHelper)Plugin, CollectionStrings.AudioControlRequest, null, null);
             }
         }
 
