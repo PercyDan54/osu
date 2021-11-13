@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using osu.Framework.Platform;
 using osu.Game.Screens.LLin.Plugins.Config;
 
@@ -91,37 +90,22 @@ namespace Mvis.Plugin.Sandbox.Config
     //上游
     public enum VisualizerLayout
     {
-        [Description("类型A")]
         TypeA,
-
-        [Description("类型B")]
         TypeB,
-
-        [Description("无")]
         Empty
     }
 
     public enum CircularBarType
     {
-        [Description("基本")]
         Basic,
-
-        [Description("圆角")]
         Rounded,
-
-        [Description("打砖块")]
         Fall,
-
-        [Description("点状")]
         Dots
     }
 
     public enum LinearBarType
     {
-        [Description("基本")]
         Basic,
-
-        [Description("圆角")]
         Rounded
     }
 }

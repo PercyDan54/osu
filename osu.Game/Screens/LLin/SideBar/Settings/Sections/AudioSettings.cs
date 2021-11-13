@@ -13,7 +13,7 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Sections
     {
         public AudioSettings()
         {
-            Title = "音频设置";
+            Title = "Audio settings";
         }
 
         [BackgroundDependencyLoader]
@@ -24,7 +24,7 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Sections
                 new SettingsSliderPiece<double>
                 {
                     Icon = FontAwesome.Solid.Forward,
-                    Description = "播放速度",
+                    Description = "Playback rate",
                     Bindable = config.GetBindable<double>(MSetting.MvisMusicSpeed),
                     DisplayAsPercentage = true,
                     TransferValueOnCommit = true
@@ -32,16 +32,15 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Sections
                 new SettingsTogglePiece
                 {
                     Icon = FontAwesome.Solid.PeopleCarry,
-                    Description = "调整音调",
+                    Description = "Adjust pitch",
                     Bindable = config.GetBindable<bool>(MSetting.MvisAdjustMusicWithFreq),
                     TooltipText = "暂不支持调整故事版的音调"
                 },
                 new SettingsTogglePiece
                 {
                     Icon = FontAwesome.Solid.HeadphonesAlt,
-                    Description = "夜核节拍器",
+                    Description = "Nightcore beat",
                     Bindable = config.GetBindable<bool>(MSetting.MvisEnableNightcoreBeat),
-                    TooltipText = "动次打次动次打次"
                 },
             });
         }

@@ -28,7 +28,8 @@ namespace osu.Game.Online.API.Requests
 
         protected override string FileExtension => ".osz";
 
-        protected override string Uri {
+        protected override string Uri
+        {
             get
             {
                 if (useSayobot)

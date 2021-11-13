@@ -47,8 +47,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 new SettingsSliderPiece<double>
                 {
                     Description = CloudMusicStrings.GlobalOffsetMain,
-                    Bindable = config.GetBindable<double>(LyricSettings.LyricOffset),
-                    TooltipText = CloudMusicStrings.GlobalOffsetSub,
+                    Bindable = config.GetBindable<double>(LyricSettings.LyricOffset)
                 },
                 new SettingsSliderPiece<float>
                 {

@@ -109,8 +109,8 @@ namespace Mvis.Plugin.CloudMusicSupport
 
         public LyricPlugin()
         {
-            Name = "歌词";
-            Description = "从网易云音乐获取歌词信息";
+            Name = "Lyrics";
+            Description = "Get lyrics from Netease music";
             Author = "MATRIX-夜翎";
             Depth = -1;
 

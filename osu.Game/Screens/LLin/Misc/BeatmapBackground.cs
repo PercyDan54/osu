@@ -17,8 +17,6 @@ namespace osu.Game.Screens.LLin.Misc
             this.beatmap = beatmap;
             RelativeSizeAxes = Axes.Both;
 
-            CacheDrawnFrameBuffer = true;
-
             Child = sprite = new Sprite
             {
                 Anchor = Anchor.Centre,

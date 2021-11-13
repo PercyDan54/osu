@@ -18,7 +18,7 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Sections
 
         public BaseSettings()
         {
-            Title = "基本设置";
+            Title = "Basic settings";
         }
 
         [BackgroundDependencyLoader]
@@ -31,8 +31,8 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Sections
             var functionBarProviders = pluginManager.GetAllFunctionBarProviders();
             functionBarProviders.Insert(0, pluginManager.DummyFunctionBar);
 
-            var currentAudioControlPlugin = config.Get<string>(MSetting.MvisCurrentAudioProvider);
-            var currentFunctionbar = config.Get<string>(MSetting.MvisCurrentFunctionBar);
+            string currentAudioControlPlugin = config.Get<string>(MSetting.MvisCurrentAudioProvider);
+            string currentFunctionbar = config.Get<string>(MSetting.MvisCurrentFunctionBar);
 
             Bindable<IProvideAudioControlPlugin> audioConfigBindable;
             Bindable<IFunctionBarProvider> functionBarConfigBindable;
@@ -41,23 +41,23 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Sections
             {
                 new SettingsSliderPiece<float>
                 {
-                    Description = "界面主题色(红)",
+                    Description = "Red",
                     Bindable = iR
                 },
                 new SettingsSliderPiece<float>
                 {
-                    Description = "界面主题色(绿)",
+                    Description = "Green",
                     Bindable = iG
                 },
                 new SettingsSliderPiece<float>
                 {
-                    Description = "界面主题色(蓝)",
+                    Description = "Blue",
                     Bindable = iB
                 },
                 new ProviderSettingsPiece<IProvideAudioControlPlugin>
                 {
                     Icon = FontAwesome.Solid.Bullseye,
-                    Description = "音乐控制插件",
+                    Description = "Music control plugin",
                     Bindable = audioConfigBindable = new Bindable<IProvideAudioControlPlugin>
                     {
                         Value = pluginManager.GetAudioControlByPath(currentAudioControlPlugin),
@@ -79,36 +79,35 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Sections
                 new SettingsEnumPiece<TabControlPosition>
                 {
                     Icon = FontAwesome.Solid.Ruler,
-                    Description = "TabControl位置",
+                    Description = "TabControl Position",
                     Bindable = config.GetBindable<TabControlPosition>(MSetting.MvisTabControlPosition)
                 },
                 new SettingsSliderPiece<float>
                 {
                     Icon = FontAwesome.Solid.SolarPanel,
-                    Description = "背景模糊",
+                    Description = "Background blur",
                     Bindable = config.GetBindable<float>(MSetting.MvisBgBlur),
                     DisplayAsPercentage = true
                 },
                 new SettingsSliderPiece<float>
                 {
                     Icon = FontAwesome.Regular.Sun,
-                    Description = "空闲时的背景亮度",
+                    Description = "Bg dim when idle",
                     Bindable = config.GetBindable<float>(MSetting.MvisIdleBgDim),
                     DisplayAsPercentage = true
                 },
                 new SettingsTogglePiece
                 {
                     Icon = FontAwesome.Regular.ArrowAltCircleUp,
-                    Description = "置顶Proxy",
+                    Description = "Top Proxy",
                     Bindable = config.GetBindable<bool>(MSetting.MvisStoryboardProxy),
-                    TooltipText = "让所有Proxy显示在前景上方"
                 },
                 new SettingsTogglePiece
                 {
                     Icon = FontAwesome.Solid.Clock,
-                    Description = "启用背景动画",
+                    Description = "Enable animation",
                     Bindable = config.GetBindable<bool>(MSetting.MvisEnableBgTriangles),
-                    TooltipText = "如果条件允许,播放器将会在背景显示动画"
+                    TooltipText = "Show background animation when possible"
                 },
             });
 

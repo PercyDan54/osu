@@ -16,9 +16,6 @@ namespace osu.Game.Screens.LLin.SideBar
 {
     internal class Sidebar : VisibilityContainer
     {
-        [Resolved]
-        private CustomColourProvider colourProvider { get; set; }
-
         [CanBeNull]
         [Resolved(CanBeNull = true)]
         private IImplementLLin mvisScreen { get; set; }

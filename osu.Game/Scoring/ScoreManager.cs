@@ -25,7 +25,7 @@ using osu.Game.Rulesets.Scoring;
 
 namespace osu.Game.Scoring
 {
-    public class ScoreManager : IModelManager<ScoreInfo>, IModelFileManager<ScoreInfo, ScoreFileInfo>, IModelDownloader<ScoreInfo>
+    public class ScoreManager : IModelManager<ScoreInfo>, IModelImporter<ScoreInfo>, IModelFileManager<ScoreInfo, ScoreFileInfo>, IModelDownloader<IScoreInfo>
     {
         private readonly Scheduler scheduler;
         private readonly Func<BeatmapDifficultyCache> difficulties;
@@ -41,11 +41,10 @@ namespace osu.Game.Scoring
             this.scheduler = scheduler;
             this.difficulties = difficulties;
             this.configManager = configManager;
+            Instance = this;
 
             scoreModelManager = new ScoreModelManager(rulesets, beatmaps, storage, contextFactory, importHost);
             scoreModelDownloader = new ScoreModelDownloader(scoreModelManager, api, importHost);
-
-            Instance = this;
         }
 
         public Score GetScore(ScoreInfo score) => scoreModelManager.GetScore(score);
@@ -250,9 +249,17 @@ namespace osu.Game.Scoring
 
         #region Implementation of IModelManager<ScoreInfo>
 
-        public IBindable<WeakReference<ScoreInfo>> ItemUpdated => scoreModelManager.ItemUpdated;
+        public event Action<ScoreInfo> ItemUpdated
+        {
+            add => scoreModelManager.ItemUpdated += value;
+            remove => scoreModelManager.ItemUpdated -= value;
+        }
 
-        public IBindable<WeakReference<ScoreInfo>> ItemRemoved => scoreModelManager.ItemRemoved;
+        public event Action<ScoreInfo> ItemRemoved
+        {
+            add => scoreModelManager.ItemRemoved += value;
+            remove => scoreModelManager.ItemRemoved -= value;
+        }
 
         public Task ImportFromStableAsync(StableStorage stableStorage)
         {
@@ -352,18 +359,24 @@ namespace osu.Game.Scoring
 
         #endregion
 
-        #region Implementation of IModelDownloader<ScoreInfo>
+        #region Implementation of IModelDownloader<IScoreInfo>
 
-        public IBindable<WeakReference<ArchiveDownloadRequest<ScoreInfo>>> DownloadBegan => scoreModelDownloader.DownloadBegan;
-
-        public IBindable<WeakReference<ArchiveDownloadRequest<ScoreInfo>>> DownloadFailed => scoreModelDownloader.DownloadFailed;
-
-        public bool Download(ScoreInfo model, bool useSayobot, bool minimiseDownloadSize)
+        public event Action<ArchiveDownloadRequest<IScoreInfo>> DownloadBegan
         {
-            return scoreModelDownloader.Download(model, useSayobot, minimiseDownloadSize);
+            add => scoreModelDownloader.DownloadBegan += value;
+            remove => scoreModelDownloader.DownloadBegan -= value;
         }
 
-        public ArchiveDownloadRequest<ScoreInfo> GetExistingDownload(ScoreInfo model)
+        public event Action<ArchiveDownloadRequest<IScoreInfo>> DownloadFailed
+        {
+            add => scoreModelDownloader.DownloadFailed += value;
+            remove => scoreModelDownloader.DownloadFailed -= value;
+        }
+
+        public bool Download(IScoreInfo model, bool minimiseDownloadSize) =>
+            scoreModelDownloader.Download(model, minimiseDownloadSize);
+
+        public ArchiveDownloadRequest<IScoreInfo> GetExistingDownload(IScoreInfo model)
         {
             return scoreModelDownloader.GetExistingDownload(model);
         }

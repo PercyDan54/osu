@@ -8,11 +8,11 @@ using osu.Framework.Bindables;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Replays;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play;
-using osu.Game.Users;
 
 namespace osu.Game.Rulesets.Osu.Mods
 {
@@ -35,7 +35,7 @@ namespace osu.Game.Rulesets.Osu.Mods
             {
                 ScoreInfo = new ScoreInfo
                 {
-                    User = new User { Username = CursorDance.Value ? "danser" : "Autoplay" },
+                    User = new APIUser { Username = CursorDance.Value ? "danser" : "Autoplay" },
                     BeatmapInfo = beatmap.BeatmapInfo,
                     BeatmapInfoID = beatmap.BeatmapInfo.Metadata.ID,
                     Date = DateTime.UtcNow,

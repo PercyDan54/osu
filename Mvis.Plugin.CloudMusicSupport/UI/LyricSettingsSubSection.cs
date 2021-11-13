@@ -49,8 +49,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 new SettingsSlider<double>
                 {
                     LabelText = CloudMusicStrings.GlobalOffsetMain,
-                    Current = config.GetBindable<double>(LyricSettings.LyricOffset),
-                    TooltipText = CloudMusicStrings.GlobalOffsetSub
+                    Current = config.GetBindable<double>(LyricSettings.LyricOffset)
                 },
                 new SettingsSlider<float>
                 {
