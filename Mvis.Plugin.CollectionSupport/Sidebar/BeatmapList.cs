@@ -62,7 +62,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             };
 
             addBeatmapSets();
-            working.BindValueChanged(OnBeatmapChanged);
+            working.BindValueChanged(onBeatmapChanged);
             IsCurrent.BindValueChanged(v =>
             {
                 foreach (var d in fillFlow)
@@ -100,7 +100,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             if (!scrollCache.IsValid) scrollToCurrent();
         }
 
-        private void OnBeatmapChanged(ValueChangedEvent<WorkingBeatmap> v)
+        private void onBeatmapChanged(ValueChangedEvent<WorkingBeatmap> v)
         {
             currentPiece?.InActive();
             currentPiece = null;
@@ -134,7 +134,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                 return;
             }
 
-            var index = fillFlow.IndexOf(currentPiece);
+            int index = fillFlow.IndexOf(currentPiece);
 
             //如果是第一个，那么滚动到头
             if (index == 0)

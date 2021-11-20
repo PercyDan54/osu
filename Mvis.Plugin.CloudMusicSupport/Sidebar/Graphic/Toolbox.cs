@@ -139,13 +139,13 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight,
                     Width = 225,
-                    PlaceholderText = "按网易云ID搜索歌词"
+                    PlaceholderText = "Search by song ID"
                 }
             });
 
             textBox.OnCommit += (sender, isNewText) =>
             {
-                if (int.TryParse(sender.Text, out var id))
+                if (int.TryParse(sender.Text, out int id))
                     plugin.GetLyricFor(id);
                 else
                 {

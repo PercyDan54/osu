@@ -121,10 +121,10 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         {
             base.LoadComplete();
 
-            collection.BindValueChanged(OnCollectionChanged);
+            collection.BindValueChanged(onCollectionChanged);
         }
 
-        private void OnCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
+        private void onCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
         {
             var c = v.NewValue;
 
@@ -140,7 +140,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             foreach (var item in c.Beatmaps)
             {
                 //获取当前BeatmapSet
-                var currentSet = item.BeatmapSet;
+                var currentSet = (BeatmapSetInfo)item.BeatmapSet;
 
                 //进行比对，如果beatmapList中不存在，则添加。
                 if (!beatmapSets.Contains(currentSet))

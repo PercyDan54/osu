@@ -121,7 +121,7 @@ namespace Mvis.Plugin.CollectionSupport
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            CurrentCollection.BindValueChanged(OnCollectionChanged);
+            CurrentCollection.BindValueChanged(onCollectionChanged);
 
             collectionManager.Collections.CollectionChanged += triggerRefresh;
         }
@@ -277,7 +277,7 @@ namespace Mvis.Plugin.CollectionSupport
                 var currentSet = item.BeatmapSet;
                 //进行比对，如果beatmapList中不存在，则添加。
                 if (!beatmapList.Contains(currentSet))
-                    beatmapList.Add(currentSet);
+                    beatmapList.Add((BeatmapSetInfo)currentSet);
 
                 if (RuntimeInfo.OS == RuntimeInfo.Platform.Linux)
                 {
@@ -286,7 +286,7 @@ namespace Mvis.Plugin.CollectionSupport
                         Label = item.BeatmapSet.Metadata.GetDisplayTitleRomanisable().GetPreferred(true),
                         OnActive = () =>
                         {
-                            Schedule(() => Play(beatmaps.GetWorkingBeatmap(item)));
+                            Schedule(() => Play(beatmaps.GetWorkingBeatmap((BeatmapInfo)item)));
                         }
                     };
 
@@ -331,7 +331,7 @@ namespace Mvis.Plugin.CollectionSupport
         private void triggerRefresh(object sender, NotifyCollectionChangedEventArgs e)
             => updateBeatmaps(CurrentCollection.Value);
 
-        private void OnCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
+        private void onCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
         {
             updateBeatmaps(CurrentCollection.Value);
         }

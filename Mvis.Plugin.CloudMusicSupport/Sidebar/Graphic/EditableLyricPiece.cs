@@ -108,7 +108,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                                 new OsuButton
                                 {
                                     Text = CloudMusicStrings.TrackTimeToLyric,
-                                    Size = new Vector2(120, 40),
+                                    Size = new Vector2(180, 40),
                                     Action = () =>
                                     {
                                         Value.Time = mvisScreen.CurrentTrack.CurrentTime;
@@ -120,7 +120,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                                 new OsuButton
                                 {
                                     Text = CloudMusicStrings.LyricTimeToTrack,
-                                    Size = new Vector2(120, 40),
+                                    Size = new Vector2(180, 40),
                                     Action = () => mvisScreen.SeekTo(Value.Time)
                                 }
                             }

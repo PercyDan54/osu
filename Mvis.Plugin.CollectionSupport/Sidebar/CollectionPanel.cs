@@ -231,7 +231,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
 
                 //进行比对，如果beatmapList中不存在，则添加。
                 if (!beatmapSets.Contains(currentSet))
-                    beatmapSets.Add(currentSet);
+                    beatmapSets.Add((BeatmapSetInfo)currentSet);
             }
         }
 
