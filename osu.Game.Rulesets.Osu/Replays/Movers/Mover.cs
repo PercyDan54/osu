@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 
@@ -16,8 +15,8 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
         protected double EndTime => End.StartTime;
         protected double Duration => EndTime - StartTime;
 
-        protected Vector2 StartPos => ObjectsDuring[ObjectIndex] ? Start.StackedPosition : Start is Slider ? LastPos : Start.StackedEndPosition;
-        protected Vector2 EndPos => End.StackedPosition;
+        public Vector2 StartPos;
+        public Vector2 EndPos;
         protected float StartX => StartPos.X;
         protected float StartY => StartPos.Y;
         protected float EndX => EndPos.X;
@@ -25,34 +24,13 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         protected float T(double time) => (float)((time - StartTime) / Duration);
 
-        public bool[] ObjectsDuring { set; protected get; }
-
         public int ObjectIndex { set; protected get; }
-        public OsuBeatmap Beatmap { set; protected get; }
+        public List<OsuHitObject> HitObjects;
         public IReadOnlyList<IApplicableToRate> TimeAffectingMods { set; protected get; }
 
-        //This hack should be removed
-        public Vector2 LastPos;
+        public OsuHitObject Start => HitObjects[ObjectIndex];
 
-        public OsuHitObject Start
-        {
-            get
-            {
-                if (Beatmap.HitObjects[ObjectIndex] is Spinner { SpinsRequired: 0 }) return Beatmap.HitObjects[ObjectIndex == 0 ? ObjectIndex : ObjectIndex - 1];
-
-                return Beatmap.HitObjects[ObjectIndex];
-            }
-        }
-
-        public OsuHitObject End
-        {
-            get
-            {
-                if (Beatmap.HitObjects[ObjectIndex + 1] is Spinner { SpinsRequired: 0 }) return Beatmap.HitObjects[ObjectIndex == Beatmap.HitObjects.Count ? ObjectIndex - 1 : ObjectIndex];
-
-                return Beatmap.HitObjects[ObjectIndex + 1];
-            }
-        }
+        public OsuHitObject End => HitObjects[ObjectIndex + 1];
 
         public virtual void OnObjChange() { }
         public abstract Vector2 Update(double time);

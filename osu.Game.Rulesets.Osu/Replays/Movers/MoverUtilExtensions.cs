@@ -24,26 +24,26 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public static float AngleBetween(Vector2 centre, Vector2 v1, Vector2 v2)
         {
-            var a = Vector2.Distance(centre, v1);
-            var b = Vector2.Distance(centre, v2);
-            var c = Vector2.Distance(v1, v2);
+            float a = Vector2.Distance(centre, v1);
+            float b = Vector2.Distance(centre, v2);
+            float c = Vector2.Distance(v1, v2);
             return MathF.Acos((a * a + b * b - c * c) / (2 * a * b));
         }
 
         public static bool IsStream(params OsuHitObject[] hitObjects)
         {
             var config = MConfigManager.Instance;
-            var max = config.Get<float>(MSetting.StreamMaximum);
-            var min = config.Get<float>(MSetting.StreamMinimum);
+            float max = config.Get<float>(MSetting.StreamMaximum);
+            float min = config.Get<float>(MSetting.StreamMinimum);
 
             var h = hitObjects[0];
-            var isStream = false;
+            bool isStream = false;
 
             for (int i = 0; i < hitObjects.Length - 1; i++)
             {
                 var next = hitObjects[i + 1];
-                var distanceSquared = Vector2.DistanceSquared(next.StackedPosition, h.StackedEndPosition);
-                var timeDifference = next.StartTime - h.GetEndTime();
+                float distanceSquared = Vector2.DistanceSquared(next.StackedPosition, h.StackedEndPosition);
+                double timeDifference = next.StartTime - h.GetEndTime();
 
                 isStream = distanceSquared >= min && distanceSquared <= max && timeDifference < 200 && h is HitCircle && next is HitCircle;
                 h = next;

@@ -2,9 +2,9 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Framework.Graphics;
 using osu.Framework.Utils;
 using osu.Game.Configuration;
-using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Replays.Movers
@@ -13,6 +13,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
     {
         protected readonly bool WaitForPreempt = MConfigManager.Instance.Get<bool>(MSetting.WaitForPreempt);
         protected new double StartTime;
+        protected Vector2 LastPos;
         protected double GetReactionTime(double timeInstant) => ApplyModsToRate(timeInstant, 100);
 
         protected double ApplyModsToRate(double time, double rate)
@@ -32,7 +33,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
                 return LastPos;
             }
 
-            return Interpolation.ValueAt(time, Start is HitCircle ? StartPos : LastPos, EndPos, StartTime, EndTime);
+            return Interpolation.ValueAt(time, StartPos, EndPos, StartTime, EndTime, Easing.Out);
         }
 
         public override void OnObjChange() => StartTime = base.StartTime;

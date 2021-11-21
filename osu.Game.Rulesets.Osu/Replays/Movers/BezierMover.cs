@@ -26,18 +26,18 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public override void OnObjChange()
         {
-            var dist = Vector2.Distance(StartPos, EndPos);
+            float dist = Vector2.Distance(StartPos, EndPos);
 
             if (previousSpeed < 0)
             {
                 previousSpeed = (float)(dist / Duration);
             }
 
-            var genScale = previousSpeed;
+            float genScale = previousSpeed;
             var s1 = Start as Slider;
             var s2 = End as Slider;
-            var ok1 = s1 != null;
-            var ok2 = s2 != null;
+            bool ok1 = s1 != null;
+            bool ok2 = s2 != null;
             float dst = 0, dst2 = 0, startAngle = 0, endAngle = 0;
 
             if (s1 != null)
@@ -78,7 +78,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             }
             else
             {
-                var angle = StartPos.AngleRV(pt);
+                float angle = StartPos.AngleRV(pt);
 
                 if (float.IsNaN(angle))
                     angle = 0;

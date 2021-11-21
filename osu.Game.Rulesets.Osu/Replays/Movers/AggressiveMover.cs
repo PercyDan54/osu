@@ -15,8 +15,8 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public override void OnObjChange()
         {
-            var scaledDistance = (float)(EndTime - StartTime);
-            var newAngle = lastAngle + MathF.PI;
+            float scaledDistance = (float)(EndTime - StartTime);
+            float newAngle = lastAngle + MathF.PI;
 
             if (Start is Slider start)
                 newAngle = start.GetEndAngle();

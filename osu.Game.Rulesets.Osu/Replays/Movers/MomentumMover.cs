@@ -58,16 +58,18 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             invertAngleInterpolation = config.Get<bool>(MSetting.InvertAngleInterpolation);
         }
 
-        private bool isSame(OsuHitObject o1, OsuHitObject o2)
+        private bool isSame(OsuHitObject o1, OsuHitObject o2) => isSame(o1, o2, skipStacks);
+
+        private bool isSame(OsuHitObject o1, OsuHitObject o2, bool skipStacks)
         {
             return o1.StackedPosition == o2.StackedPosition || skipStacks && o1.Position == o2.Position;
         }
 
         private (float, bool) nextAngle()
         {
-            var h = Beatmap.HitObjects;
+            var h = HitObjects;
 
-            for (var i = ObjectIndex + 1; i < h.Count - 1; ++i)
+            for (int i = ObjectIndex + 1; i < h.Count - 1; ++i)
             {
                 var o = h[i];
                 if (o is Slider s) return (s.GetStartAngle(), true);
@@ -82,9 +84,9 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
         {
             OsuHitObject next = null;
 
-            if (Beatmap.HitObjects.Count - 1 > ObjectIndex + 2) next = Beatmap.HitObjects[ObjectIndex + 2];
+            if (HitObjects.Count - 1 > ObjectIndex + 2) next = HitObjects[ObjectIndex + 2];
 
-            var stream = false;
+            bool stream = false;
             float sq1 = 0, sq2 = 0;
 
             if (next != null)
@@ -94,22 +96,22 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
                 sq2 = Vector2.DistanceSquared(EndPos, next.StackedPosition);
             }
 
-            var area = restrictArea * MathF.PI / 180f;
-            var sarea = streamArea * MathF.PI / 180f;
-            var mult = jumpMult;
-            var distance = Vector2.Distance(StartPos, EndPos);
+            float area = restrictArea * MathF.PI / 180f;
+            float sarea = streamArea * MathF.PI / 180f;
+            float mult = jumpMult;
+            float distance = Vector2.Distance(StartPos, EndPos);
 
             var startSlider = Start as Slider;
-            var (a2, fromLong) = nextAngle();
-            var a1 = (ObjectsDuring[ObjectIndex] ? startSlider?.GetStartAngle() + MathF.PI : startSlider?.GetEndAngle()) ?? (ObjectIndex == 0 ? a2 + MathF.PI : StartPos.AngleRV(last));
-            var ac = a2 - EndPos.AngleRV(StartPos);
+            (float a2, bool fromLong) = nextAngle();
+            float a1 = startSlider?.GetEndAngle() ?? (ObjectIndex == 0 ? a2 + MathF.PI : StartPos.AngleRV(last));
+            float ac = a2 - EndPos.AngleRV(StartPos);
 
             if (End is Slider s2 && !isSame(Start, End) && sliderPredict)
             {
                 var pos = Start.StackedPosition;
                 var pos2 = EndPos;
-                var s2a = s2.GetStartAngle();
-                var dst2 = Vector2.Distance(pos, pos2);
+                float s2a = s2.GetStartAngle();
+                float dst2 = Vector2.Distance(pos, pos2);
                 pos2 = new Vector2(s2a, dst2 * mult) + pos2;
                 a2 = pos.AngleRV(pos2);
             }
@@ -143,7 +145,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             }
             else if (next != null && !fromLong && interpolateAngles)
             {
-                var r = sq1 / (sq1 + sq2);
+                float r = sq1 / (sq1 + sq2);
                 a = StartPos.AngleRV(EndPos);
 
                 if (invertAngleInterpolation)
@@ -155,7 +157,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
                 mult = offsetMult;
             }
 
-            var bounce = !(End is IHasDuration) && isSame(Start, End);
+            bool bounce = !(End is IHasDuration) && isSame(Start, End, true);
 
             if (equalPosBounce > 0 && bounce)
             {
@@ -165,7 +167,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
                 mult = equalPosBounce;
             }
 
-            var duration = (float)(EndTime - StartTime);
+            float duration = (float)(EndTime - StartTime);
 
             if (durationTrigger > 0 && duration >= durationTrigger)
                 mult *= durationMult * (duration / durationTrigger);
