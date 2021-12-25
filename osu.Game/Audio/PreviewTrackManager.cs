@@ -19,9 +19,6 @@ namespace osu.Game.Audio
 
         private readonly BindableDouble muteBindable = new BindableDouble();
 
-        [Resolved]
-        private AudioManager audio { get; set; }
-
         private ITrackStore trackStore;
 
         protected TrackManagerPreviewTrack CurrentTrack;
@@ -120,7 +117,9 @@ namespace osu.Game.Audio
             protected override void LoadComplete()
             {
                 base.LoadComplete();
-                Logger.Log($"A {nameof(PreviewTrack)} was created without a containing {nameof(IPreviewTrackOwner)}. An owner should be added for correct behaviour.");
+
+                if (Owner == null)
+                    Logger.Log($"A {nameof(PreviewTrack)} was created without a containing {nameof(IPreviewTrackOwner)}. An owner should be added for correct behaviour.");
             }
         }
     }

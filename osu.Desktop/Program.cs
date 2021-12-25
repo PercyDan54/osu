@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using osu.Desktop.LegacyIpc;
 using osu.Framework;
 using osu.Framework.Development;
 using osu.Framework.Logging;
@@ -18,9 +19,10 @@ namespace osu.Desktop
     {
         private const string base_game_name = @"osu";
 
-        [STAThread]
-        public static int Main(string[] args)
+        private static LegacyTcpIpcProvider legacyIpc;
 
+        [STAThread]
+        public static void Main(string[] args)
         {
             // Back up the cwd before DesktopGameHost changes it
             string cwd = Environment.CurrentDirectory;
@@ -70,14 +72,28 @@ namespace osu.Desktop
                                 throw new TimeoutException(@"IPC took too long to send");
                         }
 
-                        return 0;
+                        return;
                     }
 
                     // we want to allow multiple instances to be started when in debug.
                     if (!DebugUtils.IsDebugBuild)
                     {
                         Logger.Log(@"osu! does not support multiple running instances.", LoggingTarget.Runtime, LogLevel.Error);
-                        return 0;
+                        return;
+                    }
+                }
+
+                if (host.IsPrimaryInstance)
+                {
+                    try
+                    {
+                        Logger.Log("Starting legacy IPC provider...");
+                        legacyIpc = new LegacyTcpIpcProvider();
+                        legacyIpc.Bind();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex, "Failed to start legacy IPC provider");
                     }
                 }
 
@@ -85,8 +101,6 @@ namespace osu.Desktop
                     host.Run(new TournamentGame());
                 else
                     host.Run(new OsuGameDesktop(args));
-
-                return 0;
             }
         }
 

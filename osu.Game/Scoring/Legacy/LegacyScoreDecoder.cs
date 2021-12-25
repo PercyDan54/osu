@@ -80,12 +80,9 @@ namespace osu.Game.Scoring.Legacy
                 byte[] compressedReplay = sr.ReadByteArray();
 
                 if (version >= 20140721)
-                    scoreInfo.OnlineScoreID = sr.ReadInt64();
+                    scoreInfo.OnlineID = sr.ReadInt64();
                 else if (version >= 20121008)
-                    scoreInfo.OnlineScoreID = sr.ReadInt32();
-
-                if (scoreInfo.OnlineScoreID <= 0)
-                    scoreInfo.OnlineScoreID = null;
+                    scoreInfo.OnlineID = sr.ReadInt32();
 
                 if (compressedReplay?.Length > 0)
                 {
@@ -140,7 +137,7 @@ namespace osu.Game.Scoring.Legacy
             int countGeki = score.GetCountGeki() ?? 0;
             int countKatu = score.GetCountKatu() ?? 0;
 
-            switch (score.Ruleset.ID)
+            switch (score.Ruleset.OnlineID)
             {
                 case 0:
                 {

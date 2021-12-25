@@ -30,7 +30,10 @@ namespace Mvis.Plugin.FakeEditor.Editor
         private void load()
         {
             //不知道为什么，谱面的Ruleset会是null??????
-            var rulesetInfo = beatmap.BeatmapInfo.Ruleset ?? new DummyRulesetInfo();
+            var rulesetInfo = beatmap.BeatmapInfo.Ruleset;
+            if (rulesetInfo == null)
+                return;
+
             ruleset = rulesetInfo.CreateInstance();
 
             var playableBeatmap = beatmap.GetPlayableBeatmap(rulesetInfo);
@@ -45,9 +48,6 @@ namespace Mvis.Plugin.FakeEditor.Editor
 
                 dependencies.CacheAs(editorBeatmap);
             }
-
-            if (rulesetInfo is DummyRulesetInfo)
-                return;
 
             beatmapSkinProvider = new BeatmapSkinProvidingContainer(beatmap.Skin);
             rulesetSkinProvider = new SkinProvidingContainer(ruleset.CreateLegacySkinProvider(beatmapSkinProvider, editorBeatmap.PlayableBeatmap));

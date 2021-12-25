@@ -67,7 +67,6 @@ namespace M.DBus.Tray
                     {
                         //额外产生的SimpleEntry
                         //如果某一个subEntry是SSubmenu，则其Children中的所有SimpleEntry都将加入这个词典
-                        IDictionary<int, SimpleEntry> additDict;
 
                         //如果subEntry没有被指定ChildID
                         if (subEntry.ChildId == -2)
@@ -87,10 +86,12 @@ namespace M.DBus.Tray
 
                         //添加目录
                         //不需要处理additonalOrders，因为已经有additDict可以用作计数了
-                        subMenus.Add(subEntry.ToDbusObject(subEntry.ChildId, maxOrder, out additDict));
+                        subMenus.Add(subEntry.ToDbusObject(subEntry.ChildId, maxOrder, out var additDict));
 
                         //将循环调用返回的 额外词典 加进要返回的 词典 中
+#pragma warning disable RS0030 // Do not used banned APIs
                         additionalEntries.AddRange(additDict);
+#pragma warning restore RS0030 // Do not used banned APIs
 
                         //当前的最大id += 多出的目录数量 + 额外目录的数量
                         maxOrder += additDict.Count;
