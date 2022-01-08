@@ -15,7 +15,7 @@
     <EmbeddedResource Include="Tracks\**\*" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Humanizer.Core" Version="2.11.10" />
-    <PackageReference Include="ppy.osu.Framework" Version="2021.1222.0" />
+    <PackageReference Include="Humanizer.Core" Version="2.13.14" />
+    <PackageReference Include="ppy.osu.Framework" Version="2021.1227.0" />
   </ItemGroup>
 </Project>
