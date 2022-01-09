@@ -1,6 +1,7 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using System.Collections.Generic;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
@@ -30,7 +31,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         public OsuHitObject Start => HitObjects[ObjectIndex];
 
-        public OsuHitObject End => HitObjects[ObjectIndex + 1];
+        public OsuHitObject End => HitObjects[Math.Min(ObjectIndex + 1, HitObjects.Count - 1)];
 
         public virtual void OnObjChange() { }
         public abstract Vector2 Update(double time);

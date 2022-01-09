@@ -13,7 +13,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
     {
         protected readonly bool WaitForPreempt = MConfigManager.Instance.Get<bool>(MSetting.WaitForPreempt);
         protected new double StartTime;
-        protected Vector2 LastPos;
+
         protected double GetReactionTime(double timeInstant) => ApplyModsToRate(timeInstant, 100);
 
         protected double ApplyModsToRate(double time, double rate)
@@ -30,7 +30,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             if (WaitForPreempt && waitTime > time)
             {
                 StartTime = waitTime;
-                return LastPos;
+                return StartPos;
             }
 
             return Interpolation.ValueAt(time, StartPos, EndPos, StartTime, EndTime, Easing.Out);
