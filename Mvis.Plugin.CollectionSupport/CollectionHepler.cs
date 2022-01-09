@@ -11,7 +11,6 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Audio;
-using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game;
 using osu.Game.Beatmaps;
@@ -74,8 +73,8 @@ namespace Mvis.Plugin.CollectionSupport
 
         public CollectionHelper()
         {
-            Name = "收藏夹";
-            Description = "将收藏夹作为歌单播放音乐!";
+            Name = "Collection";
+            Description = "Use collections as playlists";
             Author = "mf-osu";
 
             Flags.AddRange(new[]
@@ -94,7 +93,7 @@ namespace Mvis.Plugin.CollectionSupport
 
         private readonly SimpleEntry trayEntry = new SimpleEntry
         {
-            Label = "收藏夹（未选择任何收藏夹）",
+            Label = "Collection (No collection selected)",
             ChildrenDisplay = ChildrenDisplayType.SSubmenu
         };
 
@@ -299,7 +298,7 @@ namespace Mvis.Plugin.CollectionSupport
                 dBusObject.CollectionName = collection.Name.Value;
 
             updateCurrentPosition(true);
-            trayEntry.Label = $"收藏夹（{collection.Name}）";
+            trayEntry.Label = $"Collection({collection.Name})";
         }
 
         private SimpleEntry currentSubEntry;

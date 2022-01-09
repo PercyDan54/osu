@@ -1,13 +1,11 @@
 using System;
 using osu.Framework.Allocation;
-using osu.Framework.Graphics.Containers;
-using osu.Framework.Input.Events;
 using osu.Framework.Screens;
 using osu.Game.Overlays;
 
 namespace osu.Game.Screens.Select
 {
-    public class MvisSongSelect : SongSelect
+    public class LLinSongSelect : SongSelect
     {
         public override bool HideOverlaysOnEnter => true;
 
@@ -22,9 +20,17 @@ namespace osu.Game.Screens.Select
             musicController.CurrentTrack.Looping = true;
         }
 
+        protected override void ApplyFilterToCarousel(FilterCriteria criteria)
+        {
+            criteria.RulesetCriteria = null;
+            criteria.Ruleset = null;
+
+            base.ApplyFilterToCarousel(criteria);
+        }
+
         protected override BeatmapDetailArea CreateBeatmapDetailArea() => new MvisBeatmapDetailArea
         {
-            SelectCurrentAction = () => OnStart(),
+            SelectCurrentAction = () => OnStart()
         };
 
         public override bool AllowEditing => false;

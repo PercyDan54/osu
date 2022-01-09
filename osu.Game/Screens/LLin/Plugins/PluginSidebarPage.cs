@@ -66,7 +66,7 @@ namespace osu.Game.Screens.LLin.Plugins
                     RelativeSizeAxes = Axes.Both,
                     Alpha = 0
                 },
-                placeholder = new ClickablePlaceholder("请先启用该插件!", FontAwesome.Solid.Plug)
+                placeholder = new ClickablePlaceholder("Enable this plugin first!", FontAwesome.Solid.Plug)
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,

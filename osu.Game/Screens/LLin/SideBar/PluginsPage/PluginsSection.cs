@@ -21,7 +21,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
 
         public PluginsSection()
         {
-            Title = "插件";
+            Title = "Plugins";
             Icon = FontAwesome.Solid.Boxes;
         }
 
@@ -53,7 +53,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                     },
                     new OsuSpriteText
                     {
-                        Text = "没有插件",
+                        Text = "No plugin",
                         Font = OsuFont.GetFont(size: 45, weight: FontWeight.Bold),
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,

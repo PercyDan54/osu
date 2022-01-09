@@ -4,7 +4,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
-using osu.Framework.Screens;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osuTK;
@@ -14,7 +13,7 @@ namespace osu.Game.Screens.LLin.SideBar
 {
     public class SongSelectPage : CompositeDrawable, ISidebarContent
     {
-        public string Title => "歌曲选择";
+        public string Title => "Song select";
         public IconUsage Icon => FontAwesome.Solid.MousePointer;
 
         public SongSelectPage()
@@ -40,8 +39,8 @@ namespace osu.Game.Screens.LLin.SideBar
                     },
                     new OsuSpriteText
                     {
-                        Text = "点任意处前往歌曲选择",
-                        Font = OsuFont.GetFont(size: 45, weight: FontWeight.Bold),
+                        Text = "Click to go to song select",
+                        Font = OsuFont.GetFont(weight: FontWeight.Bold),
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
                     }

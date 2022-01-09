@@ -97,7 +97,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         {
             base.LoadComplete();
 
-            collectionHelper.CurrentCollection.BindValueChanged(OnCurrentCollectionChanged);
+            collectionHelper.CurrentCollection.BindValueChanged(onCurrentCollectionChanged);
             selectedCollection.BindValueChanged(updateSelection);
             selectedPanel.BindValueChanged(updateSelectedPanel);
 
@@ -105,7 +105,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             mvisScreen.Resuming += RefreshCollectionList;
         }
 
-        private void OnCurrentCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
+        private void onCurrentCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
         {
             if (v.NewValue == null) return;
 

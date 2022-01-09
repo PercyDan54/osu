@@ -132,14 +132,14 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                         {
                             new OsuSpriteText
                             {
-                                Text = Beatmap.Metadata.TitleUnicode ?? Beatmap.Metadata.Title,
+                                Text = string.IsNullOrEmpty(Beatmap.Metadata.TitleUnicode) ? Beatmap.Metadata.Title : Beatmap.Metadata.TitleUnicode,
                                 Font = OsuFont.GetFont(weight: FontWeight.Bold, size: 20),
                                 RelativeSizeAxes = Axes.X,
                                 Truncate = true
                             },
                             new OsuSpriteText
                             {
-                                Text = Beatmap.Metadata.ArtistUnicode ?? Beatmap.Metadata.Artist,
+                                Text = string.IsNullOrEmpty(Beatmap.Metadata.ArtistUnicode) ? Beatmap.Metadata.Artist : Beatmap.Metadata.ArtistUnicode,
                                 Font = OsuFont.GetFont(weight: FontWeight.Bold),
                                 RelativeSizeAxes = Axes.X,
                                 Truncate = true

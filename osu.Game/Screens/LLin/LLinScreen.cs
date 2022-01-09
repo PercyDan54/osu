@@ -777,7 +777,7 @@ namespace osu.Game.Screens.LLin
             //添加选歌入口
             sidebar.Add(new SongSelectPage
             {
-                Action = () => this.Push(new MvisSongSelect
+                Action = () => this.Push(new LLinSongSelect
                 {
                     ExitAction = () => sidebar.Hide()
                 }),

@@ -16,7 +16,7 @@ namespace osu.Game.Overlays
             Icon = FontAwesome.Regular.PlayCircle
         };
 
-        public override LocalisableString Header => "M-vis Player";
+        public override LocalisableString Header => "LLin";
 
         public MfMvisSection()
         {

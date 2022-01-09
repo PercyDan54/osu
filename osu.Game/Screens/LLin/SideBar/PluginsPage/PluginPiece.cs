@@ -1,3 +1,4 @@
+using M.Resources.Localisation.LLin;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
@@ -72,7 +73,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                 },
                 textureWrapper = new DelayedLoadUnloadWrapper(() =>
                 {
-                    var coverName = Plugin.GetType().Namespace?.Replace(".", "") ?? "Plugin";
+                    string coverName = Plugin.GetType().Namespace?.Replace(".", "") ?? "Plugin";
                     var s = new PluginBackgroundSprite($"{coverName}/{Plugin.GetType().Name}")
                     {
                         Anchor = Anchor.CentreLeft,
@@ -140,7 +141,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                                 {
                                     Colour = Color4.Gold,
                                     Text = Plugin.Version != manager.PluginVersion
-                                        ? Plugin.Version < manager.PluginVersion ? "为历史版本打造" : "为未来版本打造"
+                                        ? Plugin.Version < manager.PluginVersion ? "made for previous version" : "made for future version"
                                         : " ",
                                     Alpha = Plugin.Version != manager.PluginVersion ? 1 : 0,
                                     Font = OsuFont.GetFont(weight: FontWeight.Bold, size: 19),
@@ -177,7 +178,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                                         Height = 30,
                                         RelativeSizeAxes = Axes.X,
                                         Width = 0.95f,
-                                        Text = "禁用此插件",
+                                        Text = LLinGenericStrings.DisablePlugin,
                                         Action = () => manager.DisablePlugin(Plugin),
                                         Enabled = { Value = false },
                                         Anchor = Anchor.BottomCentre,
@@ -188,7 +189,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                                         Height = 30,
                                         RelativeSizeAxes = Axes.X,
                                         Width = 0.95f,
-                                        Text = "启用此插件",
+                                        Text = LLinGenericStrings.EnablePlugin,
                                         Action = () => manager.ActivePlugin(Plugin),
                                         Enabled = { Value = false },
                                         Anchor = Anchor.BottomCentre,

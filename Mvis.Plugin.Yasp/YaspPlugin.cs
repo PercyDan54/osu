@@ -43,7 +43,7 @@ namespace Mvis.Plugin.Yasp
         public YaspPlugin()
         {
             Name = "YASP";
-            Description = "另一个简单的播放器面板";
+            Description = "Yet Another Simple Panel";
             Author = "MATRIX-夜翎";
 
             Flags.AddRange(new[]

@@ -8,7 +8,7 @@ namespace osu.Game.Screens.LLin.SideBar
 {
     internal class SidebarPluginsPage : OsuScrollContainer, ISidebarContent
     {
-        public string Title => "插件";
+        public string Title => "Plugins";
         public IconUsage Icon => FontAwesome.Solid.Boxes;
 
         [BackgroundDependencyLoader]
