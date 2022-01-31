@@ -6,13 +6,12 @@ using osu.Framework.Development;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Textures;
-using osu.Game;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
 
-namespace osu.Desktop.Overlays
+namespace osu.Game.Overlays
 {
     public class VersionManager : VisibilityContainer
     {

@@ -33,15 +33,6 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
         [Resolved]
         private IImplementLLin mvisScreen { get; set; }
 
-        [Resolved]
-        private Storage storage { get; set; }
-
-        [Resolved]
-        private DialogOverlay dialog { get; set; }
-
-        [Resolved(canBeNull: true)]
-        private GameHost host { get; set; }
-
         private LyricPlugin plugin => (LyricPlugin)Plugin;
 
         public int BeatmapSetId;
@@ -139,7 +130,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
 
         private void refreshBeatmap(WorkingBeatmap working)
         {
-            BeatmapSetId = working.BeatmapSetInfo.ID;
+            BeatmapSetId = working.BeatmapSetInfo.OnlineID;
             toolbox.IdText = $"ID: {BeatmapSetId}";
         }
     }

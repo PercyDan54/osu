@@ -110,7 +110,7 @@ namespace osu.Game.Tests.Visual.Gameplay
 
             AddUntilStep("results displayed", () => Player.GetChildScreen() is ResultsScreen);
             AddAssert("ensure passing submission", () => Player.SubmittedScore?.ScoreInfo.Passed == true);
-            AddAssert("submitted score has correct ruleset ID", () => Player.SubmittedScore?.ScoreInfo.RulesetID == new TaikoRuleset().RulesetInfo.ID);
+            AddAssert("submitted score has correct ruleset ID", () => Player.SubmittedScore?.ScoreInfo.Ruleset.ShortName == new TaikoRuleset().RulesetInfo.ShortName);
         }
 
         [Test]
@@ -130,7 +130,7 @@ namespace osu.Game.Tests.Visual.Gameplay
 
             AddUntilStep("results displayed", () => Player.GetChildScreen() is ResultsScreen);
             AddAssert("ensure passing submission", () => Player.SubmittedScore?.ScoreInfo.Passed == true);
-            AddAssert("submitted score has correct ruleset ID", () => Player.SubmittedScore?.ScoreInfo.RulesetID == new ManiaRuleset().RulesetInfo.ID);
+            AddAssert("submitted score has correct ruleset ID", () => Player.SubmittedScore?.ScoreInfo.Ruleset.ShortName == new ManiaRuleset().RulesetInfo.ShortName);
         }
 
         [Test]
@@ -237,7 +237,7 @@ namespace osu.Game.Tests.Visual.Gameplay
             createPlayerTest(false, r =>
             {
                 var beatmap = createTestBeatmap(r);
-                beatmap.BeatmapInfo.OnlineID = null;
+                beatmap.BeatmapInfo.OnlineID = -1;
                 return beatmap;
             });
 
@@ -255,7 +255,15 @@ namespace osu.Game.Tests.Visual.Gameplay
         {
             prepareTestAPI(true);
 
-            createPlayerTest(false, createRuleset: () => new OsuRuleset { RulesetInfo = { OnlineID = rulesetId ?? -1 } });
+            createPlayerTest(false, createRuleset: () => new OsuRuleset
+            {
+                RulesetInfo =
+                {
+                    Name = "custom",
+                    ShortName = $"custom{rulesetId}",
+                    OnlineID = rulesetId ?? -1
+                }
+            });
 
             AddUntilStep("wait for token request", () => Player.TokenCreationRequested);
 

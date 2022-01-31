@@ -160,7 +160,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                 }
             };
 
-            Active.BindValueChanged(OnActiveChanged, true);
+            Active.BindValueChanged(onActiveChanged, true);
             colourProvider.HueColour.BindValueChanged(_ =>
             {
                 maskBox.Colour = colourProvider.Dark3.Opacity(0.65f);
@@ -194,23 +194,13 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             protected override void OnNewBeat(int beatIndex, TimingControlPoint timingPoint, EffectControlPoint effectPoint, ChannelAmplitudes amplitudes)
             {
                 base.OnNewBeat(beatIndex, timingPoint, effectPoint, amplitudes);
-
-                switch (timingPoint.TimeSignature)
-                {
-                    case TimeSignatures.SimpleQuadruple:
-                        if ((beatIndex % 4 == 0 && beatIndex / 4 > 0) || effectPoint.KiaiMode)
-                            flashBox.FadeOutFromOne(1000);
-                        break;
-
-                    case TimeSignatures.SimpleTriple:
-                        if ((beatIndex % 3 == 0 && beatIndex / 3 > 0) || effectPoint.KiaiMode)
-                            flashBox.FadeOutFromOne(1000);
-                        break;
-                }
+                int numerator = timingPoint.TimeSignature.Numerator;
+                if ((beatIndex % numerator == 0 && beatIndex / numerator > 0) || effectPoint.KiaiMode)
+                    flashBox.FadeOutFromOne(1000);
             }
         }
 
-        private void OnActiveChanged(ValueChangedEvent<bool> v)
+        private void onActiveChanged(ValueChangedEvent<bool> v)
         {
             switch (v.NewValue)
             {

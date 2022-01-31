@@ -57,7 +57,7 @@ namespace osu.Game.Screens.Play
                 replayReader = new LegacyByteArrayReader(stream.ToArray(), "replay.osr");
             }
 
-            ScoreManager.Instance.Import(Score.ScoreInfo, replayReader).ConfigureAwait(false);
+            ScoreManager.Instance.Import(Score.ScoreInfo, replayReader);
         }
 
         public bool SaveScore;

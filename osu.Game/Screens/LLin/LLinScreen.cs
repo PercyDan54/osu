@@ -487,7 +487,7 @@ namespace osu.Game.Screens.LLin
 
         private LoadingSpinner loadingSpinner;
 
-        private readonly NightcoreBeatContainer nightcoreBeatContainer = new NightcoreBeatContainer();
+        private readonly ModNightcore.NightcoreBeatContainer nightcoreBeatContainer = new ModNightcore.NightcoreBeatContainer();
 
         #region 设置
 
