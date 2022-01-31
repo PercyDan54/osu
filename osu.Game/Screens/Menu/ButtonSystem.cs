@@ -47,6 +47,7 @@ namespace osu.Game.Screens.Menu
         public Action OnSettings;
         public Action OnMultiplayer;
         public Action OnPlaylists;
+        public Action OnReplayVs;
 
         public const float BUTTON_WIDTH = 140f;
         public const float WEDGE_WIDTH = 20;
@@ -131,6 +132,7 @@ namespace osu.Game.Screens.Menu
             buttonsPlay.Add(new Button(ButtonSystemStrings.Multi, @"button-generic-select", FontAwesome.Solid.Users, new Color4(94, 63, 186, 255), onMultiplayer, 0, Key.M));
             buttonsPlay.Add(new Button(ButtonSystemStrings.Playlists, @"button-generic-select", OsuIcon.Charts, new Color4(94, 63, 186, 255), onPlaylists, 0, Key.L));
             buttonsPlay.Add(new Button(@"Mvis player", @"button-generic-select", FontAwesome.Solid.Play, new Color4(0, 86, 73, 255), () => OnMvis?.Invoke()));
+            buttonsPlay.Add(new Button(@"Replay compare", @"button-generic-select", FontAwesome.Solid.SyncAlt, new Color4(0, 86, 73, 255), () => OnReplayVs?.Invoke()));
             buttonsPlay.ForEach(b => b.VisibleState = ButtonSystemState.Play);
 
             buttonsTopLevel.Add(new Button(ButtonSystemStrings.Play, @"button-play-select", OsuIcon.Logo, new Color4(102, 68, 204, 255), () => State = ButtonSystemState.Play, WEDGE_WIDTH, Key.P));

@@ -50,7 +50,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         protected override GameplayClockContainer CreateGameplayClockContainer(WorkingBeatmap beatmap, double gameplayStart)
             => new SpectatorGameplayClockContainer(spectatorPlayerClock);
 
-        private class SpectatorGameplayClockContainer : GameplayClockContainer
+        public class SpectatorGameplayClockContainer : GameplayClockContainer
         {
             public SpectatorGameplayClockContainer([NotNull] IClock sourceClock)
                 : base(sourceClock)

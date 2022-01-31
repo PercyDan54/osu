@@ -16,6 +16,7 @@ using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play;
+using osu.Game.Screens.ReplayVs;
 
 namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 {
@@ -28,6 +29,8 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         /// Whether a <see cref="Player"/> is loaded in the area.
         /// </summary>
         public bool PlayerLoaded => (stack?.CurrentScreen as Player)?.IsLoaded == true;
+
+        public Player Player => stack?.CurrentScreen as Player;
 
         /// <summary>
         /// The user id this <see cref="PlayerArea"/> corresponds to.
@@ -52,11 +55,13 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         private readonly BindableDouble volumeAdjustment = new BindableDouble();
         private readonly Container gameplayContent;
         private readonly LoadingLayer loadingLayer;
+        private readonly bool isReplayVs;
         private OsuScreenStack stack;
 
-        public PlayerArea(int userId, IFrameBasedClock masterClock)
+        public PlayerArea(int userId, IFrameBasedClock masterClock, bool isReplayVs = false)
         {
             UserId = userId;
+            this.isReplayVs = isReplayVs;
 
             RelativeSizeAxes = Axes.Both;
             Masking = true;
@@ -93,7 +98,10 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                 }
             };
 
-            stack.Push(new MultiSpectatorPlayerLoader(Score, () => new MultiSpectatorPlayer(Score, GameplayClock)));
+            if (!isReplayVs)
+                stack.Push(new MultiSpectatorPlayerLoader(Score, () => new MultiSpectatorPlayer(Score, GameplayClock)));
+            else
+                stack.Push(new ReplayVsPlayerLoader(Score, GameplayClock));
             loadingLayer.Hide();
         }
 
