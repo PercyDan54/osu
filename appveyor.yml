@@ -1,4 +1,4 @@
-version: 2022.128.{build}
+version: 2022.205.{build}
 pull_requests:
   do_not_increment_build_number: true
 skip_tags: true
@@ -8,7 +8,7 @@ cache:
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
-  version: 2022.128.0
+  version: 2022.205.0
 build_script:
 - cmd: >-
     dotnet build osu.Desktop -c Release -r win-x64
@@ -26,8 +26,8 @@ artifacts:
   name: osu-linux-arm
 deploy:
 - provider: GitHub
-  tag: 2022.128.0
+  tag: 2022.205.0
   auth_token:
-    secure: wBUeC7f0SGZTu01Bl50RTSas9yizhxdAeqofugDSTpOoZFXOyzvP+X2OOAnaqIWz
+    secure: EEbZ2OGaIPcjhGpQGzfE80TbrG14UiTPGNnQjMIKD5wzrYPQ4Kyhb3qLzMNahL1I
   repository: PercyDan54/osu
   artifact: osu-windows, osu-linux-x64, osu-linux-arm

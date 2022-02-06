@@ -97,7 +97,7 @@ namespace osu.Game.Tests.Visual
 
             public new void Redo() => base.Redo();
 
-            public new void Save() => base.Save();
+            public new bool Save() => base.Save();
 
             public new void Cut() => base.Cut();
 
@@ -106,6 +106,8 @@ namespace osu.Game.Tests.Visual
             public new void Paste() => base.Paste();
 
             public new void SwitchToDifficulty(BeatmapInfo beatmapInfo) => base.SwitchToDifficulty(beatmapInfo);
+
+            public new void CreateNewDifficulty(RulesetInfo rulesetInfo) => base.CreateNewDifficulty(rulesetInfo);
 
             public new bool HasUnsavedChanges => base.HasUnsavedChanges;
 
@@ -126,12 +128,18 @@ namespace osu.Game.Tests.Visual
 
             protected override BeatmapModelManager CreateBeatmapModelManager(Storage storage, RealmAccess realm, RulesetStore rulesets, BeatmapOnlineLookupQueue onlineLookupQueue)
             {
-                return new TestBeatmapModelManager(storage, realm, rulesets, onlineLookupQueue);
+                return new TestBeatmapModelManager(storage, realm, onlineLookupQueue);
             }
 
             protected override WorkingBeatmapCache CreateWorkingBeatmapCache(AudioManager audioManager, IResourceStore<byte[]> resources, IResourceStore<byte[]> storage, WorkingBeatmap defaultBeatmap, GameHost host)
             {
                 return new TestWorkingBeatmapCache(this, audioManager, resources, storage, defaultBeatmap, host);
+            }
+
+            public override WorkingBeatmap CreateNewBlankDifficulty(BeatmapSetInfo beatmapSetInfo, RulesetInfo rulesetInfo)
+            {
+                // don't actually care about properly creating a difficulty for this context.
+                return TestBeatmap;
             }
 
             private class TestWorkingBeatmapCache : WorkingBeatmapCache
@@ -150,7 +158,7 @@ namespace osu.Game.Tests.Visual
 
             internal class TestBeatmapModelManager : BeatmapModelManager
             {
-                public TestBeatmapModelManager(Storage storage, RealmAccess databaseAccess, RulesetStore rulesetStore, BeatmapOnlineLookupQueue beatmapOnlineLookupQueue)
+                public TestBeatmapModelManager(Storage storage, RealmAccess databaseAccess, BeatmapOnlineLookupQueue beatmapOnlineLookupQueue)
                     : base(databaseAccess, storage, beatmapOnlineLookupQueue)
                 {
                 }
