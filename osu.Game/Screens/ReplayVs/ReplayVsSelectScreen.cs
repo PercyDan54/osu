@@ -1,12 +1,16 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
+using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets;
@@ -19,8 +23,8 @@ namespace osu.Game.Screens.ReplayVs
 {
     public class ReplayVsSelectScreen : OsuScreen
     {
-        private FileChooserLabelledTextBox fileChooser1;
-        private FileChooserLabelledTextBox fileChooser2;
+        private TeamContainer teamRedContainer;
+        private TeamContainer teamBlueContainer;
         private OsuSpriteText errorText;
         private DatabasedLegacyScoreDecoder decoder;
 
@@ -30,102 +34,188 @@ namespace osu.Game.Screens.ReplayVs
         [BackgroundDependencyLoader]
         private void load(OsuColour colours, RulesetStore rulesetStore)
         {
-            Container container;
-            FillFlowContainer flowContainer;
             decoder = new DatabasedLegacyScoreDecoder(rulesetStore, beatmapManager);
 
-            InternalChild = container = new PopoverContainer
+            InternalChild = new PopoverContainer
             {
-                Masking = true,
                 CornerRadius = 10,
                 RelativeSizeAxes = Axes.Both,
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
-                Size = new Vector2(0.55f, 0.6f),
+                Size = new Vector2(0.8f, 0.9f),
+                Children = new Drawable[]
+                {
+                    new FillFlowContainer
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Size = new Vector2(1, 0.8f),
+                        Direction = FillDirection.Horizontal,
+                        Spacing = new Vector2(15),
+                        Children = new Drawable[]
+                        {
+                            teamRedContainer = new TeamContainer("Team red", colours.Red)
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Size = new Vector2(0.5f, 1)
+                            },
+                            teamBlueContainer = new TeamContainer("Team blue", colours.Blue)
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Size = new Vector2(0.5f, 1)
+                            },
+                        }
+                    },
+                    new TriangleButton
+                    {
+                        Text = "Start",
+                        Action = validateReplays,
+                        Size = new Vector2(0.4f, 0.1f),
+                        RelativeSizeAxes = Axes.Both,
+                        Y = -50,
+                        Anchor = Anchor.BottomCentre,
+                        Origin = Anchor.BottomCentre
+                    },
+                    errorText = new OsuSpriteText
+                    {
+                        Font = OsuFont.Default.With(size: 30),
+                        Alpha = 0,
+                        Y = -20,
+                        Colour = colours.Red,
+                        Anchor = Anchor.BottomCentre,
+                        Origin = Anchor.BottomCentre
+                    }
+                }
+            };
+        }
+
+        private class TeamContainer : Container
+        {
+            private readonly string name;
+            private readonly ColourInfo colour;
+            private int index = 1;
+
+            private FileChooserLabelledTextBox newFileChooser => new FileChooserLabelledTextBox(".osr")
+            {
+                Width = 0.8f,
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
+                FixedLabelWidth = 60,
+                Label = index.ToString(),
+                PlaceholderText = "Click to select a replay",
+                TabbableContentContainer = this
+            };
+
+            private FillFlowContainer flowContainer;
+
+            public TeamContainer(string name, ColourInfo colour)
+            {
+                this.name = name;
+                this.colour = colour;
+            }
+
+            [BackgroundDependencyLoader]
+            private void load(OsuColour colours)
+            {
                 Children = new Drawable[]
                 {
                     new Box
                     {
                         Colour = colours.GreySeaFoamDark,
                         RelativeSizeAxes = Axes.Both,
+                        Width = 1
                     },
-                    flowContainer = new FillFlowContainer
+                    new OsuScrollContainer
                     {
+                        RelativeSizeAxes = Axes.Both,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Size = new Vector2(1, 0.8f),
+                        Y = 20f,
+                        Child = flowContainer = new FillFlowContainer
+                        {
+                            RelativeSizeAxes = Axes.X,
+                            AutoSizeAxes = Axes.Y,
+                            Spacing = new Vector2(15),
+                            Direction = FillDirection.Vertical
+                        }
+                    },
+                    new OsuSpriteText
+                    {
+                        Font = OsuFont.Default.With(size: 40),
+                        Text = name,
+                        Colour = colour,
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre
+                    },
+                    new OsuButton
+                    {
+                        Text = "+",
+                        Size = new Vector2(30, 30),
+                        Action = addFileChooser,
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre,
+                        RelativePositionAxes = Axes.X,
+                        X = 0.3f,
                         Padding = new MarginPadding
                         {
-                            Top = 7.5f,
-                        },
-                        RelativeSizeAxes = Axes.Both,
-                        Size = new Vector2(1, 0.9f),
-                        Spacing = new Vector2(15),
-                        Direction = FillDirection.Vertical,
-                    },
-                }
-            };
+                            Top = 5f
+                        }
+                    }
+                };
+                addFileChooser();
+            }
 
-            flowContainer.Add(fileChooser1 = new FileChooserLabelledTextBox(".osr")
+            private void addFileChooser()
             {
-                Label = "Red",
-                FixedLabelWidth = 160,
-                Width = 0.8f,
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-                PlaceholderText = "Click to select a replay",
-                TabbableContentContainer = container
-            });
-            flowContainer.Add(fileChooser2 = new FileChooserLabelledTextBox(".osr")
-            {
-                Label = "Blue",
-                Width = 0.8f,
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-                FixedLabelWidth = 160,
-                PlaceholderText = "Click to select a replay",
-                TabbableContentContainer = container
-            });
-            flowContainer.Add(new TriangleButton
-            {
-                Text = "Start",
-                Action = validateReplay,
-                Size = new Vector2(0.4f, 0.12f),
-                RelativeSizeAxes = Axes.Both,
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-            });
-            flowContainer.Add(errorText = new OsuSpriteText
-            {
-                Font = OsuFont.Default.With(size: 30),
-                Alpha = 0,
-                Colour = colours.Red,
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-            });
+                var fileChooser = newFileChooser;
+                flowContainer.Add(fileChooser);
+                index++;
+            }
+
+            public string[] Files => flowContainer.Children
+                                                  .Cast<FileChooserLabelledTextBox>()
+                                                  .Where(f => f.Current.Value != string.Empty)
+                                                  .Select(f => f.Current.Value)
+                                                  .ToArray();
         }
 
-        private void validateReplay()
+        private void validateReplays()
         {
-            string file1 = fileChooser1.Current.Value;
-            string file2 = fileChooser2.Current.Value;
+            string[] teamRedFiles = teamRedContainer.Files;
+            string[] teamBlueFiles = teamBlueContainer.Files;
 
-            if (file1 == string.Empty || file2 == string.Empty)
+            if (teamRedFiles.Length == 0 || teamBlueFiles.Length == 0)
             {
-                showError("Select two replays");
+                showError("Select at least one replay for each team");
                 return;
             }
 
+            var teamRedScores = new List<Score>();
+            var teamBlueScores = new List<Score>();
+
             try
             {
-                var score1 = parseReplay(file1);
-                var score2 = parseReplay(file2);
+                teamRedScores.Add(parseReplay(teamRedFiles[0]));
+                var beatmapInfo = teamRedScores[0].ScoreInfo.BeatmapInfo;
+                var beatmap = beatmapManager.GetWorkingBeatmap(beatmapInfo);
 
-                if (!score1.ScoreInfo.BeatmapInfo.Equals(score2.ScoreInfo.BeatmapInfo))
+                for (int i = 1; i < teamRedFiles.Length; i++)
                 {
-                    showError("Two replays must have the same beatmap");
-                    return;
+                    string file = teamRedFiles[i];
+                    var score = parseReplay(file);
+                    if (score.ScoreInfo.BeatmapInfo.Equals(beatmapInfo))
+                        teamRedScores.Add(score);
                 }
 
-                var beatmap = beatmapManager.GetWorkingBeatmap(score1.ScoreInfo.BeatmapInfo);
-                this.Push(new ReplayVsScreen(new[] { score1, score2 }, beatmap));
+                for (int i = 0; i < teamBlueFiles.Length; i++)
+                {
+                    string file = teamBlueFiles[i];
+                    var score = parseReplay(file);
+                    if (score.ScoreInfo.BeatmapInfo.Equals(beatmapInfo))
+                        teamBlueScores.Add(score);
+                }
+
+                this.Push(new ReplayVsScreen(teamRedScores.ToArray(), teamBlueScores.ToArray(), beatmap));
             }
             catch (LegacyScoreDecoder.BeatmapNotFoundException e)
             {

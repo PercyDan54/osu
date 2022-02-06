@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
@@ -19,14 +20,16 @@ namespace osu.Game.Screens.ReplayVs
         private readonly Bindable<bool> waitingOnFrames = new Bindable<bool>();
         private readonly ISpectatorPlayerClock spectatorPlayerClock;
         private readonly Score score;
+        private readonly ColourInfo teamColor;
 
         protected override bool CheckModsAllowFailure() => false;
 
-        public ReplayVsPlayer([NotNull] Score score, [NotNull] ISpectatorPlayerClock spectatorPlayerClock)
+        public ReplayVsPlayer([NotNull] Score score, [NotNull] ISpectatorPlayerClock spectatorPlayerClock, ColourInfo teamColor)
             : base(new PlayerConfiguration { AllowUserInteraction = false })
         {
             this.spectatorPlayerClock = spectatorPlayerClock;
             this.score = score;
+            this.teamColor = teamColor;
         }
 
         [BackgroundDependencyLoader]
@@ -41,6 +44,7 @@ namespace osu.Game.Screens.ReplayVs
             {
                 Text = score.ScoreInfo.User.Username,
                 Font = OsuFont.Default.With(size: 50),
+                Colour = teamColor,
                 Y = 100,
                 Anchor = Anchor.TopCentre,
                 Origin = Anchor.TopCentre,

@@ -4,11 +4,13 @@
 using System;
 using System.Linq;
 using JetBrains.Annotations;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
+using osu.Game.Graphics;
 using osu.Game.Scoring;
 using osu.Game.Screens.OnlinePlay.Multiplayer.Spectate;
 using osu.Game.Screens.Play;
@@ -32,6 +34,9 @@ namespace osu.Game.Screens.ReplayVs
         /// </summary>
         public bool AllPlayersLoaded => instances.All(p => p?.PlayerLoaded == true);
 
+        [Resolved]
+        private OsuColour colours { get; set; }
+
         private readonly WorkingBeatmap beatmap;
         private readonly PlayerArea[] instances;
         private MasterGameplayClockContainer masterClockContainer;
@@ -39,14 +44,18 @@ namespace osu.Game.Screens.ReplayVs
         private PlayerGrid grid;
         private PlayerArea currentAudioSource;
         private bool canStartMasterClock;
-        private readonly Score[] replays;
-        private readonly BindableInt team1Score = new BindableInt();
-        private readonly BindableInt team2Score = new BindableInt();
+        private readonly int replayCount;
+        private readonly Score[] teamRedScores;
+        private readonly Score[] teamBlueScores;
+        private readonly BindableInt teamRedScore = new BindableInt();
+        private readonly BindableInt teamBlueScore = new BindableInt();
 
-        public ReplayVsScreen(Score[] replays, WorkingBeatmap beatmap)
+        public ReplayVsScreen(Score[] teamRedScores, Score[] teamBlueScores, WorkingBeatmap beatmap)
         {
-            instances = new PlayerArea[replays.Length];
-            this.replays = replays;
+            replayCount = teamRedScores.Length + teamBlueScores.Length;
+            instances = new PlayerArea[replayCount];
+            this.teamRedScores = teamRedScores;
+            this.teamBlueScores = teamBlueScores;
             this.beatmap = beatmap;
         }
 
@@ -91,16 +100,22 @@ namespace osu.Game.Screens.ReplayVs
                 }
             };
 
-            for (int i = 0; i < replays.Length; i++)
+            for (int i = 0; i < teamRedScores.Length; i++)
             {
-                grid.Add(instances[i] = new PlayerArea(-1, masterClockContainer.GameplayClock, true));
+                grid.Add(instances[i] = new PlayerArea(-1, masterClockContainer.GameplayClock, true, colours.Red));
+                syncManager.AddPlayerClock(instances[i].GameplayClock);
+            }
+
+            for (int i = teamRedScores.Length; i < replayCount; i++)
+            {
+                grid.Add(instances[i] = new PlayerArea(-1, masterClockContainer.GameplayClock, true, colours.Blue));
                 syncManager.AddPlayerClock(instances[i].GameplayClock);
             }
 
             LoadComponentAsync(new MatchScoreDisplay
             {
-                Team1Score = { BindTarget = team1Score },
-                Team2Score = { BindTarget = team2Score },
+                Team1Score = { BindTarget = teamRedScore },
+                Team2Score = { BindTarget = teamBlueScore },
             }, scoreDisplayContainer.Add);
 
             base.LoadComplete();
@@ -111,24 +126,20 @@ namespace osu.Game.Screens.ReplayVs
             syncManager.ReadyToStart += onReadyToStart;
             syncManager.MasterState.BindValueChanged(onMasterStateChanged, true);
 
-            instances[0].LoadScore(replays[0]);
-            instances[1].LoadScore(replays[1]);
+            for (int i = 0; i < teamRedScores.Length; i++)
+            {
+                instances[i].LoadScore(teamRedScores[i]);
+            }
+
+            for (int i = 0; i < teamBlueScores.Length; i++)
+            {
+                instances[i + teamRedScores.Length].LoadScore(teamBlueScores[i]);
+            }
         }
 
         protected override void Update()
         {
             base.Update();
-
-            for (int i = 0; i < 2; i++)
-            {
-                if (AllPlayersLoaded && instances[i].Player.ScoreProcessor != null)
-                {
-                    if (i == 0)
-                        team1Score.Value = (int)Math.Round(instances[i].Player.ScoreProcessor.TotalScore.Value);
-                    else
-                        team2Score.Value = (int)Math.Round(instances[i].Player.ScoreProcessor.TotalScore.Value);
-                }
-            }
 
             if (!isCandidateAudioSource(currentAudioSource?.GameplayClock))
             {
@@ -139,6 +150,30 @@ namespace osu.Game.Screens.ReplayVs
                 foreach (var instance in instances)
                     instance.Mute = instance != currentAudioSource;
             }
+
+            if (!AllPlayersLoaded) return;
+
+            int team1Score = 0;
+            int team2Score = 0;
+
+            for (int i = 0; i < teamRedScores.Length; i++)
+            {
+                if (instances[i].Player.ScoreProcessor != null)
+                {
+                    team1Score += Convert.ToInt32(instances[i].Player.ScoreProcessor.TotalScore.Value);
+                }
+            }
+
+            for (int i = teamRedScores.Length; i < replayCount; i++)
+            {
+                if (instances[i].Player.ScoreProcessor != null)
+                {
+                    team2Score += Convert.ToInt32(instances[i].Player.ScoreProcessor.TotalScore.Value);
+                }
+            }
+
+            teamRedScore.Value = team1Score;
+            teamBlueScore.Value = team2Score;
         }
 
         private bool isCandidateAudioSource([CanBeNull] ISpectatorPlayerClock clock)

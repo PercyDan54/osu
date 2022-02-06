@@ -4,6 +4,7 @@
 using System;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Screens;
 using osu.Game.Scoring;
 using osu.Game.Screens.Menu;
@@ -19,8 +20,8 @@ namespace osu.Game.Screens.ReplayVs
     {
         public readonly ScoreInfo Score;
 
-        public ReplayVsPlayerLoader([NotNull] Score score, [NotNull] ISpectatorPlayerClock clock)
-            : base(() => new ReplayVsPlayer(score, clock))
+        public ReplayVsPlayerLoader([NotNull] Score score, [NotNull] ISpectatorPlayerClock clock, ColourInfo teamColor)
+            : base(() => new ReplayVsPlayer(score, clock, teamColor))
         {
             if (score.Replay == null)
                 throw new ArgumentException($"{nameof(score)} must have a non-null {nameof(score.Replay)}.", nameof(score));

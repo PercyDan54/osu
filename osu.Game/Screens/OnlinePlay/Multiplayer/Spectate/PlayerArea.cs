@@ -8,6 +8,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Timing;
 using osu.Game.Beatmaps;
@@ -61,12 +62,14 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         private readonly Container gameplayContent;
         private readonly LoadingLayer loadingLayer;
         private readonly bool isReplayVs;
+        private readonly ColourInfo teamColor;
         private OsuScreenStack stack;
 
-        public PlayerArea(int userId, IFrameBasedClock masterClock, bool isReplayVs = false)
+        public PlayerArea(int userId, IFrameBasedClock masterClock, bool isReplayVs = false, ColourInfo teamColor = default)
         {
             UserId = userId;
             this.isReplayVs = isReplayVs;
+            this.teamColor = teamColor;
 
             RelativeSizeAxes = Axes.Both;
             Masking = true;
@@ -113,7 +116,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                 }));
             }
             else
-                stack.Push(new ReplayVsPlayerLoader(Score, GameplayClock));
+                stack.Push(new ReplayVsPlayerLoader(Score, GameplayClock, teamColor));
 
             loadingLayer.Hide();
         }
