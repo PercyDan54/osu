@@ -76,7 +76,7 @@ namespace osu.Game
         /// </summary>
         public string VersionHash { get; private set; }
 
-        public bool IsDeployedBuild => false;
+        public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
         /// <summary>
         /// The <see cref="Edges"/> that the game should be drawn over at a top level.
@@ -140,7 +140,17 @@ namespace osu.Game
 
         private RulesetConfigCache rulesetConfigCache;
 
-        public virtual string Version => "2022.205.0-lazer";
+        public virtual string Version
+        {
+            get
+            {
+                if (!IsDeployedBuild)
+                    return @"local " + (DebugUtils.IsDebugBuild ? @"debug" : @"release");
+
+                var version = AssemblyVersion;
+                return $@"{version.Major}.{version.Minor}.{version.Build}-lazer";
+            }
+        }
 
         private SpectatorClient spectatorClient;
 

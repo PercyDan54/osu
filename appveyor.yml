@@ -9,6 +9,7 @@ dotnet_csproj:
   patch: true
   file: '**\*.csproj'
   version: 2022.205.0
+  file_version: 2022.205.0
 build_script:
 - cmd: >-
     dotnet build osu.Desktop -c Release -r win-x64

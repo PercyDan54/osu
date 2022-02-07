@@ -20,9 +20,9 @@ namespace osu.Game.Utils
 
         public SentryLogger(OsuGame game)
         {
-            if (!game.IsDeployedBuild) return;
+            if (true) return;
 
-            var options = new SentryOptions
+/*             var options = new SentryOptions
             {
                 Dsn = "https://5e342cd55f294edebdc9ad604d28bbd3@sentry.io/1255255",
                 Release = game.Version
@@ -31,7 +31,7 @@ namespace osu.Game.Utils
             sentry = new SentryClient(options);
             sentryScope = new Scope(options);
 
-            Logger.NewEntry += processLogEntry;
+            Logger.NewEntry += processLogEntry; */
         }
 
         private void processLogEntry(LogEntry entry)

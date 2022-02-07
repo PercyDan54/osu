@@ -51,7 +51,7 @@ namespace osu.Desktop.Updater
 
             try
             {
-                updateManager ??= await UpdateManager.GitHubUpdateManager(@"https://github.com/ppy/osu", @"osulazer", null, null, true).ConfigureAwait(false);
+                updateManager ??= await UpdateManager.GitHubUpdateManager(@"https://github.com/PercyDan54/osu", @"osulazer", null, null, true).ConfigureAwait(false);
 
                 var info = await updateManager.CheckForUpdate(!useDeltaPatching).ConfigureAwait(false);
 
