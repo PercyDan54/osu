@@ -50,14 +50,15 @@ namespace osu.Game.Screens.Play
             if (!SaveScore) return;
 
             LegacyByteArrayReader replayReader;
+            var score = Score.DeepClone();
 
             using (var stream = new MemoryStream())
             {
-                new LegacyScoreEncoder(Score, GameplayState.Beatmap).Encode(stream);
+                new LegacyScoreEncoder(score, GameplayState.Beatmap).Encode(stream);
                 replayReader = new LegacyByteArrayReader(stream.ToArray(), "replay.osr");
             }
 
-            ScoreManager.Instance.Import(Score.ScoreInfo, replayReader);
+            ScoreManager.Instance.Import(score.ScoreInfo, replayReader);
         }
 
         public bool SaveScore;
