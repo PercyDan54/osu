@@ -35,13 +35,13 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
         /// </summary>
         protected virtual float FadeExponent => 1.7f;
 
-        private readonly Bindable<bool> hueOverride = new BindableBool();
-        private readonly Bindable<bool> hueShift = new BindableBool();
-        private readonly Bindable<float> hue = new Bindable<float>();
-        private readonly Bindable<float> hueSpeed = new Bindable<float>();
-        private readonly Bindable<float> size = new Bindable<float>();
-        private readonly Bindable<float> fadeDuration = new Bindable<float>();
-        private readonly Bindable<float> density = new Bindable<float>();
+        private readonly BindableBool hueOverride = new BindableBool();
+        private readonly BindableBool rainbow = new BindableBool();
+        private readonly BindableFloat hue = new BindableFloat();
+        private readonly BindableDouble rainbowFreq = new BindableDouble();
+        private readonly BindableFloat size = new BindableFloat();
+        private readonly BindableFloat fadeDuration = new BindableFloat();
+        private readonly BindableFloat density = new BindableFloat();
 
         private readonly TrailPart[] parts = new TrailPart[max_sprites];
         private int currentIndex;
@@ -81,8 +81,8 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
         private void load(ShaderManager shaders, MConfigManager config)
         {
             config.BindWith(MSetting.CursorTrailHue, hue);
-            config.BindWith(MSetting.CursorTrailHueShift, hueShift);
-            config.BindWith(MSetting.CursorTrailHueSpeed, hueSpeed);
+            config.BindWith(MSetting.CursorTrailRainbow, rainbow);
+            config.BindWith(MSetting.CursorTrailRainbowFreq, rainbowFreq);
             config.BindWith(MSetting.CursorTrailHueOverride, hueOverride);
             config.BindWith(MSetting.CursorTrailSize, size);
             config.BindWith(MSetting.CursorTrailDensity, density);
@@ -291,7 +291,17 @@ namespace osu.Game.Rulesets.Osu.UI.Cursor
                     if (time - part.Time >= 1)
                         continue;
 
-                    var colour = hueOverride ? (ColourInfo)Colour4.FromHSV(Source.hue.Value + (Source.hueShift.Value ? time / (150 / Source.hueSpeed.Value) % 1 : 0), 1, 1) : DrawColourInfo.Colour;
+                    var colour = hueOverride ? (ColourInfo)Colour4.FromHSV(Source.hue.Value, 1, 1) : DrawColourInfo.Colour;
+
+                    if (Source.rainbow.Value)
+                    {
+                        float partTime = part.Time;
+                        double freq = Source.rainbowFreq.Value;
+                        double red = Math.Sin(freq + partTime) * 127 + 128;
+                        double green = Math.Sin(freq + 2 + partTime) * 127 + 128;
+                        double blue = Math.Sin(freq + 4 + partTime) * 127 + 128;
+                        colour = (ColourInfo)new Color4((byte)red, (byte)green, (byte)blue, byte.MaxValue);
+                    }
 
                     vertexBatch.Add(new TexturedTrailVertex
                     {

@@ -60,18 +60,18 @@ namespace osu.Game.Rulesets.Osu.UI
                 },
                 new SettingsCheckbox
                 {
-                    LabelText = "Cursor trail hue shifting",
-                    Current = mConfig.GetBindable<bool>(MSetting.CursorTrailHueShift)
+                    LabelText = "Rainbow cursor trail",
+                    Current = mConfig.GetBindable<bool>(MSetting.CursorTrailRainbow)
                 },
                 new SettingsSlider<float>
                 {
                     LabelText = "Cursor trail hue",
                     Current = mConfig.GetBindable<float>(MSetting.CursorTrailHue)
                 },
-                new SettingsSlider<float>
+                new SettingsSlider<double>
                 {
-                    LabelText = "Cursor trail hue speed",
-                    Current = mConfig.GetBindable<float>(MSetting.CursorTrailHueSpeed)
+                    LabelText = "Cursor trail rainbow frequency",
+                    Current = mConfig.GetBindable<double>(MSetting.CursorTrailRainbowFreq)
                 },
                 new SettingsSlider<float, DanceSettings.MultiplierSlider>
                 {

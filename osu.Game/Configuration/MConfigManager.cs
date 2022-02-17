@@ -91,10 +91,10 @@ namespace osu.Game.Configuration
 
             //Cursor settings
             SetDefault(MSetting.CursorTrailHueOverride, false);
-            SetDefault(MSetting.CursorTrailHueShift, false);
+            SetDefault(MSetting.CursorTrailRainbow, false);
             SetDefault(MSetting.CursorTrailForceLong, false);
             SetDefault(MSetting.CursorTrailHue, .5f, 0.1f, 1.0f, 0.05f);
-            SetDefault(MSetting.CursorTrailHueSpeed, 10f, 5f, 50.0f, 1f);
+            SetDefault(MSetting.CursorTrailRainbowFreq, 0.3, 0.01, 2, 0.01);
             SetDefault(MSetting.CursorTrailFadeDuration, 500, 100, 5000, 50);
             SetDefault(MSetting.CursorTrailSize, 1f, 1f, 15.0f, 0.5f);
             SetDefault(MSetting.CursorTrailDensity, 1f, 0.5f, 10.0f, 0.5f);
@@ -168,8 +168,8 @@ namespace osu.Game.Configuration
 
         //Cursor settings
         CursorTrailDensity,
-        CursorTrailHueShift,
-        CursorTrailHueSpeed,
+        CursorTrailRainbow,
+        CursorTrailRainbowFreq,
         CursorTrailFadeDuration,
         CursorTrailForceLong,
         CursorTrailSize,
