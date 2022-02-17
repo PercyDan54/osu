@@ -182,7 +182,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "c28eb6277cc9776313439a7b77695871";
+            VersionHash = "b74cae15ea6cb028ecd70910964a961b";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -408,7 +408,7 @@ namespace osu.Game
                 Scheduler.AddDelayed(GracefullyExit, 2000);
         }
 
-        public void Migrate(string path)
+        public bool Migrate(string path)
         {
             Logger.Log($@"Migrating osu! data from ""{Storage.GetFullPath(string.Empty)}"" to ""{path}""...");
 
@@ -427,14 +427,15 @@ namespace osu.Game
 
                 readyToRun.Wait();
 
-                (Storage as OsuStorage)?.Migrate(Host.GetStorage(path));
+                bool? cleanupSucceded = (Storage as OsuStorage)?.Migrate(Host.GetStorage(path));
+
+                Logger.Log(@"Migration complete!");
+                return cleanupSucceded != false;
             }
             finally
             {
                 realmBlocker?.Dispose();
             }
-
-            Logger.Log(@"Migration complete!");
         }
 
         protected override UserInputManager CreateUserInputManager() => new OsuUserInputManager();
