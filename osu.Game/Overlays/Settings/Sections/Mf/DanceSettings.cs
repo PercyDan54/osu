@@ -31,6 +31,12 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
                     Current = config.GetBindable<float>(MSetting.ReplayFramerate),
                     KeyboardStep = 10f
                 },
+                new SettingsCheckbox
+                {
+                    LabelText = "Change replay framerate for spinners",
+                    TooltipText = "Makes spinner movements smoother, but may not be played back on Stable",
+                    Current = config.GetBindable<bool>(MSetting.SpinnerChangeFramerate)
+                },
                 new SettingsSlider<float>
                 {
                     LabelText = "Spinner start radius",

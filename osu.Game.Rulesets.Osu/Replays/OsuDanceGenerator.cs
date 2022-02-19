@@ -44,6 +44,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         private readonly bool pippiSpinner;
         private readonly bool pippiStream;
         private readonly bool skipShortSliders;
+        private readonly bool spinnerChangeFramerate;
         private bool isStream;
         private readonly MConfigManager config;
         private readonly double frameDelay;
@@ -64,13 +65,14 @@ namespace osu.Game.Rulesets.Osu.Replays
             pippiSpinner = config.Get<bool>(MSetting.PippiSpinner) || isPippi;
             pippiStream = config.Get<bool>(MSetting.PippiStream);
             skipShortSliders = config.Get<bool>(MSetting.SkipShortSlider);
+            spinnerChangeFramerate = config.Get<bool>(MSetting.SpinnerChangeFramerate);
             mover.TimeAffectingMods = mods.OfType<IApplicableToRate>().ToList();
             preProcessObjects();
         }
 
         private void preProcessObjects()
         {
-            for (int i = 0; i < Beatmap.HitObjects.Count; ++i)
+            for (int i = 0; i < Beatmap.HitObjects.Count; i++)
             {
                 var h = Beatmap.HitObjects[i];
 
@@ -168,9 +170,11 @@ namespace osu.Game.Rulesets.Osu.Replays
                     double radiusStart = spinner.SpinsRequired > 3 ? spinRadiusStart : spinRadiusEnd;
                     double rEndTime = spinner.StartTime + spinner.Duration * 0.7;
                     double previousFrame = h.StartTime;
+                    double delay;
 
-                    for (double nextFrame = h.StartTime + GetFrameDelay(h.StartTime); nextFrame < spinner.EndTime; nextFrame += ApplyModsToRate(nextFrame, frameDelay))
+                    for (double nextFrame = h.StartTime + GetFrameDelay(h.StartTime); nextFrame < spinner.EndTime; nextFrame += delay)
                     {
+                        delay = spinnerChangeFramerate ? ApplyModsToRate(nextFrame, frameDelay) : GetFrameDelay(previousFrame);
                         double t = ApplyModsToTimeDelta(previousFrame, nextFrame) * -1;
                         angle += (float)t / 20;
                         double r = nextFrame > rEndTime ? spinRadiusEnd : Interpolation.ValueAt(nextFrame, radiusStart, spinRadiusEnd, spinner.StartTime, rEndTime, Easing.In);
@@ -205,6 +209,8 @@ namespace osu.Game.Rulesets.Osu.Replays
             float yf = baseSize.Y / 0.8f;
             float y0 = (baseSize.Y - yf) / 2f;
             float y1 = yf + y0;
+
+            mover.StartPos = h.StackedPosition;
             mover.OnObjChange();
 
             for (int i = 0; i < hitObjects.Count; i++)
@@ -255,13 +261,6 @@ namespace osu.Game.Rulesets.Osu.Replays
             AddFrameToReplay(lastFrame);
 
             return Replay;
-        }
-
-        protected override HitObject GetNextObject(int currentIndex)
-        {
-            var next = hitObjects[Math.Min(Beatmap.HitObjects.Count - 1, currentIndex + 1)];
-
-            return next;
         }
 
         private void addPippiFrame(OsuReplayFrame frame, float radius)

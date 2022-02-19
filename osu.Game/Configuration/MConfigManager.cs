@@ -50,6 +50,7 @@ namespace osu.Game.Configuration
             //Dance settings
             SetDefault(MSetting.DanceMover, OsuDanceMover.Momentum);
             SetDefault(MSetting.ReplayFramerate, 120f, 15f, 1000f, 1f);
+            SetDefault(MSetting.SpinnerChangeFramerate, false);
             SetDefault(MSetting.SpinnerRadiusStart, 50, 5f, 350f, 1f);
             SetDefault(MSetting.SpinnerRadiusEnd, 50, 5f, 350f, 1f);
             SetDefault(MSetting.AngleOffset, 0.45f, 0f, 2f, 0.01f);
@@ -127,6 +128,7 @@ namespace osu.Game.Configuration
         //Dance settings
         DanceMover,
         ReplayFramerate,
+        SpinnerChangeFramerate,
         SpinnerRadiusStart,
         SpinnerRadiusEnd,
         AngleOffset,
