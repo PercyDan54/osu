@@ -50,7 +50,16 @@ namespace osu.Game.Screens.Play
             if (!SaveScore) return;
 
             LegacyByteArrayReader replayReader;
+            var mods = Score.ScoreInfo.Mods.ToArray();
             var score = Score.DeepClone();
+
+            foreach (var m in mods)
+            {
+                if (m is ModAutoplay autoplay)
+                    autoplay.SaveScore.Value = false;
+            }
+
+            score.ScoreInfo.Mods = mods;
 
             using (var stream = new MemoryStream())
             {

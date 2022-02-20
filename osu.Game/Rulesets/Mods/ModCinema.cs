@@ -22,20 +22,20 @@ namespace osu.Game.Rulesets.Mods
         }
     }
 
-    public class ModCinema : ModAutoplay, IApplicableToHUD, IApplicableToPlayer
+    public class ModCinema : ModAutoplay
     {
         public override string Name => "Cinema";
         public override string Acronym => "CN";
         public override IconUsage? Icon => OsuIcon.ModCinema;
         public override string Description => "Watch the video without visual distractions.";
 
-        public void ApplyToHUD(HUDOverlay overlay)
+        public override void ApplyToHUD(HUDOverlay overlay)
         {
             overlay.ShowHud.Value = false;
             overlay.ShowHud.Disabled = true;
         }
 
-        public void ApplyToPlayer(Player player)
+        public override void ApplyToPlayer(Player player)
         {
             player.ApplyToBackground(b => b.IgnoreUserSettings.Value = true);
             player.DimmableStoryboard.IgnoreUserSettings.Value = true;

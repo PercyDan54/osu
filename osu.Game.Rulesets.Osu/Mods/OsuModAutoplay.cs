@@ -5,29 +5,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Bindables;
-using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Online.API.Requests.Responses;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Replays;
 using osu.Game.Scoring;
-using osu.Game.Screens.Play;
 
 namespace osu.Game.Rulesets.Osu.Mods
 {
-    public class OsuModAutoplay : ModAutoplay, IApplicableToHUD, IApplicableToPlayer
+    public class OsuModAutoplay : ModAutoplay
     {
         public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[] { typeof(OsuModAimAssist), typeof(OsuModAutopilot), typeof(OsuModSpunOut) }).ToArray();
 
         [SettingSource("Cursor Dance", "Enable cursor dance")]
         public Bindable<bool> CursorDance { get; } = new BindableBool();
-
-        [SettingSource("Save score")]
-        public Bindable<bool> SaveScore { get; } = new BindableBool();
-
-        [SettingSource("Hide replay interface")]
-        public Bindable<bool> HideInterface { get; } = new BindableBool();
 
         public override Score CreateReplayScore(IBeatmap beatmap, IReadOnlyList<Mod> mods)
         {
@@ -44,13 +36,5 @@ namespace osu.Game.Rulesets.Osu.Mods
                 Replay = CursorDance.Value ? new OsuDanceGenerator(beatmap, mods).Generate() : new OsuAutoGenerator(beatmap, mods).Generate()
             };
         }
-
-        public void ApplyToHUD(HUDOverlay overlay)
-        {
-            if (HideInterface.Value)
-                overlay.PlayerSettingsOverlay.Children.ForEach(child => child.Hide());
-        }
-
-        public void ApplyToPlayer(Player player) => ((ReplayPlayer)player).SaveScore = SaveScore.Value;
     }
 }
