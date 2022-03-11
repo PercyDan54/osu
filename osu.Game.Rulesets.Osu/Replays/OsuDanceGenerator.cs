@@ -89,7 +89,7 @@ namespace osu.Game.Rulesets.Osu.Replays
 
         private void updateAction(OsuHitObject h, OsuHitObject last)
         {
-            double timeDifference = ApplyModsToTimeDelta(last.StartTime, h.StartTime);
+            double timeDifference = ApplyModsToTimeDelta(last.GetEndTime(), h.StartTime);
 
             if (timeDifference > 0 && timeDifference < 266)
                 buttonIndex++;
