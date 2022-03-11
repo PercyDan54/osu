@@ -21,6 +21,7 @@ using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
+using osu.Game.Beatmaps.Formats;
 using osu.Game.Configuration;
 using osu.Game.Database;
 using osu.Game.Graphics;
@@ -51,6 +52,8 @@ namespace osu.Game
     /// </summary>
     public partial class OsuGameBase : Framework.Game, ICanAcceptFiles
     {
+        public const string OSU_PROTOCOL = "osu://";
+
         public const string CLIENT_STREAM_NAME = @"lazer";
 
         public const int SAMPLE_CONCURRENCY = 6;
@@ -98,7 +101,7 @@ namespace osu.Game
 
         protected SkinManager SkinManager { get; private set; }
 
-        protected RulesetStore RulesetStore { get; private set; }
+        protected RealmRulesetStore RulesetStore { get; private set; }
 
         protected RealmKeyBindingStore KeyBindingStore { get; private set; }
 
@@ -182,7 +185,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "9fe9e37c5c3f60cb1d66a0110b8c4da5";
+            VersionHash = "ed49d24f6b7fb818c659409bc9e05775";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -191,8 +194,10 @@ namespace osu.Game
 
             dependencies.Cache(realm = new RealmAccess(Storage, "client", EFContextFactory));
 
-            dependencies.Cache(RulesetStore = new RulesetStore(realm, Storage));
+            dependencies.CacheAs<RulesetStore>(RulesetStore = new RealmRulesetStore(realm, Storage));
             dependencies.CacheAs<IRulesetStore>(RulesetStore);
+
+            Decoder.RegisterDependencies(RulesetStore);
 
             // Backup is taken here rather than in EFToRealmMigrator to avoid recycling realm contexts
             // after initial usages below. It can be moved once a direction is established for handling re-subscription.
