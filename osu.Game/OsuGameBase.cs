@@ -68,7 +68,7 @@ namespace osu.Game
         /// </summary>
         private const double global_track_volume_adjust = 0.8;
 
-        public bool UseDevelopmentServer { get; }
+        public virtual bool UseDevelopmentServer => false;
 
         public virtual Version AssemblyVersion => Assembly.GetEntryAssembly()?.GetName().Version ?? new Version();
 
@@ -178,14 +178,13 @@ namespace osu.Game
 
         public OsuGameBase()
         {
-            UseDevelopmentServer = false;
             Name = @"osu!";
         }
 
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "ed49d24f6b7fb818c659409bc9e05775";
+            VersionHash = "71239674826c8265d5ceda26db57136a";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
