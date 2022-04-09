@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Input.StateChanges;
-using osu.Game.Configuration;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Replays;
 using osu.Game.Rulesets.UI;
@@ -17,7 +16,6 @@ namespace osu.Game.Rulesets.Osu.Mods
         public override string Name => "Autopilot (With Dance)";
 
         private OsuInputManager inputManager;
-        private readonly MConfigManager config = MConfigManager.Instance;
 
         private IFrameStableClock gameplayClock;
 
