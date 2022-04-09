@@ -56,6 +56,11 @@ namespace osu.Game
 
         public const string CLIENT_STREAM_NAME = @"lazer";
 
+        /// <summary>
+        /// The filename of the main client database.
+        /// </summary>
+        public const string CLIENT_DATABASE_FILENAME = @"client.realm";
+
         public const int SAMPLE_CONCURRENCY = 6;
 
         /// <summary>
@@ -184,14 +189,14 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "71239674826c8265d5ceda26db57136a";
+            VersionHash = "213c64be5e2eb58086360a140bfdbff3";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
             if (Storage.Exists(DatabaseContextFactory.DATABASE_NAME))
                 dependencies.Cache(EFContextFactory = new DatabaseContextFactory(Storage));
 
-            dependencies.Cache(realm = new RealmAccess(Storage, "client", EFContextFactory));
+            dependencies.Cache(realm = new RealmAccess(Storage, CLIENT_DATABASE_FILENAME, Host.UpdateThread, EFContextFactory));
 
             dependencies.CacheAs<RulesetStore>(RulesetStore = new RealmRulesetStore(realm, Storage));
             dependencies.CacheAs<IRulesetStore>(RulesetStore);

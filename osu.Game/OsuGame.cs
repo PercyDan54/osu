@@ -1049,6 +1049,10 @@ namespace osu.Game
 
             switch (e.Action)
             {
+                case GlobalAction.ToggleSkinEditor:
+                    skinEditor.ToggleVisibility();
+                    return true;
+
                 case GlobalAction.ResetInputSettings:
                     Host.ResetInputHandlers();
                     frameworkConfig.GetBindable<ConfineMouseMode>(FrameworkSetting.ConfineMouseMode).SetDefault();
@@ -1060,6 +1064,12 @@ namespace osu.Game
                     return true;
 
                 case GlobalAction.RandomSkin:
+                    // Don't allow random skin selection while in the skin editor.
+                    // This is mainly to stop many "osu! default (modified)" skins being created via the SkinManager.EnsureMutableSkin() path.
+                    // If people want this to work we can potentially avoid selecting default skins when the editor is open, or allow a maximum of one mutable skin somehow.
+                    if (skinEditor.State.Value == Visibility.Visible)
+                        return false;
+
                     SkinManager.SelectRandomSkin();
                     return true;
             }
@@ -1189,7 +1199,7 @@ namespace osu.Game
                     BackButton.Hide();
             }
 
-            skinEditor.SetTarget((Screen)newScreen);
+            skinEditor.SetTarget((OsuScreen)newScreen);
         }
 
         private void screenPushed(IScreen lastScreen, IScreen newScreen) => screenChanged(lastScreen, newScreen);

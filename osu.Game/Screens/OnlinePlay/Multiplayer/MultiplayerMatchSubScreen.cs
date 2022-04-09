@@ -1,11 +1,9 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -46,13 +44,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
         [Resolved]
         private MultiplayerClient client { get; set; }
 
-        [Resolved]
-        private OngoingOperationTracker ongoingOperationTracker { get; set; }
-
         private readonly IBindable<bool> isConnected = new Bindable<bool>();
-
-        [CanBeNull]
-        private IDisposable readyClickOperation;
 
         private AddItemButton addItemButton;
 
@@ -230,11 +222,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             this.Push(new MultiplayerMatchSongSelect(Room, itemToEdit));
         }
 
-        protected override Drawable CreateFooter() => new MultiplayerMatchFooter
-        {
-            OnReadyClick = onReadyClick,
-            OnSpectateClick = onSpectateClick
-        };
+        protected override Drawable CreateFooter() => new MultiplayerMatchFooter();
 
         protected override RoomSettingsOverlay CreateRoomSettingsOverlay(Room room) => new MultiplayerMatchSettingsOverlay(room);
 
@@ -293,7 +281,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             if (client.Room == null)
                 return;
 
-            client.ChangeUserMods(mods.NewValue);
+            client.ChangeUserMods(mods.NewValue).FireAndForget();
 
             modSettingChangeTracker = new ModSettingChangeTracker(mods.NewValue);
             modSettingChangeTracker.SettingChanged += onModSettingsChanged;
@@ -308,7 +296,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 if (client.Room == null)
                     return;
 
-                client.ChangeUserMods(UserMods.Value);
+                client.ChangeUserMods(UserMods.Value).FireAndForget();
             }, 500);
         }
 
@@ -317,7 +305,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
             if (client.Room == null)
                 return;
 
-            client.ChangeBeatmapAvailability(availability.NewValue);
+            client.ChangeBeatmapAvailability(availability.NewValue).FireAndForget();
 
             if (availability.NewValue.State != DownloadState.LocallyAvailable)
             {
@@ -329,52 +317,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                      && (client.Room?.State == MultiplayerRoomState.WaitingForLoad || client.Room?.State == MultiplayerRoomState.Playing))
             {
                 onLoadRequested();
-            }
-        }
-
-        private void onReadyClick()
-        {
-            Debug.Assert(readyClickOperation == null);
-            readyClickOperation = ongoingOperationTracker.BeginOperation();
-
-            if (client.IsHost && (client.LocalUser?.State == MultiplayerUserState.Ready || client.LocalUser?.State == MultiplayerUserState.Spectating))
-            {
-                client.StartMatch()
-                      .ContinueWith(t =>
-                      {
-                          // accessing Exception here silences any potential errors from the antecedent task
-                          if (t.Exception != null)
-                          {
-                              // gameplay was not started due to an exception; unblock button.
-                              endOperation();
-                          }
-
-                          // gameplay is starting, the button will be unblocked on load requested.
-                      });
-                return;
-            }
-
-            client.ToggleReady()
-                  .ContinueWith(t => endOperation());
-
-            void endOperation()
-            {
-                readyClickOperation?.Dispose();
-                readyClickOperation = null;
-            }
-        }
-
-        private void onSpectateClick()
-        {
-            Debug.Assert(readyClickOperation == null);
-            readyClickOperation = ongoingOperationTracker.BeginOperation();
-
-            client.ToggleSpectate().ContinueWith(t => endOperation());
-
-            void endOperation()
-            {
-                readyClickOperation?.Dispose();
-                readyClickOperation = null;
             }
         }
 
@@ -433,9 +375,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer
                 return;
 
             StartPlay();
-
-            readyClickOperation?.Dispose();
-            readyClickOperation = null;
         }
 
         protected override Screen CreateGameplayScreen()
