@@ -27,7 +27,7 @@ namespace osu.Game.Screens.Select
         private OsuScreen playerLoader;
 
         [Resolved(CanBeNull = true)]
-        private NotificationOverlay notifications { get; set; }
+        private INotificationOverlay notifications { get; set; }
 
         public override bool AllowExternalScreenChange => true;
 
@@ -114,9 +114,9 @@ namespace osu.Game.Screens.Select
             }
         }
 
-        public override void OnResuming(IScreen last)
+        public override void OnResuming(ScreenTransitionEvent e)
         {
-            base.OnResuming(last);
+            base.OnResuming(e);
 
             if (playerLoader != null)
             {

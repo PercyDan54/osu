@@ -26,7 +26,6 @@ using osu.Game.Input.Bindings;
 using osu.Game.Localisation;
 using osu.Game.Online.API;
 using osu.Game.Overlays;
-using osu.Game.Overlays.Notifications;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;
@@ -90,6 +89,8 @@ namespace osu.Game.Screens.Menu
 
         private readonly LogoTrackingContainer logoTrackingContainer;
 
+        public bool ReturnToTopOnIdle { get; set; } = true;
+
         public ButtonSystem()
         {
             RelativeSizeAxes = Axes.Both;
@@ -103,7 +104,8 @@ namespace osu.Game.Screens.Menu
             buttonArea.AddRange(new Drawable[]
             {
                 new MainMenuButton(ButtonSystemStrings.Settings, string.Empty, FontAwesome.Solid.Cog, new Color4(85, 85, 85, 255), () => OnSettings?.Invoke(), -WEDGE_WIDTH, Key.O),
-                backButton = new MainMenuButton(ButtonSystemStrings.Back, @"button-back-select", OsuIcon.LeftCircle, new Color4(51, 58, 94, 255), () => State = ButtonSystemState.TopLevel, -WEDGE_WIDTH)
+                backButton = new MainMenuButton(ButtonSystemStrings.Back, @"button-back-select", OsuIcon.LeftCircle, new Color4(51, 58, 94, 255), () => State = ButtonSystemState.TopLevel,
+                    -WEDGE_WIDTH)
                 {
                     VisibleState = ButtonSystemState.Play,
                 },
@@ -120,9 +122,6 @@ namespace osu.Game.Screens.Menu
         private IAPIProvider api { get; set; }
 
         [Resolved(CanBeNull = true)]
-        private NotificationOverlay notifications { get; set; }
-
-        [Resolved(CanBeNull = true)]
         private LoginOverlay loginOverlay { get; set; }
 
         [BackgroundDependencyLoader(true)]
@@ -135,9 +134,11 @@ namespace osu.Game.Screens.Menu
             buttonsPlay.Add(new MainMenuButton(@"Replay compare", @"button-generic-select", FontAwesome.Solid.SyncAlt, new Color4(0, 86, 73, 255), () => OnReplayVs?.Invoke()));
             buttonsPlay.ForEach(b => b.VisibleState = ButtonSystemState.Play);
 
-            buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Play, @"button-play-select", OsuIcon.Logo, new Color4(102, 68, 204, 255), () => State = ButtonSystemState.Play, WEDGE_WIDTH, Key.P));
+            buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Play, @"button-play-select", OsuIcon.Logo, new Color4(102, 68, 204, 255), () => State = ButtonSystemState.Play, WEDGE_WIDTH,
+                Key.P));
             buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Edit, @"button-edit-select", OsuIcon.EditCircle, new Color4(238, 170, 0, 255), () => OnEdit?.Invoke(), 0, Key.E));
-            buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Browse, @"button-direct-select", OsuIcon.ChevronDownCircle, new Color4(165, 204, 0, 255), () => OnBeatmapListing?.Invoke(), 0, Key.D));
+            buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Browse, @"button-direct-select", OsuIcon.ChevronDownCircle, new Color4(165, 204, 0, 255), () => OnBeatmapListing?.Invoke(), 0,
+                Key.D));
 
             if (host.CanExit)
                 buttonsTopLevel.Add(new MainMenuButton(ButtonSystemStrings.Exit, string.Empty, OsuIcon.CrossCircle, new Color4(238, 51, 153, 255), () => OnExit?.Invoke(), 0, Key.Q));
@@ -165,17 +166,7 @@ namespace osu.Game.Screens.Menu
         {
             if (api.State.Value != APIState.Online)
             {
-                notifications?.Post(new SimpleNotification
-                {
-                    Text = "You gotta be online to multi 'yo!",
-                    Icon = FontAwesome.Solid.Globe,
-                    Activated = () =>
-                    {
-                        loginOverlay?.Show();
-                        return true;
-                    }
-                });
-
+                loginOverlay?.Show();
                 return;
             }
 
@@ -186,17 +177,7 @@ namespace osu.Game.Screens.Menu
         {
             if (api.State.Value != APIState.Online)
             {
-                notifications?.Post(new SimpleNotification
-                {
-                    Text = "You gotta be online to view playlists 'yo!",
-                    Icon = FontAwesome.Solid.Globe,
-                    Activated = () =>
-                    {
-                        loginOverlay?.Show();
-                        return true;
-                    }
-                });
-
+                loginOverlay?.Show();
                 return;
             }
 
@@ -205,6 +186,9 @@ namespace osu.Game.Screens.Menu
 
         private void updateIdleState(bool isIdle)
         {
+            if (!ReturnToTopOnIdle)
+                return;
+
             if (isIdle && State != ButtonSystemState.Exit && State != ButtonSystemState.EnteringMode)
                 State = ButtonSystemState.Initial;
         }
@@ -213,11 +197,8 @@ namespace osu.Game.Screens.Menu
         {
             if (State == ButtonSystemState.Initial)
             {
-                if (buttonsTopLevel.Any(b => e.Key == b.TriggerKey))
-                {
-                    logo?.TriggerClick();
-                    return true;
-                }
+                logo?.TriggerClick();
+                return true;
             }
 
             return base.OnKeyDown(e);
