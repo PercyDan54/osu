@@ -189,14 +189,14 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             localList = localList.OrderBy(l => l.Time).ToList();
 
             //获取在歌词列表中的index
-            var targetIndex = localList.IndexOf(lrc);
+            int targetIndex = localList.IndexOf(lrc);
 
             //遍历LyricFlow，找到任何LyricFlow中Index大于等于目标Index的片，并将他们的Index+1以实现靠后
             foreach (var d in LyricFlow)
             {
                 //获取在LyricFlow中的Index
                 //drawableIndex不是目标index
-                var drawableIndex = LyricFlow.IndexOf(d);
+                int drawableIndex = LyricFlow.IndexOf(d);
 
                 //如果这个片比目标Index大，则将该片的Index+1
                 if (drawableIndex >= targetIndex)
@@ -227,18 +227,18 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             }
         }
 
-        public override void OnEntering(IScreen last)
+        public override void OnEntering(ScreenTransitionEvent e)
         {
             this.MoveToX(0, 200, Easing.OutQuint).FadeInFromZero(200, Easing.OutQuint);
-            base.OnEntering(last);
+            base.OnEntering(e);
         }
 
-        public override bool OnExiting(IScreen next)
+        public override bool OnExiting(ScreenExitEvent e)
         {
             Plugin.IsEditing = false;
             performSave(true);
             this.MoveToX(10, 200, Easing.OutQuint).FadeOut(200, Easing.OutQuint);
-            return base.OnExiting(next);
+            return base.OnExiting(e);
         }
     }
 }

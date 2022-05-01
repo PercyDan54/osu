@@ -47,8 +47,8 @@ namespace osu.Game.Screens.ReplayVs
         private readonly int replayCount;
         private readonly Score[] teamRedScores;
         private readonly Score[] teamBlueScores;
-        private readonly BindableInt teamRedScore = new BindableInt();
-        private readonly BindableInt teamBlueScore = new BindableInt();
+        private readonly BindableLong teamRedScore = new BindableLong();
+        private readonly BindableLong teamBlueScore = new BindableLong();
 
         public ReplayVsScreen(Score[] teamRedScores, Score[] teamBlueScores, WorkingBeatmap beatmap)
         {
@@ -121,7 +121,6 @@ namespace osu.Game.Screens.ReplayVs
             base.LoadComplete();
 
             masterClockContainer.Reset();
-            masterClockContainer.Stop();
 
             syncManager.ReadyToStart += onReadyToStart;
             syncManager.MasterState.BindValueChanged(onMasterStateChanged, true);
@@ -181,16 +180,7 @@ namespace osu.Game.Screens.ReplayVs
 
         private void onReadyToStart()
         {
-            // Seek the master clock to the gameplay time.
-            // This is chosen as the first available frame in the players' replays, which matches the seek by each individual SpectatorPlayer.
-            double startTime = instances.Where(i => i.Score != null)
-                                        .SelectMany(i => i.Score.Replay.Frames)
-                                        .Select(f => f.Time)
-                                        .DefaultIfEmpty(0)
-                                        .Min();
-
-            masterClockContainer.Seek(startTime);
-            masterClockContainer.Start();
+            masterClockContainer.Reset(true);
 
             // Although the clock has been started, this flag is set to allow for later synchronisation state changes to also be able to start it.
             canStartMasterClock = true;

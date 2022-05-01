@@ -116,22 +116,22 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
             base.OnHoverLost(e);
         }
 
-        public override void OnEntering(IScreen last)
+        public override void OnEntering(ScreenTransitionEvent e)
         {
             this.MoveToX(0, 200, Easing.OutQuint).FadeInFromZero(200, Easing.OutQuint);
-            base.OnEntering(last);
+            base.OnEntering(e);
         }
 
-        public override void OnSuspending(IScreen next)
+        public override void OnSuspending(ScreenTransitionEvent e)
         {
             this.MoveToX(10, 200, Easing.OutQuint).FadeOut(200, Easing.OutQuint);
-            base.OnSuspending(next);
+            base.OnSuspending(e);
         }
 
-        public override void OnResuming(IScreen last)
+        public override void OnResuming(ScreenTransitionEvent e)
         {
             this.MoveToX(0, 200, Easing.OutQuint).FadeIn(200, Easing.OutQuint);
-            base.OnResuming(last);
+            base.OnResuming(e);
         }
     }
 }

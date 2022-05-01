@@ -116,7 +116,12 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                 }));
             }
             else
-                stack.Push(new ReplayVsPlayerLoader(Score, GameplayClock, teamColor));
+                stack.Push(new ReplayVsPlayerLoader(Score, () =>
+                {
+                    var player = new ReplayVsPlayer(Score, GameplayClock, teamColor);
+                    player.OnGameplayStarted += () => OnGameplayStarted?.Invoke();
+                    return player;
+                }));
 
             loadingLayer.Hide();
         }

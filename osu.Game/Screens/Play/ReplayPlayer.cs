@@ -43,9 +43,9 @@ namespace osu.Game.Screens.Play
             DrawableRuleset?.SetReplayScore(Score);
         }
 
-        public override void OnEntering(IScreen last)
+        public override void OnEntering(ScreenTransitionEvent e)
         {
-            base.OnEntering(last);
+            base.OnEntering(e);
 
             if (!SaveScore) return;
 

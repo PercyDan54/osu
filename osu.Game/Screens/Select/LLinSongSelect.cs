@@ -49,10 +49,10 @@ namespace osu.Game.Screens.Select
             return true;
         }
 
-        public override bool OnExiting(IScreen next)
+        public override bool OnExiting(ScreenExitEvent e)
         {
             ExitAction?.Invoke();
-            return base.OnExiting(next);
+            return base.OnExiting(e);
         }
     }
 }
