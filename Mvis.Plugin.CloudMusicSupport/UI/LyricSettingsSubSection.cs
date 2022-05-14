@@ -21,7 +21,6 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
         {
             var config = (LyricConfigManager)ConfigManager;
 
-            SettingsCheckbox useDrawablePoolCheckBox;
             SettingsCheckbox autoScrollChechBox;
             Children = new Drawable[]
             {
@@ -29,11 +28,6 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 {
                     LabelText = LLinGenericStrings.EnablePlugin,
                     Current = config.GetBindable<bool>(LyricSettings.EnablePlugin)
-                },
-                useDrawablePoolCheckBox = new SettingsCheckbox
-                {
-                    LabelText = CloudMusicStrings.UseDrawablePool,
-                    Current = config.GetBindable<bool>(LyricSettings.UseDrawablePool)
                 },
                 new SettingsCheckbox
                 {
@@ -45,11 +39,6 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 {
                     LabelText = CloudMusicStrings.DisableShader,
                     Current = config.GetBindable<bool>(LyricSettings.NoExtraShadow)
-                },
-                new SettingsSlider<double>
-                {
-                    LabelText = CloudMusicStrings.GlobalOffsetMain,
-                    Current = config.GetBindable<double>(LyricSettings.LyricOffset)
                 },
                 new SettingsSlider<float>
                 {
@@ -97,7 +86,6 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 }
             };
 
-            useDrawablePoolCheckBox.WarningText = CloudMusicStrings.ExperimentalWarning;
             autoScrollChechBox.WarningText = CloudMusicStrings.LyricAutoScrollSub;
         }
     }

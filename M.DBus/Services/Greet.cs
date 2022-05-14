@@ -52,7 +52,7 @@ namespace M.DBus.Services
             else
                 GoingOffline?.Invoke(reason);
 
-            isOnline = online;
+            this.isOnline = online;
         }
 
         public event Action<string> GoingOffline;

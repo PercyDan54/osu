@@ -18,12 +18,10 @@ namespace Mvis.Plugin.CloudMusicSupport.Config
         protected override void InitialiseDefaults()
         {
             SetDefault(LyricSettings.EnablePlugin, true);
-            SetDefault(LyricSettings.LyricOffset, 0, -3000d, 3000d);
             SetDefault(LyricSettings.LyricFadeInDuration, 200f, 0, 1000);
             SetDefault(LyricSettings.LyricFadeOutDuration, 200f, 0, 1000);
             SetDefault(LyricSettings.SaveLrcWhenFetchFinish, true);
             SetDefault(LyricSettings.NoExtraShadow, true);
-            SetDefault(LyricSettings.UseDrawablePool, false);
             SetDefault(LyricSettings.AutoScrollToCurrent, false);
             SetDefault(LyricSettings.LyricDirection, Anchor.BottomCentre);
             SetDefault(LyricSettings.LyricPositionX, 0f, -1f, 1f);
@@ -38,12 +36,10 @@ namespace Mvis.Plugin.CloudMusicSupport.Config
     public enum LyricSettings
     {
         EnablePlugin,
-        LyricOffset,
         LyricFadeInDuration,
         LyricFadeOutDuration,
         SaveLrcWhenFetchFinish,
         NoExtraShadow,
-        UseDrawablePool,
         AutoScrollToCurrent,
         LyricDirection,
         LyricPositionX,

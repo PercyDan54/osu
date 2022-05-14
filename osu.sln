@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29424.173
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32505.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "osu.Game", "osu.Game\osu.Game.csproj", "{2A66DD92-ADB1-4994-89E2-C94E04ACDA0D}"
 EndProject
@@ -98,8 +98,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mvis.Plugin.Yasp", "Mvis.Plugin.Yasp\Mvis.Plugin.Yasp.csproj", "{8B8FACF4-1C55-470B-8D8C-BC3DA4753C48}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mvis.Plugin.CloudMusicSupport", "Mvis.Plugin.CloudMusicSupport\Mvis.Plugin.CloudMusicSupport.csproj", "{46D2B51F-C714-4216-8C65-C272AE6FC72A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mvis.Plugin.FakeEditor", "Mvis.Plugin.FakeEditor\Mvis.Plugin.FakeEditor.csproj", "{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mvis.Plugin.CollectionSupport", "Mvis.Plugin.CollectionSupport\Mvis.Plugin.CollectionSupport.csproj", "{EF6F8297-93A3-454F-B903-003CBEAED1F3}"
 EndProject
@@ -579,18 +577,6 @@ Global
 		{46D2B51F-C714-4216-8C65-C272AE6FC72A}.Release|iPhone.Build.0 = Release|Any CPU
 		{46D2B51F-C714-4216-8C65-C272AE6FC72A}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{46D2B51F-C714-4216-8C65-C272AE6FC72A}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Debug|iPhone.ActiveCfg = Debug|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Debug|iPhone.Build.0 = Debug|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Release|iPhone.ActiveCfg = Release|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Release|iPhone.Build.0 = Release|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
-		{AB7D3FCA-EC94-4BB6-AC89-6496F01F4AD7}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 		{EF6F8297-93A3-454F-B903-003CBEAED1F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EF6F8297-93A3-454F-B903-003CBEAED1F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF6F8297-93A3-454F-B903-003CBEAED1F3}.Debug|iPhone.ActiveCfg = Debug|Any CPU

@@ -1,5 +1,4 @@
 using System;
-using M.Resources.Localisation.LLin.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Config;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
@@ -62,6 +61,12 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                     Padding = new MarginPadding(10),
                     Children = new Drawable[]
                     {
+                        idText = new OsuSpriteText
+                        {
+                            Margin = new MarginPadding { Horizontal = 15, Top = 15 },
+                            Font = OsuFont.GetFont(size: 20),
+                            Colour = Color4.Black
+                        },
                         new TrackTimeIndicator(),
                         buttonFillFlow = new FillFlowContainer
                         {
@@ -72,14 +77,8 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                             AutoSizeEasing = Easing.OutQuint,
                             Anchor = Anchor.TopRight,
                             Origin = Anchor.TopRight
-                        },
+                        }
                     }
-                },
-                idText = new OsuSpriteText
-                {
-                    Margin = new MarginPadding { Horizontal = 15, Top = 15 },
-                    Font = OsuFont.GetFont(size: 20),
-                    Colour = Color4.Black
                 }
             };
         }
@@ -127,10 +126,9 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                 {
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight,
-                    Current = config.GetBindable<double>(LyricSettings.LyricOffset),
-                    LabelText = CloudMusicStrings.GlobalOffsetMain,
-                    RelativeSizeAxes = Axes.None,
-                    Width = 200 + 25,
+                    Current = plugin.Offset,
+                    LabelText = "Local offset",
+                    RelativeSizeAxes = Axes.X,
                     Padding = new MarginPadding { Right = 10 },
                     Colour = Color4.Black
                 },

@@ -1,5 +1,4 @@
 using osu.Framework.Allocation;
-using osu.Framework.Audio.Track;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
@@ -8,7 +7,6 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
-using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -131,14 +129,14 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                         {
                             new OsuSpriteText
                             {
-                                Text = string.IsNullOrEmpty(Beatmap.Metadata.TitleUnicode) ? Beatmap.Metadata.Title : Beatmap.Metadata.TitleUnicode,
+                                Text = Beatmap.Metadata.TitleUnicode,
                                 Font = OsuFont.GetFont(weight: FontWeight.Bold, size: 20),
                                 RelativeSizeAxes = Axes.X,
                                 Truncate = true
                             },
                             new OsuSpriteText
                             {
-                                Text = string.IsNullOrEmpty(Beatmap.Metadata.ArtistUnicode) ? Beatmap.Metadata.Artist : Beatmap.Metadata.ArtistUnicode,
+                                Text = Beatmap.Metadata.ArtistUnicode,
                                 Font = OsuFont.GetFont(weight: FontWeight.Bold),
                                 RelativeSizeAxes = Axes.X,
                                 Truncate = true
@@ -159,7 +157,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                 }
             };
 
-            Active.BindValueChanged(onActiveChanged, true);
+            Active.BindValueChanged(OnActiveChanged, true);
             colourProvider.HueColour.BindValueChanged(_ =>
             {
                 maskBox.Colour = colourProvider.Dark3.Opacity(0.65f);
@@ -176,30 +174,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             }, true);
         }
 
-        private class Flash : BeatSyncedContainer
-        {
-            private readonly Box flashBox;
-
-            public Flash()
-            {
-                Child = flashBox = new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Alpha = 0,
-                    Colour = Colour4.White.Opacity(0.4f)
-                };
-            }
-
-            protected override void OnNewBeat(int beatIndex, TimingControlPoint timingPoint, EffectControlPoint effectPoint, ChannelAmplitudes amplitudes)
-            {
-                base.OnNewBeat(beatIndex, timingPoint, effectPoint, amplitudes);
-                int numerator = timingPoint.TimeSignature.Numerator;
-                if ((beatIndex % numerator == 0 && beatIndex / numerator > 0) || effectPoint.KiaiMode)
-                    flashBox.FadeOutFromOne(1000);
-            }
-        }
-
-        private void onActiveChanged(ValueChangedEvent<bool> v)
+        private void OnActiveChanged(ValueChangedEvent<bool> v)
         {
             switch (v.NewValue)
             {

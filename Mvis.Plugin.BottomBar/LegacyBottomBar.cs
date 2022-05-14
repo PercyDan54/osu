@@ -28,7 +28,7 @@ namespace Mvis.Plugin.BottomBar
         private readonly SongProgressBar progressBar;
         private readonly Container contentContainer;
 
-        public override int Version => 8;
+        public override int Version => 9;
 
         public override TargetLayer Target => TargetLayer.FunctionBar;
 
@@ -135,7 +135,7 @@ namespace Mvis.Plugin.BottomBar
             progressBar.MoveToY(4f, 300, Easing.OutQuint);
         }
 
-        public bool OkForHide() => IsHovered;
+        public bool OkForHide() => !IsHovered;
 
         private void checkForPluginControls(IFunctionProvider provider)
         {

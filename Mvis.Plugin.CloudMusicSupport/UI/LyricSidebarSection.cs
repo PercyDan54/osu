@@ -26,13 +26,6 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 },
                 new SettingsTogglePiece
                 {
-                    Icon = FontAwesome.Solid.SwimmingPool,
-                    Description = CloudMusicStrings.UseDrawablePool,
-                    TooltipText = CloudMusicStrings.ExperimentalWarning,
-                    Bindable = config.GetBindable<bool>(LyricSettings.UseDrawablePool)
-                },
-                new SettingsTogglePiece
-                {
                     Icon = FontAwesome.Solid.Save,
                     Description = CloudMusicStrings.SaveLyricOnDownloadedMain,
                     Bindable = config.GetBindable<bool>(LyricSettings.SaveLrcWhenFetchFinish),
@@ -43,11 +36,6 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                     Icon = FontAwesome.Solid.FillDrip,
                     Description = CloudMusicStrings.DisableShader,
                     Bindable = config.GetBindable<bool>(LyricSettings.NoExtraShadow)
-                },
-                new SettingsSliderPiece<double>
-                {
-                    Description = CloudMusicStrings.GlobalOffsetMain,
-                    Bindable = config.GetBindable<double>(LyricSettings.LyricOffset)
                 },
                 new SettingsSliderPiece<float>
                 {

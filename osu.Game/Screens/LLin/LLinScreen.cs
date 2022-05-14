@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using JetBrains.Annotations;
 using M.DBus.Tray;
 using M.Resources.Localisation.LLin;
@@ -26,6 +28,7 @@ using osu.Game.Input;
 using osu.Game.Input.Bindings;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
+using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Screens.LLin.Misc;
 using osu.Game.Screens.LLin.Plugins;
@@ -59,7 +62,10 @@ namespace osu.Game.Screens.LLin
         private LLinPluginManager pluginManager { get; set; }
 
         [Resolved]
-        private DialogOverlay dialog { get; set; }
+        private IDialogOverlay dialog { get; set; }
+
+        [Resolved]
+        private INotificationOverlay notifications { get; set; }
 
         [Resolved(CanBeNull = true)]
         private OsuGame game { get; set; }
@@ -449,7 +455,107 @@ namespace osu.Game.Screens.LLin
 
         #endregion
 
-        private InputManager inputManager;
+        private void checkIfPluginIllegal(LLinPlugin pl)
+        {
+            if (!pluginManager.GetAllPlugins(false).Contains(pl))
+                throw new InvalidOperationException($"{pl} 不是正在运行中的插件, 请将此问题报告给插件开发者({pl.Author})。");
+        }
+
+        #region 对话框
+
+        public void PushDialog(LLinPlugin sender, IconUsage icon, LocalisableString title, LocalisableString text, DialogOption[] options)
+        {
+            checkIfPluginIllegal(sender);
+
+            dialog.Push(new LLinDialog(icon, title, text, options));
+        }
+
+        #endregion
+
+        #region 通知
+
+        public void PostNotification(LLinPlugin sender, IconUsage icon, LocalisableString message)
+        {
+            checkIfPluginIllegal(sender);
+            notifications.Post(new SimpleNotification
+            {
+                Icon = icon,
+                Text = message
+            });
+        }
+
+        private uint lastID;
+        private readonly IDictionary<uint, ProgressNotification> notificationDictionary = new ConcurrentDictionary<uint, ProgressNotification>();
+
+        public (uint id, CancellationToken cancellationToken) PostProgressNotification(LLinPlugin sender, IconUsage icon, LocalisableString message, LocalisableString completionMessage)
+        {
+            checkIfPluginIllegal(sender);
+
+            lastID++;
+            uint id = lastID;
+
+            var notification = new PluginProgressNotification
+            {
+                Text = message,
+                CompletionText = completionMessage.ToString(),
+                OnComplete = () => notificationDictionary.Remove(id)
+            };
+
+            notifications.Post(notification);
+
+            if (!notificationDictionary.TryAdd(id, notification))
+                throw new InvalidOperationException();
+
+            return (id, notification.CancellationToken);
+        }
+
+        public bool UpdateProgressNotification(LLinPlugin sender, uint targetID, float progress)
+        {
+            checkIfPluginIllegal(sender);
+
+            ProgressNotification target;
+            if (!notificationDictionary.TryGetValue(targetID, out target)) return false;
+
+            if (target.State == ProgressNotificationState.Completed || target.State == ProgressNotificationState.Cancelled)
+                return false;
+
+            target.Progress = Math.Min(1, progress);
+
+            return true;
+        }
+
+        public bool UpdateProgressNotification(LLinPlugin sender, uint targetID, ProgressState state)
+        {
+            checkIfPluginIllegal(sender);
+
+            ProgressNotification target;
+            if (!notificationDictionary.TryGetValue(targetID, out target)) return false;
+
+            if (target.State == ProgressNotificationState.Cancelled)
+            {
+                Logger.Log($"{sender} 的一项任务已经被您下达取消命令, 但似乎他们并没有这么做", level: LogLevel.Important);
+                notificationDictionary.Remove(targetID);
+            }
+
+            switch (state)
+            {
+                case ProgressState.Failed:
+                    target.State = ProgressNotificationState.Cancelled;
+                    break;
+
+                case ProgressState.Success:
+                    target.State = ProgressNotificationState.Completed;
+                    break;
+
+                default:
+                    target.State = ProgressNotificationState.Queued;
+                    break;
+            }
+
+            return true;
+        }
+
+        #endregion
 
         #region 界面属性
 
@@ -464,6 +570,8 @@ namespace osu.Game.Screens.LLin
         public override bool? AllowTrackAdjustments => true;
 
         #endregion
+
+        private InputManager inputManager;
 
         private readonly PlayerInfo info = new PlayerInfo
         {
@@ -610,10 +718,13 @@ namespace osu.Game.Screens.LLin
                         //隐藏侧边栏
                         sidebar.ShowComponent(null);
 
+                        lockButton.Bindable.Disabled = false;
                         lockButton.Bindable.Value = true;
 
                         //防止手机端无法恢复界面
                         lockButton.Bindable.Disabled = RuntimeInfo.IsDesktop;
+
+                        currentFunctionBar.ShowFunctionControlTemporary();
                     },
                     Description = LLinBaseStrings.HideAndLockInterface,
                     Type = FunctionType.Misc
@@ -642,7 +753,7 @@ namespace osu.Game.Screens.LLin
                 lockButton = new ToggleableFakeButton
                 {
                     Description = LLinBaseStrings.LockInterface,
-                    Action = currentFunctionBar.ShowFunctionControlTemporary,
+                    Action = () => currentFunctionBar.ShowFunctionControlTemporary(),
                     Type = FunctionType.Plugin,
                     Icon = FontAwesome.Solid.Lock
                 }
@@ -777,10 +888,7 @@ namespace osu.Game.Screens.LLin
             //添加选歌入口
             sidebar.Add(new SongSelectPage
             {
-                Action = () => this.Push(new LLinSongSelect
-                {
-                    ExitAction = () => sidebar.Hide()
-                }),
+                Action = () => this.Push(new LLinSongSelect())
             });
 
             //更新当前音乐控制插件
@@ -796,6 +904,8 @@ namespace osu.Game.Screens.LLin
                 //获取与新值匹配的控制插件
                 changeFunctionBarProvider(pluginManager.GetFunctionBarProviderByPath(v.NewValue));
             }, true);
+
+            blackBackground.BindValueChanged(_ => applyBackgroundBrightness());
 
             base.LoadComplete();
         }
@@ -928,7 +1038,7 @@ namespace osu.Game.Screens.LLin
             currentFunctionBar.ShowFunctionControlTemporary();
 
             //如果界面已隐藏、不是强制显示并且已经锁定变更
-            if (!forceActive && lockButton.Bindable.Disabled && InterfacesHidden) return;
+            if (!forceActive && lockButton.Bindable.Value && InterfacesHidden) return;
 
             currentFunctionBar.Show();
             applyBackgroundBrightness();

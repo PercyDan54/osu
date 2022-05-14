@@ -13,6 +13,7 @@
     <EmbeddedResource Include="Samples\**\*" />
     <EmbeddedResource Include="Textures\**\*" />
     <EmbeddedResource Include="Tracks\**\*" />
+    <EmbeddedResource Include="Documents\**\*" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />

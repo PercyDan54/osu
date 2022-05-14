@@ -13,6 +13,7 @@ namespace osu.Game.Screens.LLin.Misc
         private readonly WorkingBeatmap beatmap;
 
         public BeatmapBackground(WorkingBeatmap beatmap = null)
+            : base(cachedFrameBuffer: true)
         {
             this.beatmap = beatmap;
             RelativeSizeAxes = Axes.Both;

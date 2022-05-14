@@ -6,6 +6,7 @@ using M.DBus.Utils.Canonical.DBusMenuFlags;
 using Mvis.Plugin.CollectionSupport.Config;
 using Mvis.Plugin.CollectionSupport.DBus;
 using Mvis.Plugin.CollectionSupport.Sidebar;
+using Mvis.Plugin.CollectionSupport.Utils;
 using osu.Framework;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -37,7 +38,7 @@ namespace Mvis.Plugin.CollectionSupport
         [Resolved]
         private MusicController controller { get; set; }
 
-        private readonly List<BeatmapSetInfo> beatmapList = new List<BeatmapSetInfo>();
+        private readonly List<IBeatmapSetInfo> beatmapList = new List<IBeatmapSetInfo>();
 
         public int CurrentPosition
         {
@@ -63,7 +64,7 @@ namespace Mvis.Plugin.CollectionSupport
 
         protected override bool PostInit() => true;
 
-        public override int Version => 8;
+        public override int Version => 9;
 
         public override PluginSidebarPage CreateSidebarPage()
             => new CollectionPluginPage(this);
@@ -231,7 +232,7 @@ namespace Mvis.Plugin.CollectionSupport
         /// <param name="prevBeatmap">上一张图</param>
         /// <param name="updateCurrentPosition">是否更新当前位置</param>
         /// <param name="displace">位移数值，默认为1.</param>
-        private WorkingBeatmap getBeatmap(List<BeatmapSetInfo> list, WorkingBeatmap prevBeatmap, bool updateCurrentPosition = false, int displace = 1)
+        private WorkingBeatmap getBeatmap(List<IBeatmapSetInfo> list, WorkingBeatmap prevBeatmap, bool updateCurrentPosition = false, int displace = 1)
         {
             var prevSet = prevBeatmap.BeatmapSetInfo;
 
@@ -254,7 +255,7 @@ namespace Mvis.Plugin.CollectionSupport
             //从list获取当前位置所在的BeatmapSetInfo, 然后选择该BeatmapSetInfo下的第一个WorkingBeatmap
             //最终赋值给NewBeatmap
             var newBeatmap = list.Count > 0
-                ? beatmaps.GetWorkingBeatmap(list.ElementAt(CurrentPosition).Beatmaps.First())
+                ? beatmaps.GetWorkingBeatmap(list.ElementAt(CurrentPosition).Beatmaps.First().AsBeatmapInfo())
                 : b.Value;
             return newBeatmap;
         }
@@ -276,16 +277,16 @@ namespace Mvis.Plugin.CollectionSupport
                 var currentSet = item.BeatmapSet;
                 //进行比对，如果beatmapList中不存在，则添加。
                 if (!beatmapList.Contains(currentSet))
-                    beatmapList.Add((BeatmapSetInfo)currentSet);
+                    beatmapList.Add(currentSet);
 
                 if (RuntimeInfo.OS == RuntimeInfo.Platform.Linux)
                 {
                     var subEntry = new SimpleEntry
                     {
-                        Label = item.BeatmapSet.Metadata.GetDisplayTitleRomanisable().GetPreferred(true),
+                        Label = item.BeatmapSet?.Metadata.GetDisplayTitleRomanisable().GetPreferred(true) ?? item.ToString(),
                         OnActive = () =>
                         {
-                            Schedule(() => Play(beatmaps.GetWorkingBeatmap((BeatmapInfo)item)));
+                            Schedule(() => Play(beatmaps.GetWorkingBeatmap(item.AsBeatmapInfo())));
                         }
                     };
 

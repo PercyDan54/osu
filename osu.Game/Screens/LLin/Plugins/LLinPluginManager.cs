@@ -19,7 +19,6 @@ using osu.Game.Screens.LLin.Misc.PluginResolvers;
 using osu.Game.Screens.LLin.Plugins.Config;
 using osu.Game.Screens.LLin.Plugins.Internal;
 using osu.Game.Screens.LLin.Plugins.Types;
-using Tmds.DBus;
 
 namespace osu.Game.Screens.LLin.Plugins
 {
@@ -37,14 +36,14 @@ namespace osu.Game.Screens.LLin.Plugins
 
         [Resolved(canBeNull: true)]
         [CanBeNull]
-        private DBusManager dBusManager { get; set; }
+        private IDBusManagerContainer<IMDBusObject> dBusManagerContainer { get; set; }
 
         internal Action<LLinPlugin> OnPluginAdd;
         internal Action<LLinPlugin> OnPluginUnLoad;
 
-        public int PluginVersion => 8;
+        public int PluginVersion => 9;
         public int MinimumPluginVersion => 8;
-        private const bool experimental = true;
+        private const bool experimental = false;
 
         public readonly IProvideAudioControlPlugin DefaultAudioController = new OsuMusicControllerWrapper();
         public readonly IFunctionBarProvider DummyFunctionBar = new DummyFunctionBar();
@@ -106,6 +105,8 @@ namespace osu.Game.Screens.LLin.Plugins
 
             resolver.UpdatePluginDictionary(GetAllPlugins(false));
 
+#pragma warning disable 162
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             if (!DebugUtils.IsDebugBuild && experimental)
             {
                 Logger.Log($"看上去该版本 ({PluginVersion}) 尚处于实现性阶段。 "
@@ -113,39 +114,40 @@ namespace osu.Game.Screens.LLin.Plugins
                     LoggingTarget.Runtime,
                     LogLevel.Important);
             }
+#pragma warning restore 162
         }
 
         public IPluginConfigManager GetConfigManager(LLinPlugin pl) =>
             configManagers.GetOrAdd(pl.GetType(), _ => pl.CreateConfigManager(storage));
 
-        public void RegisterDBusObject(IDBusObject target)
+        public void RegisterDBusObject(IMDBusObject target)
         {
             if (platformSupportsDBus)
-                dBusManager?.RegisterNewObject(target);
+                dBusManagerContainer?.Add(target);
         }
 
-        public void UnRegisterDBusObject(IDBusObject target)
+        public void UnRegisterDBusObject(IMDBusObject target)
         {
             if (platformSupportsDBus)
-                dBusManager?.UnRegisterObject(target);
+                dBusManagerContainer?.Remove(target);
         }
 
         public void AddDBusMenuEntry(SimpleEntry entry)
         {
             if (platformSupportsDBus)
-                dBusManager?.TrayManager.AddEntry(entry);
+                dBusManagerContainer?.AddTrayEntry(entry);
         }
 
         public void RemoveDBusMenuEntry(SimpleEntry entry)
         {
             if (platformSupportsDBus)
-                dBusManager?.TrayManager.RemoveEntry(entry);
+                dBusManagerContainer?.RemoveTrayEntry(entry);
         }
 
         public void PostSystemNotification(SystemNotification notification)
         {
             if (platformSupportsDBus)
-                dBusManager?.Notifications.PostAsync(notification);
+                dBusManagerContainer?.PostSystemNotification(notification);
         }
 
         private bool platformSupportsDBus => RuntimeInfo.OS == RuntimeInfo.Platform.Linux;
@@ -194,7 +196,7 @@ namespace osu.Game.Screens.LLin.Plugins
 
                     using (var writer = new StreamWriter(File.OpenWrite(blockedPluginFilePath)))
                     {
-                        var serializedString = JsonConvert.SerializeObject(blockedProviders);
+                        string serializedString = JsonConvert.SerializeObject(blockedProviders);
                         writer.Write(serializedString);
                     }
                 }
