@@ -24,7 +24,6 @@ namespace osu.Game.Rulesets.Mods
         public override string Acronym => "NC";
         public override IconUsage? Icon => OsuIcon.ModNightcore;
         public override string Description => "Uguuuuuuuu...";
-
         public class NightcoreBeatContainer : BeatSyncedContainer
         {
             private PausableSkinnableSound hatSample;
@@ -136,7 +135,7 @@ namespace osu.Game.Rulesets.Mods
             }, true);
         }
 
-        public override void ApplyToTrack(ITrack track)
+        public override void ApplyToTrack(IAdjustableAudioComponent track)
         {
             // base.ApplyToTrack() intentionally not called (different tempo adjustment is applied)
             track.AddAdjustment(AdjustableProperty.Frequency, freqAdjust);

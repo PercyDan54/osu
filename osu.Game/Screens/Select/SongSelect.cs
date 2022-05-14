@@ -35,6 +35,7 @@ using osu.Framework.Input.Bindings;
 using osu.Game.Collections;
 using osu.Game.Graphics.UserInterface;
 using System.Diagnostics;
+using JetBrains.Annotations;
 using osu.Game.Screens.Play;
 using osu.Game.Database;
 using osu.Game.Skinning;
@@ -116,8 +117,14 @@ namespace osu.Game.Screens.Select
 
         private double audioFeedbackLastPlaybackTime;
 
+        [CanBeNull]
+        private IDisposable modSelectOverlayRegistration;
+
         [Resolved]
         private MusicController music { get; set; }
+
+        [Resolved(CanBeNull = true)]
+        internal IOverlayManager OverlayManager { get; private set; }
 
         [BackgroundDependencyLoader(true)]
         private void load(AudioManager audio, IDialogOverlay dialog, OsuColour colours, ManageCollectionsDialog manageCollectionsDialog, DifficultyRecommender recommender)
@@ -252,37 +259,24 @@ namespace osu.Game.Screens.Select
             {
                 AddRangeInternal(new Drawable[]
                 {
-                    new GridContainer // used for max height implementation
+                    FooterPanels = new Container
                     {
+                        Anchor = Anchor.BottomLeft,
+                        Origin = Anchor.BottomLeft,
                         RelativeSizeAxes = Axes.Both,
-                        RowDimensions = new[]
+                        Padding = new MarginPadding { Bottom = Footer.HEIGHT },
+                        Children = new Drawable[]
                         {
-                            new Dimension(),
-                            new Dimension(GridSizeMode.Relative, 1f, maxSize: ModSelectOverlay.HEIGHT + Footer.HEIGHT),
-                        },
-                        Content = new[]
-                        {
-                            null,
-                            new Drawable[]
-                            {
-                                FooterPanels = new Container
-                                {
-                                    Anchor = Anchor.BottomLeft,
-                                    Origin = Anchor.BottomLeft,
-                                    RelativeSizeAxes = Axes.Both,
-                                    Padding = new MarginPadding { Bottom = Footer.HEIGHT },
-                                    Children = new Drawable[]
-                                    {
-                                        BeatmapOptions = new BeatmapOptionsOverlay(),
-                                        ModSelect = CreateModSelectOverlay()
-                                    }
-                                }
-                            }
+                            BeatmapOptions = new BeatmapOptionsOverlay(),
                         }
                     },
-                    Footer = new Footer()
+                    Footer = new Footer(),
                 });
             }
+
+            // preload the mod select overlay for later use in `LoadComplete()`.
+            // therein it will be registered at the `OsuGame` level to properly function as a blocking overlay.
+            LoadComponent(ModSelect = CreateModSelectOverlay());
 
             if (Footer != null)
             {
@@ -315,6 +309,13 @@ namespace osu.Game.Screens.Select
                     }
                 });
             }
+        }
+
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            modSelectOverlayRegistration = OverlayManager?.RegisterBlockingOverlay(ModSelect);
         }
 
         /// <summary>
@@ -658,6 +659,7 @@ namespace osu.Game.Screens.Select
                 return true;
 
             beatmapInfoWedge.Hide();
+            ModSelect.Hide();
 
             this.FadeOut(100);
 
@@ -716,6 +718,8 @@ namespace osu.Game.Screens.Select
 
             if (music != null)
                 music.TrackChanged -= ensureTrackLooping;
+
+            modSelectOverlayRegistration?.Dispose();
         }
 
         private BeatmapSetInfo oldBeatmapSet;

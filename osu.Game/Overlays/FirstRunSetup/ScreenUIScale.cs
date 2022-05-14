@@ -2,6 +2,7 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -19,6 +20,7 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Localisation;
 using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Screens;
 using osu.Game.Screens.Menu;
 using osu.Game.Screens.Select;
@@ -33,9 +35,11 @@ namespace osu.Game.Overlays.FirstRunSetup
         [BackgroundDependencyLoader]
         private void load(OsuConfigManager config)
         {
+            const float screen_width = 640;
+
             Content.Children = new Drawable[]
             {
-                new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: 24))
+                new OsuTextFlowContainer(cp => cp.Font = OsuFont.Default.With(size: CONTENT_FONT_SIZE))
                 {
                     Text = FirstRunSetupOverlayStrings.UIScaleDescription,
                     RelativeSizeAxes = Axes.X,
@@ -52,7 +56,7 @@ namespace osu.Game.Overlays.FirstRunSetup
                     Anchor = Anchor.TopCentre,
                     Origin = Anchor.TopCentre,
                     RelativeSizeAxes = Axes.None,
-                    Size = new Vector2(960, 960 / 16f * 9 / 2),
+                    Size = new Vector2(screen_width, screen_width / 16f * 9 / 2),
                     Children = new Drawable[]
                     {
                         new GridContainer
@@ -99,6 +103,8 @@ namespace osu.Game.Overlays.FirstRunSetup
         private class NestedSongSelect : PlaySongSelect
         {
             protected override bool ControlGlobalMusic => false;
+
+            public override bool? AllowTrackAdjustments => false;
         }
 
         private class PinnedMainMenu : MainMenu
@@ -119,6 +125,7 @@ namespace osu.Game.Overlays.FirstRunSetup
 
         private class SampleScreenContainer : CompositeDrawable
         {
+            private readonly OsuScreen screen;
             // Minimal isolation from main game.
 
             [Cached]
@@ -129,10 +136,20 @@ namespace osu.Game.Overlays.FirstRunSetup
             [Cached(typeof(IBindable<WorkingBeatmap>))]
             protected Bindable<WorkingBeatmap> Beatmap { get; private set; } = new Bindable<WorkingBeatmap>();
 
+            [Cached]
+            [Cached(typeof(IBindable<IReadOnlyList<Mod>>))]
+            protected Bindable<IReadOnlyList<Mod>> SelectedMods { get; private set; } = new Bindable<IReadOnlyList<Mod>>(Array.Empty<Mod>());
+
             public override bool HandlePositionalInput => false;
             public override bool HandleNonPositionalInput => false;
             public override bool PropagatePositionalInputSubTree => false;
             public override bool PropagateNonPositionalInputSubTree => false;
+
+            public SampleScreenContainer(OsuScreen screen)
+            {
+                this.screen = screen;
+                RelativeSizeAxes = Axes.Both;
+            }
 
             [BackgroundDependencyLoader]
             private void load(AudioManager audio, TextureStore textures, RulesetStore rulesets)
@@ -141,13 +158,8 @@ namespace osu.Game.Overlays.FirstRunSetup
                 Beatmap.Value.LoadTrack();
 
                 Ruleset.Value = rulesets.AvailableRulesets.First();
-            }
 
-            public SampleScreenContainer(Screen screen)
-            {
                 OsuScreenStack stack;
-                RelativeSizeAxes = Axes.Both;
-
                 OsuLogo logo;
 
                 Padding = new MarginPadding(5);
@@ -181,7 +193,8 @@ namespace osu.Game.Overlays.FirstRunSetup
                     },
                 };
 
-                stack.Push(screen);
+                // intentionally load synchronously so it is included in the initial load of the first run screen.
+                stack.PushSynchronously(screen);
             }
         }
     }

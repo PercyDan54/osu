@@ -1,6 +1,8 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable enable
+
 using System;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
@@ -12,6 +14,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
+using osu.Game.Audio;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
@@ -21,15 +24,15 @@ using osu.Game.Rulesets.UI;
 using osuTK;
 using osuTK.Input;
 
-#nullable enable
-
 namespace osu.Game.Overlays.Mods
 {
     public class ModPanel : OsuClickableContainer
     {
-        public Mod Mod { get; }
-        public BindableBool Active { get; } = new BindableBool();
-        public BindableBool Filtered { get; } = new BindableBool();
+        public Mod Mod => modState.Mod;
+        public BindableBool Active => modState.Active;
+        public BindableBool Filtered => modState.Filtered;
+
+        private readonly ModState modState;
 
         protected readonly Box Background;
         protected readonly Container SwitchContainer;
@@ -50,12 +53,13 @@ namespace osu.Game.Overlays.Mods
 
         private Colour4 activeColour;
 
+        private readonly Bindable<bool> samplePlaybackDisabled = new BindableBool();
         private Sample? sampleOff;
         private Sample? sampleOn;
 
-        public ModPanel(Mod mod)
+        public ModPanel(ModState modState)
         {
-            Mod = mod;
+            this.modState = modState;
 
             RelativeSizeAxes = Axes.X;
             Height = 42;
@@ -77,7 +81,7 @@ namespace osu.Game.Overlays.Mods
                 SwitchContainer = new Container
                 {
                     RelativeSizeAxes = Axes.Y,
-                    Child = new ModSwitchSmall(mod)
+                    Child = new ModSwitchSmall(Mod)
                     {
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
@@ -113,7 +117,7 @@ namespace osu.Game.Overlays.Mods
                                 {
                                     new OsuSpriteText
                                     {
-                                        Text = mod.Name,
+                                        Text = Mod.Name,
                                         Font = OsuFont.TorusAlternate.With(size: 18, weight: FontWeight.SemiBold),
                                         Shear = new Vector2(-ShearedOverlayContainer.SHEAR, 0),
                                         Margin = new MarginPadding
@@ -123,7 +127,7 @@ namespace osu.Game.Overlays.Mods
                                     },
                                     new OsuSpriteText
                                     {
-                                        Text = mod.Description,
+                                        Text = Mod.Description,
                                         Font = OsuFont.Default.With(size: 12),
                                         RelativeSizeAxes = Axes.X,
                                         Truncate = true,
@@ -139,13 +143,21 @@ namespace osu.Game.Overlays.Mods
             Action = Active.Toggle;
         }
 
-        [BackgroundDependencyLoader]
-        private void load(AudioManager audio, OsuColour colours)
+        public ModPanel(Mod mod)
+            : this(new ModState(mod))
+        {
+        }
+
+        [BackgroundDependencyLoader(true)]
+        private void load(AudioManager audio, OsuColour colours, ISamplePlaybackDisabler? samplePlaybackDisabler)
         {
             sampleOn = audio.Samples.Get(@"UI/check-on");
             sampleOff = audio.Samples.Get(@"UI/check-off");
 
             activeColour = colours.ForModType(Mod.Type);
+
+            if (samplePlaybackDisabler != null)
+                ((IBindable<bool>)samplePlaybackDisabled).BindTo(samplePlaybackDisabler.SamplePlaybackDisabled);
         }
 
         protected override HoverSounds CreateHoverSounds(HoverSampleSet sampleSet) => new HoverSounds(sampleSet);
@@ -166,6 +178,9 @@ namespace osu.Game.Overlays.Mods
 
         private void playStateChangeSamples()
         {
+            if (samplePlaybackDisabled.Value)
+                return;
+
             if (Active.Value)
                 sampleOn?.Play();
             else

@@ -14,6 +14,7 @@ namespace osu.Game.Rulesets.Osu.Mods
     public class OsuModAutopilotDance : OsuModAutopilot
     {
         public override string Name => "Autopilot (With Dance)";
+        public override Type[] IncompatibleMods => base.IncompatibleMods.Append(typeof(OsuModAutopilot)).ToArray();
 
         private OsuInputManager inputManager;
 
