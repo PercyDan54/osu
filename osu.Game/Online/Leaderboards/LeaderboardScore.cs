@@ -31,6 +31,7 @@ using osuTK;
 using osuTK.Graphics;
 using osu.Game.Online.API;
 using osu.Game.Resources.Localisation.Web;
+using osu.Game.Screens.Ranking;
 using osu.Game.Utils;
 
 namespace osu.Game.Online.Leaderboards
@@ -234,6 +235,10 @@ namespace osu.Game.Online.Leaderboards
                                                 },
                                             },
                                         },
+                                        new ReplayDownloadButton(Score)
+                                        {
+                                            Scale = new Vector2(0.8f)
+                                        }
                                     },
                                 },
                                 modsContainer = new FillFlowContainer<ModIcon>

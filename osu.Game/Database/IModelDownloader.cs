@@ -30,8 +30,9 @@ namespace osu.Game.Database
         /// </summary>
         /// <param name="item">The <stypeparamref name="T"/> to be downloaded.</param>
         /// <param name="minimiseDownloadSize">Whether this download should be optimised for slow connections. Generally means extras are not included in the download bundle..</param>
+        /// <param name="import"></param>
         /// <returns>Whether the download was started.</returns>
-        bool Download(T item, bool minimiseDownloadSize);
+        bool Download(T item, bool minimiseDownloadSize, bool import);
 
         /// <summary>
         /// Gets an existing <typeparamref name="T"/> download request if it exists.

@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Humanizer;
 using osu.Framework.Logging;
@@ -42,7 +44,7 @@ namespace osu.Game.Database
         /// <returns>The request object.</returns>
         protected abstract ArchiveDownloadRequest<T> CreateDownloadRequest(T model, bool minimiseDownloadSize);
 
-        public bool Download(T model, bool minimiseDownloadSize = false)
+        public bool Download(T model, bool minimiseDownloadSize = false, bool import = true)
         {
             if (!canDownload(model)) return false;
 
@@ -63,12 +65,24 @@ namespace osu.Game.Database
             {
                 Task.Factory.StartNew(async () =>
                 {
-                    // This gets scheduled back to the update thread, but we want the import to run in the background.
-                    var imported = await importer.Import(notification, new ImportTask(filename)).ConfigureAwait(false);
+                    if (import)
+                    {
+                        // This gets scheduled back to the update thread, but we want the import to run in the background.
+                        var imported = await importer.Import(notification, new ImportTask(filename)).ConfigureAwait(false);
 
-                    // for now a failed import will be marked as a failed download for simplicity.
-                    if (!imported.Any())
-                        DownloadFailed?.Invoke(request);
+                        // for now a failed import will be marked as a failed download for simplicity.
+                        if (!imported.Any())
+                            DownloadFailed?.Invoke(request);
+                    }
+                    else
+                    {
+                        string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "osu\\downloads");
+
+                        if (!Directory.Exists(path))
+                            Directory.CreateDirectory(path);
+                        File.Move(filename, Path.Combine(path, $"{model.GetDisplayString().GetValidArchiveContentFilename()}{Path.GetExtension(filename)}"));
+                        notification.State = ProgressNotificationState.Completed;
+                    }
 
                     CurrentDownloads.Remove(request);
                 }, TaskCreationOptions.LongRunning);

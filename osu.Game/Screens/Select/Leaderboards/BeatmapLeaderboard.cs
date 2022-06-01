@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
+using osu.Framework.Graphics;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
 using osu.Game.Extensions;
@@ -164,7 +165,8 @@ namespace osu.Game.Screens.Select.Leaderboards
 
         protected override LeaderboardScore CreateDrawableScore(ScoreInfo model, int index) => new LeaderboardScore(model, index, IsOnlineScope)
         {
-            Action = () => ScoreSelected?.Invoke(model)
+            Action = () => ScoreSelected?.Invoke(model),
+            Margin = new MarginPadding { Top = index == 1 && IsOnlineScope ? 35 : 0 }
         };
 
         protected override LeaderboardScore CreateDrawableTopScore(ScoreInfo model) => new LeaderboardScore(model, model.Position, false)

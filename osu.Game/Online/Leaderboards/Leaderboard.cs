@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -23,6 +24,7 @@ using osu.Game.Online.Placeholders;
 using osuTK;
 using osuTK.Graphics;
 using osu.Game.Localisation;
+using osu.Game.Scoring;
 
 namespace osu.Game.Online.Leaderboards
 {
@@ -47,10 +49,11 @@ namespace osu.Game.Online.Leaderboards
         private const double fade_duration = 300;
 
         private readonly OsuScrollContainer scrollContainer;
+        private readonly OsuButton downloadButton;
         private readonly Container placeholderContainer;
         private readonly UserTopScoreContainer<TScoreInfo> userScoreContainer;
 
-        private FillFlowContainer<LeaderboardScore> scoreFlowContainer;
+        private FillFlowContainer<Drawable> scoreFlowContainer;
 
         private readonly LoadingSpinner loading;
 
@@ -63,6 +66,9 @@ namespace osu.Game.Online.Leaderboards
 
         [Resolved(CanBeNull = true)]
         private IAPIProvider api { get; set; }
+
+        [Resolved]
+        private ScoreModelDownloader downloader { get; set; }
 
         private readonly IBindable<APIState> apiState = new Bindable<APIState>();
 
@@ -122,6 +128,31 @@ namespace osu.Game.Online.Leaderboards
                     RelativeSizeAxes = Axes.Both
                 },
             };
+
+            scrollContainer.Add(downloadButton = new OsuButton
+            {
+                Text = "Download All",
+                RelativeSizeAxes = Axes.X,
+                Width = 1,
+                Action = () =>
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        for (int i = 0; i < scores.Count; i++)
+                        {
+                            if (scores.ElementAt(i) is IScoreInfo score)
+                            {
+                                downloader.Download(score, import: false);
+                                Thread.Sleep(3000);
+
+                                if (i % 9 == 0 && i > 0)
+                                    Thread.Sleep(20000);
+                            }
+                        }
+                    }, TaskCreationOptions.LongRunning);
+                    if (downloadButton != null) downloadButton.Enabled.Value = false;
+                }
+            });
         }
 
         protected override void LoadComplete()
@@ -248,10 +279,11 @@ namespace osu.Game.Online.Leaderboards
             if (scores?.Any() != true)
             {
                 setState(LeaderboardState.NoScores);
+                downloadButton.Hide();
                 return;
             }
 
-            LoadComponentAsync(new FillFlowContainer<LeaderboardScore>
+            LoadComponentAsync(new FillFlowContainer<Drawable>
             {
                 RelativeSizeAxes = Axes.X,
                 AutoSizeAxes = Axes.Y,
@@ -261,6 +293,11 @@ namespace osu.Game.Online.Leaderboards
             }, newFlow =>
             {
                 setState(LeaderboardState.Success);
+
+                if (!IsOnlineScope)
+                    downloadButton.Hide();
+                else
+                    downloadButton.Show();
 
                 scrollContainer.Add(scoreFlowContainer = newFlow);
 
