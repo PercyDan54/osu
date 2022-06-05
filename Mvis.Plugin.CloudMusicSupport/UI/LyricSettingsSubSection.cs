@@ -86,7 +86,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 }
             };
 
-            autoScrollChechBox.WarningText = CloudMusicStrings.LyricAutoScrollSub;
+            autoScrollChechBox.SetNoticeText(CloudMusicStrings.LyricAutoScrollSub, true);
         }
     }
 }

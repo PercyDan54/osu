@@ -29,10 +29,19 @@ namespace osu.Game.Overlays.Mods
 {
     public abstract class ModSelectOverlay : ShearedOverlayContainer, ISamplePlaybackDisabler
     {
-        protected const int BUTTON_WIDTH = 200;
+        public const int BUTTON_WIDTH = 200;
 
         [Cached]
         public Bindable<IReadOnlyList<Mod>> SelectedMods { get; private set; } = new Bindable<IReadOnlyList<Mod>>(Array.Empty<Mod>());
+
+        /// <summary>
+        /// Contains a dictionary with the current <see cref="ModState"/> of all mods applicable for the current ruleset.
+        /// </summary>
+        /// <remarks>
+        /// Contrary to <see cref="OsuGameBase.AvailableMods"/> and <see cref="globalAvailableMods"/>, the <see cref="Mod"/> instances
+        /// inside the <see cref="ModState"/> objects are owned solely by this <see cref="ModSelectOverlay"/> instance.
+        /// </remarks>
+        public Bindable<Dictionary<ModType, IReadOnlyList<ModState>>> AvailableMods { get; } = new Bindable<Dictionary<ModType, IReadOnlyList<ModState>>>(new Dictionary<ModType, IReadOnlyList<ModState>>());
 
         private Func<Mod, bool> isValidMod = m => true;
 
@@ -56,15 +65,32 @@ namespace osu.Game.Overlays.Mods
         /// </summary>
         protected virtual bool ShowTotalMultiplier => true;
 
+        /// <summary>
+        /// Whether per-mod customisation controls are visible.
+        /// </summary>
+        protected virtual bool AllowCustomisation => true;
+
         protected virtual ModColumn CreateModColumn(ModType modType, Key[]? toggleKeys = null) => new ModColumn(modType, false, toggleKeys);
 
         protected virtual IReadOnlyList<Mod> ComputeNewModsFromSelection(IReadOnlyList<Mod> oldSelection, IReadOnlyList<Mod> newSelection) => newSelection;
 
-        protected virtual IEnumerable<ShearedButton> CreateFooterButtons() => createDefaultFooterButtons();
+        protected virtual IEnumerable<ShearedButton> CreateFooterButtons()
+        {
+            if (AllowCustomisation)
+            {
+                yield return customisationButton = new ShearedToggleButton(BUTTON_WIDTH)
+                {
+                    Text = ModSelectOverlayStrings.ModCustomisation,
+                    Active = { BindTarget = customisationVisible }
+                };
+            }
 
-        private readonly Bindable<Dictionary<ModType, IReadOnlyList<Mod>>> availableMods = new Bindable<Dictionary<ModType, IReadOnlyList<Mod>>>();
-        private readonly Dictionary<ModType, IReadOnlyList<ModState>> localAvailableMods = new Dictionary<ModType, IReadOnlyList<ModState>>();
-        private IEnumerable<ModState> allLocalAvailableMods => localAvailableMods.SelectMany(pair => pair.Value);
+            yield return new DeselectAllModsButton(this);
+        }
+
+        private readonly Bindable<Dictionary<ModType, IReadOnlyList<Mod>>> globalAvailableMods = new Bindable<Dictionary<ModType, IReadOnlyList<Mod>>>();
+
+        private IEnumerable<ModState> allAvailableMods => AvailableMods.Value.SelectMany(pair => pair.Value);
 
         private readonly BindableBool customisationVisible = new BindableBool();
 
@@ -187,13 +213,13 @@ namespace osu.Game.Overlays.Mods
                 })
             };
 
-            availableMods.BindTo(game.AvailableMods);
+            globalAvailableMods.BindTo(game.AvailableMods);
         }
 
         protected override void LoadComplete()
         {
             // this is called before base call so that the mod state is populated early, and the transition in `PopIn()` can play out properly.
-            availableMods.BindValueChanged(_ => createLocalMods(), true);
+            globalAvailableMods.BindValueChanged(_ => createLocalMods(), true);
 
             base.LoadComplete();
 
@@ -201,7 +227,7 @@ namespace osu.Game.Overlays.Mods
 
             // This is an optimisation to prevent refreshing the available settings controls when it can be
             // reasonably assumed that the settings panel is never to be displayed (e.g. FreeModSelectOverlay).
-            if (customisationButton != null)
+            if (AllowCustomisation)
                 ((IBindable<IReadOnlyList<Mod>>)modSettingsArea.SelectedMods).BindTo(SelectedMods);
 
             SelectedMods.BindValueChanged(val =>
@@ -225,7 +251,7 @@ namespace osu.Game.Overlays.Mods
         /// <summary>
         /// Select all visible mods in all columns.
         /// </summary>
-        protected void SelectAll()
+        public void SelectAll()
         {
             foreach (var column in columnFlow.Columns)
                 column.SelectAll();
@@ -234,7 +260,7 @@ namespace osu.Game.Overlays.Mods
         /// <summary>
         /// Deselect all visible mods in all columns.
         /// </summary>
-        protected void DeselectAll()
+        public void DeselectAll()
         {
             foreach (var column in columnFlow.Columns)
                 column.DeselectAll();
@@ -256,26 +282,11 @@ namespace osu.Game.Overlays.Mods
             };
         }
 
-        private ShearedButton[] createDefaultFooterButtons()
-            => new[]
-            {
-                customisationButton = new ShearedToggleButton(BUTTON_WIDTH)
-                {
-                    Text = ModSelectOverlayStrings.ModCustomisation,
-                    Active = { BindTarget = customisationVisible }
-                },
-                new ShearedButton(BUTTON_WIDTH)
-                {
-                    Text = CommonStrings.DeselectAll,
-                    Action = DeselectAll
-                }
-            };
-
         private void createLocalMods()
         {
-            localAvailableMods.Clear();
+            var newLocalAvailableMods = new Dictionary<ModType, IReadOnlyList<ModState>>();
 
-            foreach (var (modType, mods) in availableMods.Value)
+            foreach (var (modType, mods) in globalAvailableMods.Value)
             {
                 var modStates = mods.SelectMany(ModUtils.FlattenMod)
                                     .Select(mod => new ModState(mod.DeepClone()))
@@ -284,18 +295,19 @@ namespace osu.Game.Overlays.Mods
                 foreach (var modState in modStates)
                     modState.Active.BindValueChanged(_ => updateFromInternalSelection());
 
-                localAvailableMods[modType] = modStates;
+                newLocalAvailableMods[modType] = modStates;
             }
 
+            AvailableMods.Value = newLocalAvailableMods;
             filterMods();
 
             foreach (var column in columnFlow.Columns)
-                column.AvailableMods = localAvailableMods.GetValueOrDefault(column.ModType, Array.Empty<ModState>());
+                column.AvailableMods = AvailableMods.Value.GetValueOrDefault(column.ModType, Array.Empty<ModState>());
         }
 
         private void filterMods()
         {
-            foreach (var modState in allLocalAvailableMods)
+            foreach (var modState in allAvailableMods)
                 modState.Filtered.Value = !modState.Mod.HasImplementation || !IsValidMod.Invoke(modState.Mod);
         }
 
@@ -376,7 +388,7 @@ namespace osu.Game.Overlays.Mods
 
             var newSelection = new List<Mod>();
 
-            foreach (var modState in allLocalAvailableMods)
+            foreach (var modState in allAvailableMods)
             {
                 var matchingSelectedMod = SelectedMods.Value.SingleOrDefault(selected => selected.GetType() == modState.Mod.GetType());
 
@@ -403,9 +415,9 @@ namespace osu.Game.Overlays.Mods
             if (externalSelectionUpdateInProgress)
                 return;
 
-            var candidateSelection = allLocalAvailableMods.Where(modState => modState.Active.Value)
-                                                          .Select(modState => modState.Mod)
-                                                          .ToArray();
+            var candidateSelection = allAvailableMods.Where(modState => modState.Active.Value)
+                                                     .Select(modState => modState.Mod)
+                                                     .ToArray();
 
             SelectedMods.Value = ComputeNewModsFromSelection(SelectedMods.Value, candidateSelection);
         }
@@ -421,9 +433,8 @@ namespace osu.Game.Overlays.Mods
             base.PopIn();
 
             multiplierDisplay?
-                .Delay(fade_in_duration * 0.65f)
-                .FadeIn(fade_in_duration / 2, Easing.OutQuint)
-                .ScaleTo(1, fade_in_duration, Easing.OutElastic);
+                .FadeIn(fade_in_duration, Easing.OutQuint)
+                .MoveToY(0, fade_in_duration, Easing.OutQuint);
 
             int nonFilteredColumnCount = 0;
 
@@ -458,7 +469,7 @@ namespace osu.Game.Overlays.Mods
 
             multiplierDisplay?
                 .FadeOut(fade_out_duration / 2, Easing.OutQuint)
-                .ScaleTo(0.75f, fade_out_duration, Easing.OutQuint);
+                .MoveToY(-distance, fade_out_duration / 2, Easing.OutQuint);
 
             int nonFilteredColumnCount = 0;
 

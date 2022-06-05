@@ -4,18 +4,20 @@
 using System;
 using osu.Game.Overlays;
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Graphics;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays.Mods;
 using osu.Game.Rulesets.Mods;
 using osuTK.Input;
-using osu.Game.Localisation;
 
 namespace osu.Game.Screens.OnlinePlay
 {
     public class FreeModSelectOverlay : ModSelectOverlay
     {
         protected override bool ShowTotalMultiplier => false;
+
+        protected override bool AllowCustomisation => false;
 
         public new Func<Mod, bool> IsValidMod
         {
@@ -31,22 +33,11 @@ namespace osu.Game.Screens.OnlinePlay
 
         protected override ModColumn CreateModColumn(ModType modType, Key[] toggleKeys = null) => new ModColumn(modType, true, toggleKeys);
 
-        protected override IEnumerable<ShearedButton> CreateFooterButtons() => new[]
-        {
-            new ShearedButton(BUTTON_WIDTH)
+        protected override IEnumerable<ShearedButton> CreateFooterButtons() => base.CreateFooterButtons().Prepend(
+            new SelectAllModsButton(this)
             {
                 Anchor = Anchor.BottomLeft,
                 Origin = Anchor.BottomLeft,
-                Text = CommonStrings.SelectAll,
-                Action = SelectAll
-            },
-            new ShearedButton(BUTTON_WIDTH)
-            {
-                Anchor = Anchor.BottomLeft,
-                Origin = Anchor.BottomLeft,
-                Text = CommonStrings.DeselectAll,
-                Action = DeselectAll
-            }
-        };
+            });
     }
 }

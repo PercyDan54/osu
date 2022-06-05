@@ -175,6 +175,11 @@ namespace osu.Game.Localisation
         public static LocalisableString EditorTimingMode => new TranslatableString(getKey(@"editor_timing_mode"), @"Timing mode");
 
         /// <summary>
+        /// "Tap for BPM"
+        /// </summary>
+        public static LocalisableString EditorTapForBPM => new TranslatableString(getKey(@"editor_tap_for_bpm"), @"Tap for BPM");
+
+        /// <summary>
         /// "Cycle grid display mode"
         /// </summary>
         public static LocalisableString EditorCycleGridDisplayMode => new TranslatableString(getKey(@"editor_cycle_grid_display_mode"), @"Cycle grid display mode");
@@ -207,7 +212,12 @@ namespace osu.Game.Localisation
         /// <summary>
         /// "Toggle Mod Select"
         /// </summary>
-        public static LocalisableString ToggleModSelection => new TranslatableString(getKey(@"toggle_mod_selection"), @"Toggle Mod Select");
+        public static LocalisableString ToggleModSelection => new TranslatableString(getKey(@"toggle_mod_selection"), @"Toggle mod select");
+
+        /// <summary>
+        /// "Deselect all mods"
+        /// </summary>
+        public static LocalisableString DeselectAllMods => new TranslatableString(getKey(@"deselect_all_mods"), @"Deselect all mods");
 
         /// <summary>
         /// "Random"

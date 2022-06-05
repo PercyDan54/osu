@@ -72,6 +72,9 @@ namespace osu.Game.Overlays
                 case OverlayColourScheme.Green:
                     return 125 / 360f;
 
+                case OverlayColourScheme.Aquamarine:
+                    return 160 / 360f;
+
                 case OverlayColourScheme.Purple:
                     return 255 / 360f;
 
@@ -89,6 +92,7 @@ namespace osu.Game.Overlays
 
     public enum OverlayColourScheme
     {
+        Mvis,
         Red,
         Pink,
         Orange,
@@ -97,6 +101,6 @@ namespace osu.Game.Overlays
         Purple,
         Blue,
         Plum,
-        Mvis
+        Aquamarine
     }
 }
