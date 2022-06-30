@@ -1,6 +1,8 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Allocation;
@@ -115,8 +117,8 @@ namespace osu.Game.Tests.Visual.Editing
 
             // After placement these must be non-default as defaults are read-only.
             AddAssert("Placed object has non-default control points", () =>
-                EditorBeatmap.HitObjects[0].SampleControlPoint != SampleControlPoint.DEFAULT &&
-                EditorBeatmap.HitObjects[0].DifficultyControlPoint != DifficultyControlPoint.DEFAULT);
+                !ReferenceEquals(EditorBeatmap.HitObjects[0].SampleControlPoint, SampleControlPoint.DEFAULT) &&
+                !ReferenceEquals(EditorBeatmap.HitObjects[0].DifficultyControlPoint, DifficultyControlPoint.DEFAULT));
 
             ReloadEditorToSameBeatmap();
 
@@ -124,8 +126,8 @@ namespace osu.Game.Tests.Visual.Editing
 
             // After placement these must be non-default as defaults are read-only.
             AddAssert("Placed object still has non-default control points", () =>
-                EditorBeatmap.HitObjects[0].SampleControlPoint != SampleControlPoint.DEFAULT &&
-                EditorBeatmap.HitObjects[0].DifficultyControlPoint != DifficultyControlPoint.DEFAULT);
+                !ReferenceEquals(EditorBeatmap.HitObjects[0].SampleControlPoint, SampleControlPoint.DEFAULT) &&
+                !ReferenceEquals(EditorBeatmap.HitObjects[0].DifficultyControlPoint, DifficultyControlPoint.DEFAULT));
         }
 
         [Test]

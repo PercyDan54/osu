@@ -10,8 +10,6 @@ using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.UI;
 using osuTK;
 
-#nullable enable
-
 namespace osu.Game.Rulesets.Osu.Utils
 {
     public static partial class OsuHitObjectGenerationUtils
@@ -90,11 +88,11 @@ namespace osu.Game.Rulesets.Osu.Utils
 
                 switch (hitObject)
                 {
-                    case HitCircle _:
+                    case HitCircle:
                         shift = clampHitCircleToPlayfield(current);
                         break;
 
-                    case Slider _:
+                    case Slider:
                         shift = clampSliderToPlayfield(current);
                         break;
                 }

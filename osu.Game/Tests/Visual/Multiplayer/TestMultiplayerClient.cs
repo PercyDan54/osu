@@ -1,8 +1,6 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -89,8 +87,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
             switch (Room?.MatchState)
             {
                 case TeamVersusRoomState teamVersus:
-                    Debug.Assert(Room != null);
-
                     // simulate the server's automatic assignment of users to teams on join.
                     // the "best" team is the one with the least users on it.
                     int bestTeam = teamVersus.Teams
@@ -105,6 +101,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         public void RemoveUser(APIUser user)
         {
             Debug.Assert(Room != null);
+
             ((IMultiplayerClient)this).UserLeft(new MultiplayerRoomUser(user.Id));
 
             Schedule(() =>
@@ -116,25 +113,23 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
         public void ChangeRoomState(MultiplayerRoomState newState)
         {
-            Debug.Assert(Room != null);
             ((IMultiplayerClient)this).RoomStateChanged(newState);
         }
 
         public void ChangeUserState(int userId, MultiplayerUserState newState)
         {
-            Debug.Assert(Room != null);
-
             ((IMultiplayerClient)this).UserStateChanged(userId, newState);
             updateRoomStateIfRequired();
         }
 
         private void updateRoomStateIfRequired()
         {
-            Debug.Assert(Room != null);
             Debug.Assert(APIRoom != null);
 
             Schedule(() =>
             {
+                Debug.Assert(Room != null);
+
                 switch (Room.State)
                 {
                     case MultiplayerRoomState.Open:
@@ -181,8 +176,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
         public void ChangeUserBeatmapAvailability(int userId, BeatmapAvailability newBeatmapAvailability)
         {
-            Debug.Assert(Room != null);
-
             ((IMultiplayerClient)this).UserBeatmapAvailabilityChanged(userId, newBeatmapAvailability);
         }
 
@@ -274,8 +267,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
         public override Task ChangeState(MultiplayerUserState newState)
         {
-            Debug.Assert(Room != null);
-
             if (newState == MultiplayerUserState.Idle && LocalUser?.State == MultiplayerUserState.WaitingForLoad)
                 return Task.CompletedTask;
 
@@ -294,7 +285,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
         public void ChangeUserMods(int userId, IEnumerable<APIMod> newMods)
         {
-            Debug.Assert(Room != null);
             ((IMultiplayerClient)this).UserModsChanged(userId, newMods.ToList());
         }
 
@@ -342,7 +332,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
         public override Task AbortGameplay()
         {
-            Debug.Assert(Room != null);
             Debug.Assert(LocalUser != null);
 
             ChangeUserState(LocalUser.UserID, MultiplayerUserState.Idle);

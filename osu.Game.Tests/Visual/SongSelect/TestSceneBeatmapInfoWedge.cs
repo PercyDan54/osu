@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
@@ -89,19 +91,19 @@ namespace osu.Game.Tests.Visual.SongSelect
 
                 switch (instance)
                 {
-                    case OsuRuleset _:
+                    case OsuRuleset:
                         testInfoLabels(5);
                         break;
 
-                    case TaikoRuleset _:
+                    case TaikoRuleset:
                         testInfoLabels(5);
                         break;
 
-                    case CatchRuleset _:
+                    case CatchRuleset:
                         testInfoLabels(5);
                         break;
 
-                    case ManiaRuleset _:
+                    case ManiaRuleset:
                         testInfoLabels(4);
                         break;
 

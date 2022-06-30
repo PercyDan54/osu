@@ -13,38 +13,31 @@ using osu.Framework.Graphics.Textures;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Testing;
-using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.Database;
 using osu.Game.Extensions;
 using osu.Game.IO;
 using osu.Game.IO.Archives;
-using osu.Game.Models;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Skinning;
 using Realms;
 
-#nullable enable
-
-namespace osu.Game.Stores
+namespace osu.Game.Beatmaps
 {
     /// <summary>
     /// Handles the storage and retrieval of Beatmaps/WorkingBeatmaps.
     /// </summary>
     [ExcludeFromDynamicCompile]
-    public abstract class BeatmapImporter : RealmArchiveModelManager<BeatmapSetInfo>, IDisposable
+    public class BeatmapImporter : RealmArchiveModelImporter<BeatmapSetInfo>, IDisposable
     {
         public override IEnumerable<string> HandledExtensions => new[] { ".osz" };
 
         protected override string[] HashableFileTypes => new[] { ".osu" };
 
-        // protected override bool CheckLocalAvailability(RealmBeatmapSet model, System.Linq.IQueryable<RealmBeatmapSet> items)
-        //     => base.CheckLocalAvailability(model, items) || (model.OnlineID > -1));
-
         private readonly BeatmapOnlineLookupQueue? onlineLookupQueue;
 
-        protected BeatmapImporter(RealmAccess realm, Storage storage, BeatmapOnlineLookupQueue? onlineLookupQueue = null)
+        public BeatmapImporter(Storage storage, RealmAccess realm, BeatmapOnlineLookupQueue? onlineLookupQueue = null)
             : base(storage, realm)
         {
             this.onlineLookupQueue = onlineLookupQueue;
@@ -55,7 +48,7 @@ namespace osu.Game.Stores
         protected override void Populate(BeatmapSetInfo beatmapSet, ArchiveReader? archive, Realm realm, CancellationToken cancellationToken = default)
         {
             if (archive != null)
-                beatmapSet.Beatmaps.AddRange(createBeatmapDifficulties(beatmapSet.Files, realm));
+                beatmapSet.Beatmaps.AddRange(createBeatmapDifficulties(beatmapSet, realm));
 
             foreach (BeatmapInfo b in beatmapSet.Beatmaps)
             {
@@ -169,11 +162,6 @@ namespace osu.Game.Stores
             existing.DateAdded = DateTimeOffset.UtcNow;
         }
 
-        public override bool IsAvailableLocally(BeatmapSetInfo model)
-        {
-            return Realm.Run(realm => realm.All<BeatmapSetInfo>().Any(s => s.OnlineID == model.OnlineID));
-        }
-
         public override string HumanisedModelName => "beatmap";
 
         protected override BeatmapSetInfo? CreateModel(ArchiveReader reader)
@@ -188,8 +176,17 @@ namespace osu.Game.Stores
             }
 
             Beatmap beatmap;
+
             using (var stream = new LineBufferedReader(reader.GetStream(mapName)))
+            {
+                if (stream.PeekLine() == null)
+                {
+                    Logger.Log($"No content found in first .osu file of beatmap archive ({reader.Name} / {mapName})", LoggingTarget.Database);
+                    return null;
+                }
+
                 beatmap = Decoder.GetDecoder<Beatmap>(stream).Decode(stream);
+            }
 
             return new BeatmapSetInfo
             {
@@ -202,23 +199,32 @@ namespace osu.Game.Stores
         /// <summary>
         /// Create all required <see cref="BeatmapInfo"/>s for the provided archive.
         /// </summary>
-        private List<BeatmapInfo> createBeatmapDifficulties(IList<RealmNamedFileUsage> files, Realm realm)
+        private List<BeatmapInfo> createBeatmapDifficulties(BeatmapSetInfo beatmapSet, Realm realm)
         {
             var beatmaps = new List<BeatmapInfo>();
 
-            foreach (var file in files.Where(f => f.Filename.EndsWith(".osu", StringComparison.OrdinalIgnoreCase)))
+            foreach (var file in beatmapSet.Files.Where(f => f.Filename.EndsWith(".osu", StringComparison.OrdinalIgnoreCase)))
             {
                 using (var memoryStream = new MemoryStream(Files.Store.Get(file.File.GetStoragePath()))) // we need a memory stream so we can seek
                 {
                     IBeatmap decoded;
+
                     using (var lineReader = new LineBufferedReader(memoryStream, true))
+                    {
+                        if (lineReader.PeekLine() == null)
+                        {
+                            LogForModel(beatmapSet, $"No content found in beatmap file {file.Filename}.");
+                            continue;
+                        }
+
                         decoded = Decoder.GetDecoder<Beatmap>(lineReader).Decode(lineReader);
+                    }
 
                     string hash = memoryStream.ComputeSHA2Hash();
 
                     if (beatmaps.Any(b => b.Hash == hash))
                     {
-                        Logger.Log($"Skipping import of {file.Filename} due to duplicate file content.", LoggingTarget.Database);
+                        LogForModel(beatmapSet, $"Skipping import of {file.Filename} due to duplicate file content.");
                         continue;
                     }
 
@@ -229,7 +235,7 @@ namespace osu.Game.Stores
 
                     if (ruleset?.Available != true)
                     {
-                        Logger.Log($"Skipping import of {file.Filename} due to missing local ruleset {decodedInfo.Ruleset.OnlineID}.", LoggingTarget.Database);
+                        LogForModel(beatmapSet, $"Skipping import of {file.Filename} due to missing local ruleset {decodedInfo.Ruleset.OnlineID}.");
                         continue;
                     }
 

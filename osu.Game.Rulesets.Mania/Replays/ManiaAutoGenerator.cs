@@ -1,6 +1,8 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+#nullable disable
+
 using System.Collections.Generic;
 using System.Linq;
 using osu.Game.Rulesets.Mania.Beatmaps;
@@ -55,11 +57,11 @@ namespace osu.Game.Rulesets.Mania.Replays
                 {
                     switch (point)
                     {
-                        case HitPoint _:
+                        case HitPoint:
                             actions.Add(columnActions[point.Column]);
                             break;
 
-                        case ReleasePoint _:
+                        case ReleasePoint:
                             actions.Remove(columnActions[point.Column]);
                             break;
                     }

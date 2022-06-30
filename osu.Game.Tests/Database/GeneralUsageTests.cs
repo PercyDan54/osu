@@ -8,8 +8,6 @@ using NUnit.Framework;
 using osu.Game.Beatmaps;
 using osu.Game.Database;
 
-#nullable enable
-
 namespace osu.Game.Tests.Database
 {
     [TestFixture]
@@ -48,7 +46,7 @@ namespace osu.Game.Tests.Database
 
                 realm.RegisterCustomSubscription(r =>
                 {
-                    var subscription = r.All<BeatmapInfo>().QueryAsyncWithNotifications((sender, changes, error) =>
+                    var subscription = r.All<BeatmapInfo>().QueryAsyncWithNotifications((_, _, _) =>
                     {
                         realm.Run(_ =>
                         {
@@ -81,11 +79,11 @@ namespace osu.Game.Tests.Database
                     {
                         hasThreadedUsage.Set();
 
-                        stopThreadedUsage.Wait();
+                        stopThreadedUsage.Wait(60000);
                     });
                 }, TaskCreationOptions.LongRunning | TaskCreationOptions.HideScheduler);
 
-                hasThreadedUsage.Wait();
+                hasThreadedUsage.Wait(60000);
 
                 Assert.Throws<TimeoutException>(() =>
                 {
