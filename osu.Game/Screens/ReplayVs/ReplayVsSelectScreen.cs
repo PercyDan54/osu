@@ -1,4 +1,9 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+// See the LICENCE file in the repository root for full licence text.
+
+#nullable disable
+
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -173,9 +178,9 @@ namespace osu.Game.Screens.ReplayVs
             }
 
             public string[] Files => flowContainer.Children
-                                                  .Cast<FileChooserLabelledTextBox>()
-                                                  .Where(f => f.Current.Value != string.Empty)
-                                                  .Select(f => f.Current.Value)
+                                                  .Cast<LabelledFileChooser>()
+                                                  .Where(f => f.Current.Value.Name != string.Empty)
+                                                  .Select(f => f.Current.Value.Name)
                                                   .ToArray();
         }
 
