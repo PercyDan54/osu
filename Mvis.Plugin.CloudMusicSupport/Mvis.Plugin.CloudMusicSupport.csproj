@@ -15,6 +15,10 @@
     <ProjectReference Include="..\osu.Game\osu.Game.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="Textures\**\*" />
   </ItemGroup>

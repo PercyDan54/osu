@@ -10,6 +10,9 @@
     <RepositoryUrl>https://github.com/MATRIX-feather/osu</RepositoryUrl>
     <Company />
   </PropertyGroup>
+  <PropertyGroup>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
 
   <ItemGroup Label="Project References">
     <ProjectReference Include="..\osu.Game\osu.Game.csproj" />

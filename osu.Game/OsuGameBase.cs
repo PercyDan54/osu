@@ -218,7 +218,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "39bcfa1dcea12986fc52cab1900fbbcc";
+            VersionHash = "8e21b6ccaaecd7ffe605410f26633af3";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -265,7 +265,7 @@ namespace osu.Game
 
             // ordering is important here to ensure foreign keys rules are not broken in ModelStore.Cleanup()
             dependencies.Cache(ScoreManager = new ScoreManager(RulesetStore, () => BeatmapManager, Storage, realm, Scheduler, difficultyCache, LocalConfig));
-            dependencies.Cache(BeatmapManager = new BeatmapManager(Storage, realm, RulesetStore, API, Audio, Resources, Host, defaultBeatmap, performOnlineLookups: true));
+            dependencies.Cache(BeatmapManager = new BeatmapManager(Storage, realm, RulesetStore, API, Audio, Resources, Host, defaultBeatmap, difficultyCache, performOnlineLookups: true));
 
             dependencies.Cache(BeatmapDownloader = new BeatmapModelDownloader(BeatmapManager, API));
             dependencies.Cache(ScoreDownloader = new ScoreModelDownloader(ScoreManager, API));
@@ -441,7 +441,7 @@ namespace osu.Game
 
                 Scheduler.Add(() =>
                 {
-                    realmBlocker = realm.BlockAllOperations();
+                    realmBlocker = realm.BlockAllOperations("migration");
 
                     readyToRun.Set();
                 }, false);

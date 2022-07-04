@@ -94,14 +94,14 @@ namespace osu.Game.Screens.ReplayVs
             private readonly ColourInfo colour;
             private int index = 1;
 
-            private FileChooserLabelledTextBox newFileChooser => new FileChooserLabelledTextBox(".osr")
+            private LabelledFileChooser newFileChooser => new LabelledFileChooser(".osr")
             {
                 Width = 0.8f,
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 FixedLabelWidth = 60,
                 Label = index.ToString(),
-                PlaceholderText = "Click to select a replay",
+                Text = "Click to select a replay",
                 TabbableContentContainer = this
             };
 
