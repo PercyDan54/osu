@@ -31,12 +31,11 @@ namespace osu.Game.Beatmaps
 
         protected override string[] HashableFileTypes => new[] { ".osu" };
 
-        private readonly BeatmapUpdater? beatmapUpdater;
+        public Action<BeatmapSetInfo>? ProcessBeatmap { private get; set; }
 
-        public BeatmapImporter(Storage storage, RealmAccess realm, BeatmapUpdater? beatmapUpdater = null)
+        public BeatmapImporter(Storage storage, RealmAccess realm)
             : base(storage, realm)
         {
-            this.beatmapUpdater = beatmapUpdater;
         }
 
         protected override bool ShouldDeleteArchive(string path) => Path.GetExtension(path).ToLowerInvariant() == ".osz";
@@ -81,9 +80,8 @@ namespace osu.Game.Beatmaps
 
             if (beatmapSet.OnlineID > 0)
             {
-                var existingSetWithSameOnlineID = realm.All<BeatmapSetInfo>().SingleOrDefault(b => b.OnlineID == beatmapSet.OnlineID);
-
-                if (existingSetWithSameOnlineID != null)
+                // OnlineID should really be unique, but to avoid catastrophic failure let's iterate just to be sure.
+                foreach (var existingSetWithSameOnlineID in realm.All<BeatmapSetInfo>().Where(b => b.OnlineID == beatmapSet.OnlineID))
                 {
                     existingSetWithSameOnlineID.DeletePending = true;
                     existingSetWithSameOnlineID.OnlineID = -1;
@@ -91,7 +89,7 @@ namespace osu.Game.Beatmaps
                     foreach (var b in existingSetWithSameOnlineID.Beatmaps)
                         b.OnlineID = -1;
 
-                    LogForModel(beatmapSet, $"Found existing beatmap set with same OnlineID ({beatmapSet.OnlineID}). It will be deleted.");
+                    LogForModel(beatmapSet, $"Found existing beatmap set with same OnlineID ({beatmapSet.OnlineID}). It will be disassociated and marked for deletion.");
                 }
             }
         }
@@ -100,7 +98,7 @@ namespace osu.Game.Beatmaps
         {
             base.PostImport(model, realm);
 
-            beatmapUpdater?.Process(model);
+            ProcessBeatmap?.Invoke(model);
         }
 
         private void validateOnlineIds(BeatmapSetInfo beatmapSet, Realm realm)

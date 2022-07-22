@@ -6,11 +6,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using osu.Framework.Extensions.ObjectExtensions;
+using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Database;
 using osu.Game.Online.API;
 using osu.Game.Rulesets.Objects;
-using Realms;
 
 namespace osu.Game.Beatmaps
 {
@@ -36,21 +36,20 @@ namespace osu.Game.Beatmaps
         /// </summary>
         public void Queue(Live<BeatmapSetInfo> beatmap)
         {
-            // For now, just fire off a task.
-            // TODO: Add actual queueing probably.
+            Logger.Log($"Queueing change for local beatmap {beatmap}");
             Task.Factory.StartNew(() => beatmap.PerformRead(Process));
         }
 
         /// <summary>
         /// Run all processing on a beatmap immediately.
         /// </summary>
-        public void Process(BeatmapSetInfo beatmapSet) => beatmapSet.Realm.Write(r => Process(beatmapSet, r));
-
-        public void Process(BeatmapSetInfo beatmapSet, Realm realm)
+        public void Process(BeatmapSetInfo beatmapSet) => beatmapSet.Realm.Write(r =>
         {
             // Before we use below, we want to invalidate.
             workingBeatmapCache.Invalidate(beatmapSet);
 
+            // TODO: this call currently uses the local `online.db` lookup.
+            // We probably don't want this to happen after initial import (as the data may be stale).
             onlineLookupQueue.Update(beatmapSet);
 
             foreach (var beatmap in beatmapSet.Beatmaps)
@@ -71,7 +70,7 @@ namespace osu.Game.Beatmaps
 
             // And invalidate again afterwards as re-fetching the most up-to-date database metadata will be required.
             workingBeatmapCache.Invalidate(beatmapSet);
-        }
+        });
 
         private double calculateLength(IBeatmap b)
         {

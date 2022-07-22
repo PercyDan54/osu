@@ -57,9 +57,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         [CanBeNull]
         public Score Score { get; private set; }
 
-        [Resolved]
-        private BeatmapManager beatmapManager { get; set; }
-
         private readonly BindableDouble volumeAdjustment = new BindableDouble();
         private readonly Container gameplayContent;
         private readonly LoadingLayer loadingLayer;
@@ -92,6 +89,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             GameplayClock.Source = masterClock;
         }
 
+        [Resolved]
+        private IBindable<WorkingBeatmap> beatmap { get; set; }
+
         public void LoadScore([NotNull] Score score)
         {
             if (Score != null)
@@ -99,7 +99,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
 
             Score = score;
 
-            gameplayContent.Child = new PlayerIsolationContainer(beatmapManager.GetWorkingBeatmap(Score.ScoreInfo.BeatmapInfo), Score.ScoreInfo.Ruleset, Score.ScoreInfo.Mods)
+            gameplayContent.Child = new PlayerIsolationContainer(beatmap.Value, Score.ScoreInfo.Ruleset, Score.ScoreInfo.Mods)
             {
                 RelativeSizeAxes = Axes.Both,
                 Child = stack = new OsuScreenStack

@@ -167,6 +167,8 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.DiscordRichPresence, DiscordRichPresenceMode.Full);
 
             SetDefault(OsuSetting.EditorWaveformOpacity, 0.25f);
+
+            SetDefault(OsuSetting.LastProcessedMetadataId, -1);
         }
 
         public IDictionary<OsuSetting, string> GetLoggableState() =>
@@ -222,6 +224,12 @@ namespace osu.Game.Configuration
 
             return new TrackedSettings
             {
+                new TrackedSetting<bool>(OsuSetting.ShowFpsDisplay, state => new SettingDescription(
+                    rawValue: state,
+                    name: GlobalActionKeyBindingStrings.ToggleFPSCounter,
+                    value: state ? CommonStrings.Enabled.ToLower() : CommonStrings.Disabled.ToLower(),
+                    shortcut: LookupKeyBindings(GlobalAction.ToggleFPSDisplay))
+                ),
                 new TrackedSetting<bool>(OsuSetting.MouseDisableButtons, disabledState => new SettingDescription(
                     rawValue: !disabledState,
                     name: GlobalActionKeyBindingStrings.ToggleGameplayMouseButtons,
@@ -363,5 +371,6 @@ namespace osu.Game.Configuration
         DiscordRichPresence,
         AutomaticallyDownloadWhenSpectating,
         ShowOnlineExplicitContent,
+        LastProcessedMetadataId
     }
 }

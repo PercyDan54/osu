@@ -67,9 +67,7 @@ namespace osu.Game.Screens.Menu
         [Resolved(canBeNull: true)]
         private IDialogOverlay dialogOverlay { get; set; }
 
-        private BackgroundScreenDefault background;
-
-        protected override BackgroundScreen CreateBackground() => background;
+        protected override BackgroundScreen CreateBackground() => new BackgroundScreenDefault();
 
         protected override bool PlayExitSound => false;
 
@@ -152,8 +150,7 @@ namespace osu.Game.Screens.Menu
             Buttons.OnSettings = () => settings?.ToggleVisibility();
             Buttons.OnBeatmapListing = () => beatmapListing?.ToggleVisibility();
 
-            LoadComponentAsync(background = new BackgroundScreenDefault());
-            preloadScreens();
+            preloadSongSelect();
         }
 
         [Resolved(canBeNull: true)]
@@ -169,7 +166,7 @@ namespace osu.Game.Screens.Menu
             performer?.PerformFromScreen(menu => menu.Exit());
         }
 
-        private void preloadScreens()
+        private void preloadSongSelect()
         {
             if (songSelect == null)
                 LoadComponentAsync(songSelect = new PlaySongSelect());
@@ -281,7 +278,7 @@ namespace osu.Game.Screens.Menu
             ApplyToBackground(b => (b as BackgroundScreenDefault)?.Next());
 
             // we may have consumed our preloaded instance, so let's make another.
-            preloadScreens();
+            preloadSongSelect();
 
             musicController.EnsurePlayingSomething();
         }
