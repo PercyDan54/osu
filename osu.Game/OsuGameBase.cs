@@ -138,7 +138,7 @@ namespace osu.Game
 
         protected RealmKeyBindingStore KeyBindingStore { get; private set; }
 
-        protected MenuCursorContainer MenuCursorContainer { get; private set; }
+        protected GlobalCursorDisplay GlobalCursorDisplay { get; private set; }
 
         protected MusicController MusicController { get; private set; }
 
@@ -218,7 +218,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "df824381e6b2f859d1c401c404a61d56";
+            VersionHash = "e4ddb6e35080785d6f63d99fddc4beaa";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -263,7 +263,7 @@ namespace osu.Game
             // ordering is important here to ensure foreign keys rules are not broken in ModelStore.Cleanup()
             dependencies.Cache(ScoreManager = new ScoreManager(RulesetStore, () => BeatmapManager, Storage, realm, Scheduler, API, difficultyCache, LocalConfig));
 
-            dependencies.Cache(BeatmapManager = new BeatmapManager(Storage, realm, RulesetStore, API, Audio, Resources, Host, defaultBeatmap, difficultyCache, performOnlineLookups: true));
+            dependencies.Cache(BeatmapManager = new BeatmapManager(Storage, realm, API, Audio, Resources, Host, defaultBeatmap, difficultyCache, performOnlineLookups: true));
 
             dependencies.Cache(BeatmapDownloader = new BeatmapModelDownloader(BeatmapManager, API));
             dependencies.Cache(ScoreDownloader = new ScoreModelDownloader(ScoreManager, API));
@@ -272,15 +272,14 @@ namespace osu.Game
             AddInternal(difficultyCache);
 
             // TODO: OsuGame or OsuGameBase?
-            beatmapUpdater = new BeatmapUpdater(BeatmapManager, difficultyCache, API, Storage);
-
+            dependencies.CacheAs(beatmapUpdater = new BeatmapUpdater(BeatmapManager, difficultyCache, API, Storage));
             dependencies.CacheAs(spectatorClient = new OnlineSpectatorClient(endpoints));
             dependencies.CacheAs(multiplayerClient = new OnlineMultiplayerClient(endpoints));
             dependencies.CacheAs(metadataClient = new OnlineMetadataClient(endpoints));
 
             AddInternal(new BeatmapOnlineChangeIngest(beatmapUpdater, realm, metadataClient));
 
-            BeatmapManager.ProcessBeatmap = set => beatmapUpdater.Process(set);
+            BeatmapManager.ProcessBeatmap = args => beatmapUpdater.Process(args.beatmapSet, !args.isBatch);
 
             dependencies.Cache(userCache = new UserLookupCache());
             AddInternal(userCache);
@@ -333,10 +332,10 @@ namespace osu.Game
                 RelativeSizeAxes = Axes.Both,
                 Child = CreateScalingContainer().WithChildren(new Drawable[]
                 {
-                    (MenuCursorContainer = new MenuCursorContainer
+                    (GlobalCursorDisplay = new GlobalCursorDisplay
                     {
                         RelativeSizeAxes = Axes.Both
-                    }).WithChild(content = new OsuTooltipContainer(MenuCursorContainer.Cursor)
+                    }).WithChild(content = new OsuTooltipContainer(GlobalCursorDisplay.MenuCursor)
                     {
                         RelativeSizeAxes = Axes.Both
                     }),
