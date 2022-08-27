@@ -5,8 +5,8 @@ using Mvis.Plugin.Sandbox.Extensions;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.OpenGL.Vertices;
 using osu.Framework.Graphics.Primitives;
+using osu.Framework.Graphics.Rendering;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Utils;
@@ -61,7 +61,7 @@ namespace Mvis.Plugin.Sandbox.Components
 
         public void SetRandomDirection()
         {
-            var count = Enum.GetValues(typeof(MoveDirection)).Length;
+            int count = Enum.GetValues(typeof(MoveDirection)).Length;
             var newDirection = (MoveDirection)RNG.Next(count);
 
             if (Direction.Value == newDirection)
@@ -77,8 +77,8 @@ namespace Mvis.Plugin.Sandbox.Components
         {
             base.Update();
 
-            var timeDiff = (float)Clock.ElapsedFrameTime * depth_speed_multiplier;
-            var multiplier = Math.Max(DrawSize.Y, DrawSize.X) / Math.Min(DrawSize.Y, DrawSize.X);
+            float timeDiff = (float)Clock.ElapsedFrameTime * depth_speed_multiplier;
+            float multiplier = Math.Max(DrawSize.Y, DrawSize.X) / Math.Min(DrawSize.Y, DrawSize.X);
             bool horizontalIsFaster = DrawSize.Y >= DrawSize.X;
 
             foreach (var p in parts)
@@ -118,22 +118,22 @@ namespace Mvis.Plugin.Sandbox.Components
                 sourceSize = source.DrawSize;
             }
 
-            protected override void Blit(Action<TexturedVertex2D> vertexAction)
+            protected override void Blit(IRenderer renderer)
             {
                 foreach (var p in parts)
                 {
                     var rect = getPartRectangle(p.CurrentPosition, p.CurrentSize);
                     var quad = getQuad(rect);
 
-                    drawPart(quad, p.CurrentAlpha, vertexAction);
+                    drawPart(quad, p.CurrentAlpha, renderer);
                 }
             }
 
-            private void drawPart(Quad quad, float alpha, Action<TexturedVertex2D> vertexAction)
+            private void drawPart(Quad quad, float alpha, IRenderer renderer)
             {
-                DrawQuad(Texture, quad, DrawColourInfo.Colour.MultiplyAlpha(alpha), null, vertexAction,
-                        new Vector2(InflationAmount.X / DrawRectangle.Width, InflationAmount.Y / DrawRectangle.Height),
-                        null, TextureCoords);
+                renderer.DrawQuad(Texture, quad, DrawColourInfo.Colour.MultiplyAlpha(alpha), null, null,
+                    new Vector2(InflationAmount.X / DrawRectangle.Width, InflationAmount.Y / DrawRectangle.Height),
+                    null, TextureCoords);
             }
 
             private Quad getQuad(RectangleF rect) => new Quad(

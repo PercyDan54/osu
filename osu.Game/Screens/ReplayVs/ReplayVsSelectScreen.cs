@@ -179,8 +179,8 @@ namespace osu.Game.Screens.ReplayVs
 
             public string[] Files => flowContainer.Children
                                                   .Cast<LabelledFileChooser>()
-                                                  .Where(f => f.Current.Value.Name != string.Empty)
-                                                  .Select(f => f.Current.Value.Name)
+                                                  .Where(f => f.Current.Value.FullName != string.Empty)
+                                                  .Select(f => f.Current.Value.FullName)
                                                   .ToArray();
         }
 

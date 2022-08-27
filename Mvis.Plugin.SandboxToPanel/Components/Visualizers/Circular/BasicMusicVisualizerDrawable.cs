@@ -1,6 +1,7 @@
 ﻿using System;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Primitives;
+using osu.Framework.Graphics.Rendering;
 using osuTK;
 
 namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
@@ -35,7 +36,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
                         Vector2Extensions.Transform(barPosition + bottomOffset + amplitudeOffset, DrawInfo.Matrix)
                     );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     Texture,
                     rectangle,
                     DrawColourInfo.Colour,

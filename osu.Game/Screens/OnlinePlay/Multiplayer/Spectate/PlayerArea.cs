@@ -1,18 +1,14 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Timing;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Rulesets;
@@ -31,14 +27,14 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         /// <summary>
         /// Raised after <see cref="Player.StartGameplay"/> is called on <see cref="Player"/>.
         /// </summary>
-        public event Action OnGameplayStarted;
+        public event Action? OnGameplayStarted;
 
         /// <summary>
         /// Whether a <see cref="Player"/> is loaded in the area.
         /// </summary>
         public bool PlayerLoaded => (stack?.CurrentScreen as Player)?.IsLoaded == true;
 
-        public Player Player => stack?.CurrentScreen as Player;
+        public Player? Player => stack?.CurrentScreen as Player;
 
         /// <summary>
         /// The user id this <see cref="PlayerArea"/> corresponds to.
@@ -46,27 +42,30 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
         public readonly int UserId;
 
         /// <summary>
-        /// The <see cref="ISpectatorPlayerClock"/> used to control the gameplay running state of a loaded <see cref="Player"/>.
+        /// The <see cref="Spectate.SpectatorPlayerClock"/> used to control the gameplay running state of a loaded <see cref="Player"/>.
         /// </summary>
-        [NotNull]
-        public readonly ISpectatorPlayerClock GameplayClock = new CatchUpSpectatorPlayerClock();
+        public readonly SpectatorPlayerClock SpectatorPlayerClock;
 
         /// <summary>
         /// The currently-loaded score.
         /// </summary>
-        [CanBeNull]
-        public Score Score { get; private set; }
+        public Score? Score { get; private set; }
+
+        [Resolved]
+        private IBindable<WorkingBeatmap> beatmap { get; set; } = null!;
 
         private readonly BindableDouble volumeAdjustment = new BindableDouble();
         private readonly Container gameplayContent;
         private readonly LoadingLayer loadingLayer;
+        private OsuScreenStack? stack;
+
         private readonly bool isReplayVs;
         private readonly ColourInfo teamColor;
-        private OsuScreenStack stack;
 
-        public PlayerArea(int userId, IFrameBasedClock masterClock, bool isReplayVs = false, ColourInfo teamColor = default)
+        public PlayerArea(int userId, SpectatorPlayerClock clock, bool isReplayVs = false, ColourInfo teamColor = default)
         {
             UserId = userId;
+            SpectatorPlayerClock = clock;
             this.isReplayVs = isReplayVs;
             this.teamColor = teamColor;
 
@@ -85,14 +84,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             };
 
             audioContainer.AddAdjustment(AdjustableProperty.Volume, volumeAdjustment);
-
-            GameplayClock.Source = masterClock;
         }
 
-        [Resolved]
-        private IBindable<WorkingBeatmap> beatmap { get; set; }
-
-        public void LoadScore([NotNull] Score score)
+        public void LoadScore(Score score)
         {
             if (Score != null)
                 throw new InvalidOperationException($"Cannot load a new score on a {nameof(PlayerArea)} that has an existing score.");
@@ -112,7 +106,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             {
                 stack.Push(new MultiSpectatorPlayerLoader(Score, () =>
                 {
-                    var player = new MultiSpectatorPlayer(Score, GameplayClock);
+                    var player = new MultiSpectatorPlayer(Score, SpectatorPlayerClock);
                     player.OnGameplayStarted += () => OnGameplayStarted?.Invoke();
                     return player;
                 }));
@@ -120,7 +114,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             else
                 stack.Push(new ReplayVsPlayerLoader(Score, () =>
                 {
-                    var player = new ReplayVsPlayer(Score, GameplayClock, teamColor);
+                    var player = new ReplayVsPlayer(Score, SpectatorPlayerClock, teamColor);
                     player.OnGameplayStarted += () => OnGameplayStarted?.Invoke();
                     return player;
                 }));

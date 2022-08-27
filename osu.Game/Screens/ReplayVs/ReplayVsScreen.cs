@@ -1,13 +1,11 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System;
 using System.Linq;
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Screens;
@@ -37,15 +35,14 @@ namespace osu.Game.Screens.ReplayVs
         public bool AllPlayersLoaded => instances.All(p => p?.PlayerLoaded == true);
 
         [Resolved]
-        private OsuColour colours { get; set; }
+        private OsuColour colours { get; set; } = null!;
 
         private readonly WorkingBeatmap beatmap;
         private readonly PlayerArea[] instances;
-        private MasterGameplayClockContainer masterClockContainer;
-        private ISyncManager syncManager;
-        private PlayerGrid grid;
-        private PlayerArea currentAudioSource;
-        private bool canStartMasterClock;
+        private MasterGameplayClockContainer masterClockContainer = null!;
+        private SpectatorSyncManager syncManager = null!;
+        private PlayerGrid grid = null!;
+        private PlayerArea currentAudioSource = null!;
         private readonly int replayCount;
         private readonly Score[] teamRedScores;
         private readonly Score[] teamBlueScores;
@@ -69,7 +66,10 @@ namespace osu.Game.Screens.ReplayVs
 
             InternalChildren = new[]
             {
-                (Drawable)(syncManager = new CatchUpSyncManager(masterClockContainer)),
+                (Drawable)(syncManager = new SpectatorSyncManager(masterClockContainer)
+                {
+                    ReadyToStart = performInitialSeek,
+                }),
                 masterClockContainer.WithChild(new GridContainer
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -104,14 +104,12 @@ namespace osu.Game.Screens.ReplayVs
 
             for (int i = 0; i < teamRedScores.Length; i++)
             {
-                grid.Add(instances[i] = new PlayerArea(-1, masterClockContainer.GameplayClock, true, colours.Red));
-                syncManager.AddPlayerClock(instances[i].GameplayClock);
+                grid.Add(instances[i] = new PlayerArea(-1, syncManager.CreateManagedClock(), true, colours.Red));
             }
 
             for (int i = teamRedScores.Length; i < replayCount; i++)
             {
-                grid.Add(instances[i] = new PlayerArea(-1, masterClockContainer.GameplayClock, true, colours.Blue));
-                syncManager.AddPlayerClock(instances[i].GameplayClock);
+                grid.Add(instances[i] = new PlayerArea(-1, syncManager.CreateManagedClock(), true, colours.Blue));
             }
 
             LoadComponentAsync(new MatchScoreDisplay
@@ -123,9 +121,6 @@ namespace osu.Game.Screens.ReplayVs
             base.LoadComplete();
 
             masterClockContainer.Reset();
-
-            syncManager.ReadyToStart += onReadyToStart;
-            syncManager.MasterState.BindValueChanged(onMasterStateChanged, true);
 
             for (int i = 0; i < teamRedScores.Length; i++)
             {
@@ -142,10 +137,10 @@ namespace osu.Game.Screens.ReplayVs
         {
             base.Update();
 
-            if (!isCandidateAudioSource(currentAudioSource?.GameplayClock))
+            if (!isCandidateAudioSource(currentAudioSource?.SpectatorPlayerClock))
             {
-                currentAudioSource = instances.Where(i => isCandidateAudioSource(i.GameplayClock))
-                                              .OrderBy(i => Math.Abs(i.GameplayClock.CurrentTime - syncManager.MasterClock.CurrentTime))
+                currentAudioSource = instances.Where(i => isCandidateAudioSource(i.SpectatorPlayerClock))
+                                              .OrderBy(i => Math.Abs(i.SpectatorPlayerClock.CurrentTime - syncManager.CurrentMasterTime))
                                               .FirstOrDefault();
 
                 foreach (var instance in instances)
@@ -159,17 +154,17 @@ namespace osu.Game.Screens.ReplayVs
 
             for (int i = 0; i < teamRedScores.Length; i++)
             {
-                if (instances[i].Player.ScoreProcessor != null)
+                if (instances[i].Player?.ScoreProcessor != null)
                 {
-                    team1Score += Convert.ToInt32(instances[i].Player.ScoreProcessor.TotalScore.Value);
+                    team1Score += Convert.ToInt32(instances[i].Player?.ScoreProcessor.TotalScore.Value);
                 }
             }
 
             for (int i = teamRedScores.Length; i < replayCount; i++)
             {
-                if (instances[i].Player.ScoreProcessor != null)
+                if (instances[i].Player?.ScoreProcessor != null)
                 {
-                    team2Score += Convert.ToInt32(instances[i].Player.ScoreProcessor.TotalScore.Value);
+                    team2Score += Convert.ToInt32(instances[i].Player?.ScoreProcessor.TotalScore.Value);
                 }
             }
 
@@ -177,31 +172,20 @@ namespace osu.Game.Screens.ReplayVs
             teamBlueScore.Value = team2Score;
         }
 
-        private bool isCandidateAudioSource([CanBeNull] ISpectatorPlayerClock clock)
-            => clock?.IsRunning == true && !clock.IsCatchingUp && !clock.WaitingOnFrames.Value;
+        private bool isCandidateAudioSource(SpectatorPlayerClock? clock)
+            => clock?.IsRunning == true && !clock.IsCatchingUp && !clock.WaitingOnFrames;
 
-        private void onReadyToStart()
+        private void performInitialSeek()
         {
-            masterClockContainer.Reset(true);
+            // Seek the master clock to the gameplay time.
+            // This is chosen as the first available frame in the players' replays, which matches the seek by each individual SpectatorPlayer.
+            double startTime = instances.Where(i => i.Score != null)
+                                        .SelectMany(i => i.Score.AsNonNull().Replay.Frames)
+                                        .Select(f => f.Time)
+                                        .DefaultIfEmpty(0)
+                                        .Min();
 
-            // Although the clock has been started, this flag is set to allow for later synchronisation state changes to also be able to start it.
-            canStartMasterClock = true;
-        }
-
-        private void onMasterStateChanged(ValueChangedEvent<MasterClockState> state)
-        {
-            switch (state.NewValue)
-            {
-                case MasterClockState.Synchronised:
-                    if (canStartMasterClock)
-                        masterClockContainer.Start();
-
-                    break;
-
-                case MasterClockState.TooFarAhead:
-                    masterClockContainer.Stop();
-                    break;
-            }
+            masterClockContainer.Reset(startTime, true);
         }
     }
 }

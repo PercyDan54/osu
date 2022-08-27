@@ -5,8 +5,8 @@ using Mvis.Plugin.Sandbox.Extensions;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Batches;
-using osu.Framework.Graphics.OpenGL.Vertices;
+using osu.Framework.Graphics.Rendering;
+using osu.Framework.Graphics.Rendering.Vertices;
 using osu.Framework.Graphics.Shaders;
 using osu.Framework.Graphics.Textures;
 using osuTK;
@@ -27,17 +27,20 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers
 
         public Texture Texture { get; protected set; }
 
+        protected IRenderer Renderer { get; private set; }
+
         private IShader shader;
 
         public MusicVisualizerDrawable()
         {
-            Texture = Texture.WhitePixel;
         }
 
         [BackgroundDependencyLoader]
-        private void load(ShaderManager shaders)
+        private void load(ShaderManager shaders, IRenderer renderer)
         {
             shader = shaders.Load(VertexShaderDescriptor.TEXTURE_2, FragmentShaderDescriptor.TEXTURE_ROUNDED);
+            Texture = renderer.WhitePixel;
+            Renderer = renderer;
         }
 
         protected override void LoadComplete()
@@ -76,7 +79,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers
 
         public void SetAmplitudes(float[] amplitudes)
         {
-            var newRawAudioData = getConvertedAmplitudes(amplitudes);
+            float[] newRawAudioData = getConvertedAmplitudes(amplitudes);
 
             for (int i = 0; i < AdjustedBarCount; i++)
                 ApplyData(i, newRawAudioData[i]);
@@ -95,7 +98,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers
         {
             base.Update();
 
-            var diff = (float)Clock.ElapsedFrameTime;
+            float diff = (float)Clock.ElapsedFrameTime;
 
             for (int i = 0; i < AdjustedBarCount; i++)
                 UpdateData(i, diff);
@@ -119,9 +122,9 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers
 
         private float[] getConvertedAmplitudes(float[] amplitudes)
         {
-            var amps = new float[AdjustedBarCount];
+            float[] amps = new float[AdjustedBarCount];
 
-            var lerp = AdjustedBarCount != BarCount.Value;
+            bool lerp = AdjustedBarCount != BarCount.Value;
 
             if (lerp)
             {
@@ -129,8 +132,8 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers
                 {
                     for (int j = 0; j < barsToFill; j++)
                     {
-                        var realValue = amplitudes[i];
-                        var nextValue = amplitudes[i + 1];
+                        float realValue = amplitudes[i];
+                        float nextValue = amplitudes[i + 1];
 
                         amps[i * barsToFill + j] = MathExtensions.Map(j, 0, barsToFill, realValue, nextValue);
                     }
@@ -153,7 +156,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers
         {
             protected new MusicVisualizerDrawable Source => (MusicVisualizerDrawable)base.Source;
 
-            protected readonly QuadBatch<TexturedVertex2D> VertexBatch = new QuadBatch<TexturedVertex2D>(200, 5);
+            protected IVertexBatch<TexturedVertex2D> VertexBatch;
             protected readonly List<float> AudioData = new List<float>();
 
             private IShader shader;
@@ -161,10 +164,12 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers
             protected Vector2 Size;
             protected double BarWidth;
             protected bool Reversed;
+            protected IRenderer Renderer;
 
             public VisualizerDrawNode(MusicVisualizerDrawable source)
                 : base(source)
             {
+                Renderer = source.Renderer;
             }
 
             public override void ApplyState()
@@ -179,21 +184,23 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers
 
                 AudioData.Clear();
                 AudioData.AddRange(Source.smoothAudioData);
+
+                VertexBatch = Source.Renderer.CreateQuadBatch<TexturedVertex2D>(200, 5);
             }
 
             protected abstract float Spacing { get; }
             protected virtual Vector2 Inflation => Vector2.One;
 
-            public override void Draw(Action<TexturedVertex2D> vertexAction)
+            public override void Draw(IRenderer renderer)
             {
-                base.Draw(vertexAction);
+                base.Draw(renderer);
 
                 if (AudioData.Any())
                 {
                     shader.Bind();
 
                     Vector2 inflation = Inflation;
-                    var spacing = Spacing;
+                    float spacing = Spacing;
                     PreCompute();
 
                     for (int i = 0; i < AudioData.Count; i++)

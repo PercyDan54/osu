@@ -1,8 +1,6 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
@@ -23,6 +21,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
         public GlobalKeyBindingsSection(GlobalActionContainer manager)
         {
             Add(new DefaultBindingsSubsection(manager));
+            Add(new OverlayBindingsSubsection(manager));
             Add(new AudioControlKeyBindingsSubsection(manager));
             Add(new MvisBindingsSection(manager));
             Add(new SongSelectKeyBindingSubsection(manager));
@@ -41,14 +40,14 @@ namespace osu.Game.Overlays.Settings.Sections.Input
             }
         }
 
-        private class MvisBindingsSection : KeyBindingsSubsection
+        private class OverlayBindingsSubsection : KeyBindingsSubsection
         {
-            protected override LocalisableString Header => "Mvis player";
+            protected override LocalisableString Header => InputSettingsStrings.OverlaysSection;
 
-            public MvisBindingsSection(GlobalActionContainer manager)
+            public OverlayBindingsSubsection(GlobalActionContainer manager)
                 : base(null)
             {
-                Defaults = manager.MvisControlKeyBindings;
+                Defaults = manager.OverlayKeyBindings;
             }
         }
 
@@ -93,6 +92,17 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                 : base(null)
             {
                 Defaults = manager.EditorKeyBindings;
+            }
+        }
+
+        private class MvisBindingsSection : KeyBindingsSubsection
+        {
+            protected override LocalisableString Header => "Mvis player";
+
+            public MvisBindingsSection(GlobalActionContainer manager)
+                : base(null)
+            {
+                Defaults = manager.MvisControlKeyBindings;
             }
         }
     }

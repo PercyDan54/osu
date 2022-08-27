@@ -2,6 +2,7 @@
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Primitives;
+using osu.Framework.Graphics.Rendering;
 using osu.Framework.Graphics.Textures;
 using osuTK;
 
@@ -53,7 +54,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
                         Vector2Extensions.Transform(dotPosition + bottomOffset + amplitudeOffset, DrawInfo.Matrix)
                     );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     Texture,
                     rectangle,
                     DrawColourInfo.Colour,

@@ -1,6 +1,7 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Primitives;
+using osu.Framework.Graphics.Rendering;
 using osu.Framework.Graphics.Textures;
 using osuTK;
 
@@ -37,7 +38,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
 
             protected override void DrawBar(Vector2 barPosition, Vector2 barSize)
             {
-                switch(Origin)
+                switch (Origin)
                 {
                     case BarAnchor.Top:
                         drawTop(barPosition, barSize);
@@ -62,7 +63,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
                             Vector2Extensions.Transform(barPosition + new Vector2(barSize.X), DrawInfo.Matrix)
                             );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     circleTexture,
                     topDot,
                     DrawColourInfo.Colour,
@@ -79,7 +80,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
                             Vector2Extensions.Transform(barPosition + new Vector2(barSize.X, barSize.X + barSize.Y), DrawInfo.Matrix)
                             );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     circleTexture,
                     bottomDot,
                     DrawColourInfo.Colour,
@@ -94,7 +95,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
                             Vector2Extensions.Transform(adjustedPosition + new Vector2(barSize.X, barSize.Y), DrawInfo.Matrix)
                             );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     Texture,
                     quad,
                     DrawColourInfo.Colour,
@@ -112,7 +113,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
                             Vector2Extensions.Transform(barPosition + new Vector2(barSize.X, -barSize.Y / 2 + barSize.X / 2), DrawInfo.Matrix)
                             );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     circleTexture,
                     topDot,
                     DrawColourInfo.Colour,
@@ -127,7 +128,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
                             Vector2Extensions.Transform(barPosition + new Vector2(barSize.X, barSize.Y / 2 - barSize.X / 2), DrawInfo.Matrix)
                             );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     circleTexture,
                     bottomDot,
                     DrawColourInfo.Colour,
@@ -142,7 +143,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
                             Vector2Extensions.Transform(barPosition + new Vector2(barSize.X, barSize.Y / 2), DrawInfo.Matrix)
                             );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     Texture,
                     quad,
                     DrawColourInfo.Colour,
@@ -160,7 +161,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
                             Vector2Extensions.Transform(barPosition + new Vector2(barSize.X, -barSize.X), DrawInfo.Matrix)
                             );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     circleTexture,
                     topDot,
                     DrawColourInfo.Colour,
@@ -174,10 +175,10 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
                             Vector2Extensions.Transform(barPosition + new Vector2(0, -barSize.Y), DrawInfo.Matrix),
                             Vector2Extensions.Transform(barPosition + new Vector2(barSize.X, -barSize.Y), DrawInfo.Matrix),
                             Vector2Extensions.Transform(barPosition + new Vector2(0, - barSize.X - barSize.Y), DrawInfo.Matrix),
-                            Vector2Extensions.Transform(barPosition + new Vector2(barSize.X, - barSize.X - barSize.Y), DrawInfo.Matrix)
+                            Vector2Extensions.Transform(barPosition + new Vector2(barSize.X, -barSize.X - barSize.Y), DrawInfo.Matrix)
                             );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     circleTexture,
                     bottomDot,
                     DrawColourInfo.Colour,
@@ -186,13 +187,13 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Linear
                     new Vector2(1f / barSize.X));
 
                 var quad = new Quad(
-                            Vector2Extensions.Transform(adjustedPosition, DrawInfo.Matrix),
-                            Vector2Extensions.Transform(adjustedPosition + new Vector2(0, -barSize.Y), DrawInfo.Matrix),
-                            Vector2Extensions.Transform(adjustedPosition + new Vector2(barSize.X, 0), DrawInfo.Matrix),
-                            Vector2Extensions.Transform(adjustedPosition + new Vector2(barSize.X, -barSize.Y), DrawInfo.Matrix)
-                            );
+                    Vector2Extensions.Transform(adjustedPosition, DrawInfo.Matrix),
+                    Vector2Extensions.Transform(adjustedPosition + new Vector2(0, -barSize.Y), DrawInfo.Matrix),
+                    Vector2Extensions.Transform(adjustedPosition + new Vector2(barSize.X, 0), DrawInfo.Matrix),
+                    Vector2Extensions.Transform(adjustedPosition + new Vector2(barSize.X, -barSize.Y), DrawInfo.Matrix)
+                );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     Texture,
                     quad,
                     DrawColourInfo.Colour,

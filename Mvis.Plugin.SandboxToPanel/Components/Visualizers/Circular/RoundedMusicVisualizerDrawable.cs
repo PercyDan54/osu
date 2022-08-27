@@ -2,6 +2,7 @@
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Primitives;
+using osu.Framework.Graphics.Rendering;
 using osu.Framework.Graphics.Textures;
 using osuTK;
 
@@ -64,7 +65,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
                         Vector2Extensions.Transform(bottomDotPosition + dotBottomOffset + dotAmplitudeOffset, DrawInfo.Matrix)
                     );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     circleTexture,
                     bottomDotQuad,
                     DrawColourInfo.Colour,
@@ -74,8 +75,8 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
 
 
                 // Bar
-                var barPositionScale = (dotSize.X + Size.X) / Size.X;
-                var barPositionMultiplier = 1f / (barPositionScale * 2);
+                float barPositionScale = (dotSize.X + Size.X) / Size.X;
+                float barPositionMultiplier = 1f / (barPositionScale * 2);
 
                 var barPosition = new Vector2(rotationCos / 2 + barPositionMultiplier, rotationSin / 2 + barPositionMultiplier) * Size.X * barPositionScale;
                 var barSize = new Vector2((float)BarWidth, data);
@@ -90,7 +91,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
                         Vector2Extensions.Transform(barPosition + bottomOffset + amplitudeOffset, DrawInfo.Matrix)
                     );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     Texture,
                     rectangle,
                     DrawColourInfo.Colour,
@@ -98,21 +99,20 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
                     VertexBatch.AddAction,
                     Vector2.Divide(inflation, barSize.Yx));
 
-
                 // Top Dot
-                var topDotScale = (barSize.Y * 2 + Size.X) / Size.X;
-                var topDotPositionMultiplier = 1f / (topDotScale * 2);
+                float topDotScale = (barSize.Y * 2 + Size.X) / Size.X;
+                float topDotPositionMultiplier = 1f / (topDotScale * 2);
 
                 var topDotPosition = new Vector2(rotationCos / 2 + topDotPositionMultiplier, rotationSin / 2 + topDotPositionMultiplier) * Size.X * topDotScale;
 
                 var topDotQuad = new Quad(
-                        Vector2Extensions.Transform(topDotPosition - dotBottomOffset, DrawInfo.Matrix),
-                        Vector2Extensions.Transform(topDotPosition - dotBottomOffset + dotAmplitudeOffset, DrawInfo.Matrix),
-                        Vector2Extensions.Transform(topDotPosition + dotBottomOffset, DrawInfo.Matrix),
-                        Vector2Extensions.Transform(topDotPosition + dotBottomOffset + dotAmplitudeOffset, DrawInfo.Matrix)
-                    );
+                    Vector2Extensions.Transform(topDotPosition - dotBottomOffset, DrawInfo.Matrix),
+                    Vector2Extensions.Transform(topDotPosition - dotBottomOffset + dotAmplitudeOffset, DrawInfo.Matrix),
+                    Vector2Extensions.Transform(topDotPosition + dotBottomOffset, DrawInfo.Matrix),
+                    Vector2Extensions.Transform(topDotPosition + dotBottomOffset + dotAmplitudeOffset, DrawInfo.Matrix)
+                );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     circleTexture,
                     topDotQuad,
                     DrawColourInfo.Colour,

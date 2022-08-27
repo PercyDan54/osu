@@ -5,6 +5,7 @@
 
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
+using osu.Framework.Localisation;
 using osu.Game.Rulesets.Mods;
 
 namespace osu.Game.Screens.LLin.Misc
@@ -13,7 +14,7 @@ namespace osu.Game.Screens.LLin.Misc
     {
         public override string Name => ToString();
         public override string Acronym => "RA";
-        public override string Description => "missingno";
+        public override LocalisableString Description => "missingno";
         public override double ScoreMultiplier => 0;
 
         public override BindableNumber<double> SpeedChange { get; } = new BindableDouble

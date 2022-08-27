@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Mvis.Plugin.Sandbox.Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Primitives;
+using osu.Framework.Graphics.Rendering;
 using osuTK;
 
 namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
@@ -89,7 +90,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
                         Vector2Extensions.Transform(barPosition + bottomOffset + amplitudeOffset, DrawInfo.Matrix)
                     );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     Texture,
                     rectangle,
                     DrawColourInfo.Colour,
@@ -116,7 +117,7 @@ namespace Mvis.Plugin.Sandbox.Components.Visualizers.Circular
                         Vector2Extensions.Transform(fallBarPosition + bottomOffset + fallBarAmplitudeOffset, DrawInfo.Matrix)
                     );
 
-                DrawQuad(
+                Renderer.DrawQuad(
                     Texture,
                     fallBarRectangle,
                     DrawColourInfo.Colour,

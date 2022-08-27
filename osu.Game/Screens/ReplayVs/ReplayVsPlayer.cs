@@ -19,14 +19,13 @@ namespace osu.Game.Screens.ReplayVs
 {
     public class ReplayVsPlayer : Player
     {
-        private readonly Bindable<bool> waitingOnFrames = new Bindable<bool>();
-        private readonly ISpectatorPlayerClock spectatorPlayerClock;
+        private readonly SpectatorPlayerClock spectatorPlayerClock;
         private readonly Score score;
         private readonly ColourInfo teamColor;
 
         protected override bool CheckModsAllowFailure() => false;
 
-        public ReplayVsPlayer([NotNull] Score score, [NotNull] ISpectatorPlayerClock spectatorPlayerClock, ColourInfo teamColor)
+        public ReplayVsPlayer([NotNull] Score score, [NotNull] SpectatorPlayerClock spectatorPlayerClock, ColourInfo teamColor)
             : base(new PlayerConfiguration { AllowUserInteraction = false })
         {
             this.spectatorPlayerClock = spectatorPlayerClock;
@@ -37,8 +36,6 @@ namespace osu.Game.Screens.ReplayVs
         [BackgroundDependencyLoader]
         private void load()
         {
-            spectatorPlayerClock.WaitingOnFrames.BindTo(waitingOnFrames);
-
             HUDOverlay.PlayerSettingsOverlay.Expire();
             HUDOverlay.HoldToQuit.Expire();
 
@@ -57,7 +54,18 @@ namespace osu.Game.Screens.ReplayVs
         {
             base.UpdateAfterChildren();
 
-            waitingOnFrames.Value = DrawableRuleset.FrameStableClock.WaitingOnFrames.Value;
+            spectatorPlayerClock.WaitingOnFrames = false;
+        }
+
+        protected override void Update()
+        {
+            // The player clock's running state is controlled externally, but the local pausing state needs to be updated to start/stop gameplay.
+            if (GameplayClockContainer.SourceClock.IsRunning)
+                GameplayClockContainer.Start();
+            else
+                GameplayClockContainer.Stop();
+
+            base.Update();
         }
 
         protected override void PrepareReplay()
@@ -68,6 +76,6 @@ namespace osu.Game.Screens.ReplayVs
         protected override Score CreateScore(IBeatmap beatmap) => score;
 
         protected override GameplayClockContainer CreateGameplayClockContainer(WorkingBeatmap beatmap, double gameplayStart)
-            => new MultiSpectatorPlayer.SpectatorGameplayClockContainer(spectatorPlayerClock);
+            => new GameplayClockContainer(spectatorPlayerClock);
     }
 }
