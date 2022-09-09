@@ -5,7 +5,7 @@
 
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
+using osu.Framework.Audio;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Game.Beatmaps;
@@ -24,6 +24,9 @@ namespace osu.Game.Screens.ReplayVs
         private readonly ColourInfo teamColor;
 
         protected override bool CheckModsAllowFailure() => false;
+        public IAggregateAudioAdjustment ClockAdjustmentsFromMods => clockAdjustmentsFromMods;
+
+        private readonly AudioAdjustments clockAdjustmentsFromMods = new AudioAdjustments();
 
         public ReplayVsPlayer([NotNull] Score score, [NotNull] SpectatorPlayerClock spectatorPlayerClock, ColourInfo teamColor)
             : base(new PlayerConfiguration { AllowUserInteraction = false })
@@ -76,6 +79,10 @@ namespace osu.Game.Screens.ReplayVs
         protected override Score CreateScore(IBeatmap beatmap) => score;
 
         protected override GameplayClockContainer CreateGameplayClockContainer(WorkingBeatmap beatmap, double gameplayStart)
-            => new GameplayClockContainer(spectatorPlayerClock);
+        {
+            var gameplayClockContainer = new GameplayClockContainer(spectatorPlayerClock);
+            clockAdjustmentsFromMods.BindAdjustments(gameplayClockContainer.AdjustmentsFromMods);
+            return gameplayClockContainer;
+        }
     }
 }

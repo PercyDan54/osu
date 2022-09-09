@@ -42,7 +42,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
         }
 
         [Resolved]
-        private DialogOverlay dialog { get; set; }
+        private IDialogOverlay dialog { get; set; }
 
         private readonly BindableBool disabled = new BindableBool();
         private GridContainer buttonsGrid;

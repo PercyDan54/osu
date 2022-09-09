@@ -12,10 +12,10 @@ namespace osu.Game.Screens.LLin.Misc
     {
         public Action OnComplete { get; set; }
 
-        protected override void Completed()
+        protected override Notification CreateCompletionNotification()
         {
             OnComplete?.Invoke();
-            base.Completed();
+            return base.CreateCompletionNotification();
         }
     }
 }

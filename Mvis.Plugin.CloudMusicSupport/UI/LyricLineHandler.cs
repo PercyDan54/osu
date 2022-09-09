@@ -151,7 +151,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 if (v.NewValue)
                 {
                     if (outlineEffectContainer.Contains(lyricContainer))
-                        outlineEffectContainer.Remove(lyricContainer);
+                        outlineEffectContainer.Remove(lyricContainer, true);
 
                     AddInternal(lyricContainer);
                     outlineEffectContainer.Hide();
@@ -159,7 +159,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 else
                 {
                     if (InternalChildren.Contains(lyricContainer))
-                        RemoveInternal(lyricContainer);
+                        RemoveInternal(lyricContainer, true);
 
                     outlineEffectContainer.Add(lyricContainer);
                     outlineEffectContainer.Show();

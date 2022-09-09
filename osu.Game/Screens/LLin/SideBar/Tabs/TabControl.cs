@@ -136,7 +136,7 @@ namespace osu.Game.Screens.LLin.SideBar.Tabs
 
                 if (!verticalScroll.Contains(Tabs))
                 {
-                    horizonalScroll.Remove(Tabs);
+                    horizonalScroll.Remove(Tabs, false);
                     verticalScroll.Add(Tabs);
                 }
 
@@ -158,7 +158,7 @@ namespace osu.Game.Screens.LLin.SideBar.Tabs
 
                 if (!horizonalScroll.Contains(Tabs))
                 {
-                    verticalScroll.Remove(Tabs);
+                    verticalScroll.Remove(Tabs, true);
                     horizonalScroll.Add(Tabs);
                 }
 
