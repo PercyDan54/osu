@@ -807,8 +807,8 @@ namespace osu.Game
                     Children = new Drawable[]
                     {
                         overlayContent = new Container { RelativeSizeAxes = Axes.Both },
-                        rightFloatingOverlayContent = new Container { RelativeSizeAxes = Axes.Both },
                         leftFloatingOverlayContent = new Container { RelativeSizeAxes = Axes.Both },
+                        rightFloatingOverlayContent = new Container { RelativeSizeAxes = Axes.Both },
                     }
                 },
                 topMostOverlayContent = new Container { RelativeSizeAxes = Axes.Both },
@@ -842,7 +842,9 @@ namespace osu.Game
                 OnHome = delegate
                 {
                     CloseAllOverlays(false);
-                    menuScreen?.MakeCurrent();
+
+                    if (menuScreen?.GetChildScreen() != null)
+                        menuScreen.MakeCurrent();
                 },
             }, topMostOverlayContent.Add);
 

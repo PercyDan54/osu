@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions;
@@ -151,17 +150,12 @@ namespace osu.Game.Screens.Select.Leaderboards
 
             var req = new GetScoresRequest(fetchBeatmapInfo, fetchRuleset, Scope, requestMods);
 
-            req.Success += r =>
+            req.Success += r => Schedule(() =>
             {
-                scoreManager.OrderByTotalScoreAsync(r.Scores.Select(s => s.ToScoreInfo(rulesets, fetchBeatmapInfo)).ToArray(), cancellationToken)
-                            .ContinueWith(task => Schedule(() =>
-                            {
-                                if (cancellationToken.IsCancellationRequested)
-                                    return;
-
-                                SetScores(task.GetResultSafely(), r.UserScore?.CreateScoreInfo(rulesets, fetchBeatmapInfo));
-                            }), TaskContinuationOptions.OnlyOnRanToCompletion);
-            };
+                SetScores(
+                    scoreManager.OrderByTotalScore(r.Scores.Select(s => s.ToScoreInfo(rulesets, fetchBeatmapInfo))),
+                    r.UserScore?.CreateScoreInfo(rulesets, fetchBeatmapInfo));
+            });
 
             return req;
         }
@@ -215,16 +209,9 @@ namespace osu.Game.Screens.Select.Leaderboards
                     scores = scores.Where(s => s.Mods.Any(m => selectedMods.Contains(m.Acronym)));
                 }
 
-                scores = scores.Detach();
+                scores = scoreManager.OrderByTotalScore(scores.Detach());
 
-                scoreManager.OrderByTotalScoreAsync(scores.ToArray(), cancellationToken)
-                            .ContinueWith(ordered => Schedule(() =>
-                            {
-                                if (cancellationToken.IsCancellationRequested)
-                                    return;
-
-                                SetScores(ordered.GetResultSafely());
-                            }), TaskContinuationOptions.OnlyOnRanToCompletion);
+                Schedule(() => SetScores(scores));
             }
         }
 
