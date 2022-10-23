@@ -1,8 +1,6 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -25,22 +23,22 @@ namespace osu.Game.Screens.Select
 {
     public class PlaySongSelect : SongSelect
     {
-        private OsuScreen playerLoader;
+        private OsuScreen? playerLoader;
 
         [Resolved(CanBeNull = true)]
-        private INotificationOverlay notifications { get; set; }
+        private INotificationOverlay? notifications { get; set; }
 
         public override bool AllowExternalScreenChange => true;
 
         protected override UserActivity InitialActivity => new UserActivity.ChoosingBeatmap();
+
+        private PlayBeatmapDetailArea playBeatmapDetailArea = null!;
 
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
             BeatmapOptions.AddButton(@"Edit", @"beatmap", FontAwesome.Solid.PencilAlt, colours.Yellow, () => Edit());
             Footer.AddButton(new FooterButtonOpenInMvis { Action = openMvis }, null);
-
-            ((PlayBeatmapDetailArea)BeatmapDetails).Leaderboard.ScoreSelected += PresentScore;
         }
 
         private void openMvis() => this.Push(new LLinScreen());
@@ -48,7 +46,18 @@ namespace osu.Game.Screens.Select
         protected void PresentScore(ScoreInfo score) =>
             FinaliseSelection(score.BeatmapInfo, score.Ruleset, () => this.Push(new SoloResultsScreen(score, false)));
 
-        protected override BeatmapDetailArea CreateBeatmapDetailArea() => new PlayBeatmapDetailArea();
+        protected override BeatmapDetailArea CreateBeatmapDetailArea()
+        {
+            playBeatmapDetailArea = new PlayBeatmapDetailArea
+            {
+                Leaderboard =
+                {
+                    ScoreSelected = PresentScore
+                }
+            };
+
+            return playBeatmapDetailArea;
+        }
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -65,9 +74,9 @@ namespace osu.Game.Screens.Select
             return base.OnKeyDown(e);
         }
 
-        private IReadOnlyList<Mod> modsAtGameplayStart;
+        private IReadOnlyList<Mod>? modsAtGameplayStart;
 
-        private ModAutoplay getAutoplayMod() => Ruleset.Value.CreateInstance().GetAutoplayMod();
+        private ModAutoplay? getAutoplayMod() => Ruleset.Value.CreateInstance().GetAutoplayMod();
 
         protected override bool OnStart()
         {
@@ -104,14 +113,26 @@ namespace osu.Game.Screens.Select
 
             Player createPlayer()
             {
+                Player player;
+
                 var replayGeneratingMod = Mods.Value.OfType<ICreateReplayData>().FirstOrDefault();
 
                 if (replayGeneratingMod != null)
                 {
-                    return new ReplayPlayer((beatmap, mods) => replayGeneratingMod.CreateScoreFromReplayData(beatmap, mods));
+                    player = new ReplayPlayer((beatmap, mods) => replayGeneratingMod.CreateScoreFromReplayData(beatmap, mods))
+                    {
+                        LeaderboardScores = { BindTarget = playBeatmapDetailArea.Leaderboard.Scores }
+                    };
+                }
+                else
+                {
+                    player = new SoloPlayer
+                    {
+                        LeaderboardScores = { BindTarget = playBeatmapDetailArea.Leaderboard.Scores }
+                    };
                 }
 
-                return new SoloPlayer();
+                return player;
             }
         }
 

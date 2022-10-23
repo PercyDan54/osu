@@ -1,15 +1,11 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Development;
@@ -26,7 +22,6 @@ using osu.Game.Online.Placeholders;
 using osuTK;
 using osuTK.Graphics;
 using osu.Game.Localisation;
-using osu.Game.Scoring;
 
 namespace osu.Game.Online.Leaderboards
 {
@@ -41,7 +36,9 @@ namespace osu.Game.Online.Leaderboards
         /// <summary>
         /// The currently displayed scores.
         /// </summary>
-        public IEnumerable<TScoreInfo> Scores => scores;
+        public IBindableList<TScoreInfo> Scores => scores;
+
+        private readonly BindableList<TScoreInfo> scores = new BindableList<TScoreInfo>();
 
         /// <summary>
         /// Whether the current scope should refetch in response to changes in API connectivity state.
@@ -51,32 +48,26 @@ namespace osu.Game.Online.Leaderboards
         private const double fade_duration = 300;
 
         private readonly OsuScrollContainer scrollContainer;
-        private readonly OsuButton downloadButton;
         private readonly Container placeholderContainer;
         private readonly UserTopScoreContainer<TScoreInfo> userScoreContainer;
 
-        private FillFlowContainer<Drawable> scoreFlowContainer;
+        private FillFlowContainer<LeaderboardScore>? scoreFlowContainer;
 
         private readonly LoadingSpinner loading;
 
-        private CancellationTokenSource currentFetchCancellationSource;
-        private CancellationTokenSource currentScoresAsyncLoadCancellationSource;
+        private CancellationTokenSource? currentFetchCancellationSource;
+        private CancellationTokenSource? currentScoresAsyncLoadCancellationSource;
 
-        private APIRequest fetchScoresRequest;
+        private APIRequest? fetchScoresRequest;
 
         private LeaderboardState state;
 
         [Resolved(CanBeNull = true)]
-        private IAPIProvider api { get; set; }
-
-        [Resolved]
-        private ScoreModelDownloader downloader { get; set; }
+        private IAPIProvider? api { get; set; }
 
         private readonly IBindable<APIState> apiState = new Bindable<APIState>();
 
-        private ICollection<TScoreInfo> scores;
-
-        private TScope scope;
+        private TScope scope = default!;
 
         public TScope Scope
         {
@@ -130,31 +121,6 @@ namespace osu.Game.Online.Leaderboards
                     RelativeSizeAxes = Axes.Both
                 },
             };
-
-            scrollContainer.Add(downloadButton = new OsuButton
-            {
-                Text = "Download All",
-                RelativeSizeAxes = Axes.X,
-                Width = 1,
-                Action = () =>
-                {
-                    Task.Factory.StartNew(() =>
-                    {
-                        for (int i = 0; i < scores.Count; i++)
-                        {
-                            if (scores.ElementAt(i) is IScoreInfo score)
-                            {
-                                downloader.Download(score, import: false);
-                                Thread.Sleep(3000);
-
-                                if (i % 9 == 0 && i > 0)
-                                    Thread.Sleep(20000);
-                            }
-                        }
-                    }, TaskCreationOptions.LongRunning);
-                    if (downloadButton != null) downloadButton.Enabled.Value = false;
-                }
-            });
         }
 
         protected override void LoadComplete()
@@ -200,7 +166,7 @@ namespace osu.Game.Online.Leaderboards
                     throw new InvalidOperationException($"State {state} cannot be set by a leaderboard implementation.");
             }
 
-            Debug.Assert(scores?.Any() != true);
+            Debug.Assert(!scores.Any());
 
             setState(state);
         }
@@ -210,17 +176,33 @@ namespace osu.Game.Online.Leaderboards
         /// </summary>
         /// <param name="scores">The scores to display.</param>
         /// <param name="userScore">The user top score, if any.</param>
-        protected void SetScores(IEnumerable<TScoreInfo> scores, TScoreInfo userScore = default)
+        protected void SetScores(IEnumerable<TScoreInfo>? scores, TScoreInfo? userScore = default)
         {
-            this.scores = scores?.ToList();
-            userScoreContainer.Score.Value = userScore;
+            this.scores.Clear();
+            if (scores != null)
+                this.scores.AddRange(scores);
 
-            if (userScore == null)
-                userScoreContainer.Hide();
-            else
-                userScoreContainer.Show();
+            // Non-delayed schedule may potentially run inline (due to IsMainThread check passing) after leaderboard  is disposed.
+            // This is guarded against in BeatmapLeaderboard via web request cancellation, but let's be extra safe.
+            if (!IsDisposed)
+            {
+                // Schedule needs to be non-delayed here for the weird logic in refetchScores to work.
+                // If it is removed, the placeholder will be incorrectly updated to "no scores" rather than "retrieving".
+                // This whole flow should be refactored in the future.
+                Scheduler.Add(applyNewScores, false);
+            }
 
-            Scheduler.Add(updateScoresDrawables, false);
+            void applyNewScores()
+            {
+                userScoreContainer.Score.Value = userScore;
+
+                if (userScore == null)
+                    userScoreContainer.Hide();
+                else
+                    userScoreContainer.Show();
+
+                updateScoresDrawables();
+            }
         }
 
         /// <summary>
@@ -228,8 +210,7 @@ namespace osu.Game.Online.Leaderboards
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns>An <see cref="APIRequest"/> responsible for the fetch operation. This will be queued and performed automatically.</returns>
-        [CanBeNull]
-        protected abstract APIRequest FetchScores(CancellationToken cancellationToken);
+        protected abstract APIRequest? FetchScores(CancellationToken cancellationToken);
 
         protected abstract LeaderboardScore CreateDrawableScore(TScoreInfo model, int index);
 
@@ -240,8 +221,8 @@ namespace osu.Game.Online.Leaderboards
             Debug.Assert(ThreadSafety.IsUpdateThread);
 
             cancelPendingWork();
-            SetScores(null);
 
+            SetScores(null);
             setState(LeaderboardState.Retrieving);
 
             currentFetchCancellationSource = new CancellationTokenSource();
@@ -278,14 +259,13 @@ namespace osu.Game.Online.Leaderboards
                 .Expire();
             scoreFlowContainer = null;
 
-            if (scores?.Any() != true)
+            if (!scores.Any())
             {
                 setState(LeaderboardState.NoScores);
-                downloadButton.Hide();
                 return;
             }
 
-            LoadComponentAsync(new FillFlowContainer<Drawable>
+            LoadComponentAsync(new FillFlowContainer<LeaderboardScore>
             {
                 RelativeSizeAxes = Axes.X,
                 AutoSizeAxes = Axes.Y,
@@ -295,11 +275,6 @@ namespace osu.Game.Online.Leaderboards
             }, newFlow =>
             {
                 setState(LeaderboardState.Success);
-
-                if (!IsOnlineScope)
-                    downloadButton.Hide();
-                else
-                    downloadButton.Show();
 
                 scrollContainer.Add(scoreFlowContainer = newFlow);
 
@@ -319,7 +294,7 @@ namespace osu.Game.Online.Leaderboards
 
         #region Placeholder handling
 
-        private Placeholder placeholder;
+        private Placeholder? placeholder;
 
         private void setState(LeaderboardState state)
         {
@@ -346,7 +321,7 @@ namespace osu.Game.Online.Leaderboards
             placeholder.FadeInFromZero(fade_duration, Easing.OutQuint);
         }
 
-        private Placeholder getPlaceholderFor(LeaderboardState state)
+        private Placeholder? getPlaceholderFor(LeaderboardState state)
         {
             switch (state)
             {

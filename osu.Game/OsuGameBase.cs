@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -59,6 +60,7 @@ namespace osu.Game
     /// Unlike <see cref="OsuGame"/>, this class will not load any kind of UI, allowing it to be used
     /// for provide dependencies to test cases without interfering with them.
     /// </summary>
+    [Cached(typeof(OsuGameBase))]
     public partial class OsuGameBase : Framework.Game, ICanAcceptFiles, IBeatSyncProvider
     {
         public static readonly string[] VIDEO_EXTENSIONS = { ".mp4", ".mov", ".avi", ".flv" };
@@ -124,6 +126,8 @@ namespace osu.Game
 
         protected SessionStatics SessionStatics { get; private set; }
 
+        protected OsuColour Colours { get; private set; }
+
         protected BeatmapManager BeatmapManager { get; private set; }
 
         protected BeatmapModelDownloader BeatmapDownloader { get; private set; }
@@ -179,7 +183,7 @@ namespace osu.Game
 
         private SpectatorClient spectatorClient;
 
-        private MultiplayerClient multiplayerClient;
+        protected MultiplayerClient MultiplayerClient { get; private set; }
 
         private MetadataClient metadataClient;
 
@@ -198,11 +202,6 @@ namespace osu.Game
         private DependencyContainer dependencies;
 
         private readonly BindableNumber<double> globalTrackVolumeAdjust = new BindableNumber<double>(global_track_volume_adjust);
-
-        /// <summary>
-        /// A legacy EF context factory if migration has not been performed to realm yet.
-        /// </summary>
-        protected DatabaseContextFactory EFContextFactory { get; private set; }
 
         /// <summary>
         /// Number of unhandled exceptions to allow before aborting execution.
@@ -228,14 +227,11 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "fdfa3fa54daaacc689a6f1e6cd55545f";
+            VersionHash = "901cb5d69c84782060b7fea961cd61ff";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
-            if (Storage.Exists(DatabaseContextFactory.DATABASE_NAME))
-                dependencies.Cache(EFContextFactory = new DatabaseContextFactory(Storage));
-
-            dependencies.Cache(realm = new RealmAccess(Storage, CLIENT_DATABASE_FILENAME, Host.UpdateThread, EFContextFactory));
+            dependencies.Cache(realm = new RealmAccess(Storage, CLIENT_DATABASE_FILENAME, Host.UpdateThread));
 
             dependencies.CacheAs<RulesetStore>(RulesetStore = new RealmRulesetStore(realm, Storage));
             dependencies.CacheAs<IRulesetStore>(RulesetStore);
@@ -248,12 +244,13 @@ namespace osu.Game
             largeStore.AddTextureSource(Host.CreateTextureLoaderStore(new OnlineStore()));
             dependencies.Cache(largeStore);
 
-            dependencies.CacheAs(this);
             dependencies.CacheAs(LocalConfig);
             dependencies.Cache(MConfig);
             dependencies.Cache(new CustomStore(Storage, this));
 
             InitialiseFonts();
+
+            addFilesWarning();
 
             Audio.Samples.PlaybackConcurrency = SAMPLE_CONCURRENCY;
 
@@ -284,7 +281,7 @@ namespace osu.Game
             // TODO: OsuGame or OsuGameBase?
             dependencies.CacheAs(beatmapUpdater = new BeatmapUpdater(BeatmapManager, difficultyCache, API, Storage));
             dependencies.CacheAs(spectatorClient = new OnlineSpectatorClient(endpoints));
-            dependencies.CacheAs(multiplayerClient = new OnlineMultiplayerClient(endpoints));
+            dependencies.CacheAs(MultiplayerClient = new OnlineMultiplayerClient(endpoints));
             dependencies.CacheAs(metadataClient = new OnlineMetadataClient(endpoints));
 
             AddInternal(new BeatmapOnlineChangeIngest(beatmapUpdater, realm, metadataClient));
@@ -308,7 +305,7 @@ namespace osu.Game
                 dependencies.CacheAs(powerStatus);
 
             dependencies.Cache(SessionStatics = new SessionStatics());
-            dependencies.Cache(new OsuColour());
+            dependencies.Cache(Colours = new OsuColour());
 
             RegisterImportHandler(BeatmapManager);
             RegisterImportHandler(ScoreManager);
@@ -329,7 +326,7 @@ namespace osu.Game
                 AddInternal(apiAccess);
 
             AddInternal(spectatorClient);
-            AddInternal(multiplayerClient);
+            AddInternal(MultiplayerClient);
             AddInternal(metadataClient);
 
             AddInternal(rulesetConfigCache);
@@ -371,6 +368,29 @@ namespace osu.Game
 
             Ruleset.BindValueChanged(onRulesetChanged);
             Beatmap.BindValueChanged(onBeatmapChanged);
+        }
+
+        private void addFilesWarning()
+        {
+            var realmStore = new RealmFileStore(realm, Storage);
+
+            const string filename = "IMPORTANT READ ME.txt";
+
+            if (!realmStore.Storage.Exists(filename))
+            {
+                using (var stream = realmStore.Storage.CreateFileSafely(filename))
+                using (var textWriter = new StreamWriter(stream))
+                {
+                    textWriter.WriteLine(@"This folder contains all your user files (beatmaps, skins, replays etc.)");
+                    textWriter.WriteLine(@"Please do not touch or delete this folder!!");
+                    textWriter.WriteLine();
+                    textWriter.WriteLine(@"If you are really looking to completely delete user data, please delete");
+                    textWriter.WriteLine(@"the parent folder including all other files and directories");
+                    textWriter.WriteLine();
+                    textWriter.WriteLine(@"For more information on how these files are organised,");
+                    textWriter.WriteLine(@"see https://github.com/ppy/osu/wiki/User-file-storage");
+                }
+            }
         }
 
         private void onTrackChanged(WorkingBeatmap beatmap, TrackChangeDirection direction)

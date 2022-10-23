@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
+using osu.Framework.Bindables;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Screens;
@@ -18,6 +19,7 @@ using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
+using osu.Game.Screens.Play.HUD;
 using osu.Game.Screens.Ranking;
 
 namespace osu.Game.Screens.Play
@@ -86,6 +88,15 @@ namespace osu.Game.Screens.Play
 
         // Don't re-import replay scores as they're already present in the database.
         protected override Task ImportScore(Score score) => Task.CompletedTask;
+
+        public readonly BindableList<ScoreInfo> LeaderboardScores = new BindableList<ScoreInfo>();
+
+        protected override GameplayLeaderboard CreateGameplayLeaderboard() =>
+            new SoloGameplayLeaderboard(Score.ScoreInfo.User)
+            {
+                AlwaysVisible = { Value = true },
+                Scores = { BindTarget = LeaderboardScores }
+            };
 
         protected override ResultsScreen CreateResults(ScoreInfo score) => new SoloResultsScreen(score, false);
 
