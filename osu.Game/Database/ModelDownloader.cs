@@ -90,7 +90,7 @@ namespace osu.Game.Database
 
                         if (!Directory.Exists(path))
                             Directory.CreateDirectory(path);
-                        File.Move(filename, Path.Combine(path, $"{model.GetDisplayString().GetValidArchiveContentFilename()}{Path.GetExtension(filename)}"));
+                        File.Move(filename, Path.Combine(path, $"{model.GetDisplayString().GetValidFilename()}{Path.GetExtension(filename)}"));
                         notification.State = ProgressNotificationState.Completed;
                     }
                 }, TaskCreationOptions.LongRunning);
