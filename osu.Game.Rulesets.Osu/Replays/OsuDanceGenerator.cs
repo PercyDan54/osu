@@ -13,6 +13,7 @@ using osu.Game.Configuration;
 using osu.Game.Replays;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Objects;
+using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Replays.Movers;
@@ -104,14 +105,20 @@ namespace osu.Game.Rulesets.Osu.Replays
 
         private OsuAction[] getAction(double time)
         {
-            var action = new List<OsuAction>(2);
+            var actions = new List<OsuAction>(2);
 
             if (time < keyUpTime[0])
-                action.Add(OsuAction.LeftButton);
+                actions.Add(OsuAction.LeftButton);
             if (time < keyUpTime[1])
-                action.Add(OsuAction.RightButton);
+                actions.Add(OsuAction.RightButton);
 
-            return action.ToArray();
+            if (actions.Count == 2)
+            {
+                var lastAction = (buttonIndex - 1) % 2 == 0 ? OsuAction.LeftButton : OsuAction.RightButton;
+                keyUpTime[(int)lastAction] = time;
+            }
+
+            return actions.ToArray();
         }
 
         private Vector2 addHitObjectClickFrames(OsuHitObject h, OsuHitObject prev)
@@ -271,7 +278,12 @@ namespace osu.Game.Rulesets.Osu.Replays
                 }
             }
 
-            addHitObjectClickFrames(hitObjects[^1], hitObjects[^2]);
+            // idk how to fix this
+            if (!(h is IHasDuration))
+            {
+                addHitObjectClickFrames(hitObjects[^1], hitObjects[^2]);
+            }
+
             var lastFrame = (OsuReplayFrame)Frames[^1];
             lastFrame.Actions.Clear();
             AddFrameToReplay(lastFrame);
