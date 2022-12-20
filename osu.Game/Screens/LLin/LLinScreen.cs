@@ -52,7 +52,7 @@ using osuTK.Input;
 namespace osu.Game.Screens.LLin
 {
     [Cached(typeof(IImplementLLin))]
-    public class LLinScreen : ScreenWithBeatmapBackground, IImplementLLin, IKeyBindingHandler<GlobalAction>
+    public partial class LLinScreen : ScreenWithBeatmapBackground, IImplementLLin, IKeyBindingHandler<GlobalAction>
     {
         public Action<bool> OnTrackRunningToggle { get; set; }
         public Action Exiting { get; set; }
@@ -600,7 +600,7 @@ namespace osu.Game.Screens.LLin
 
         private LoadingSpinner loadingSpinner;
 
-        private readonly ModNightcore.NightcoreBeatContainer nightcoreBeatContainer = new ModNightcore.NightcoreBeatContainer();
+        private readonly NightcoreBeatContainer nightcoreBeatContainer = new NightcoreBeatContainer();
 
         #region 设置
 

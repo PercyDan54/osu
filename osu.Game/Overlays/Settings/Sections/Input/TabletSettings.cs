@@ -21,7 +21,7 @@ using osu.Game.Online.Chat;
 
 namespace osu.Game.Overlays.Settings.Sections.Input
 {
-    public class TabletSettings : SettingsSubsection
+    public partial class TabletSettings : SettingsSubsection
     {
         public TabletAreaSelection AreaSelection { get; private set; }
 
@@ -45,9 +45,9 @@ namespace osu.Game.Overlays.Settings.Sections.Input
         private GameHost host { get; set; }
 
         /// <summary>
-        /// Based on ultrawide monitor configurations.
+        /// Based on ultrawide monitor configurations, plus a bit of lenience for users which are intentionally aiming for higher horizontal velocity.
         /// </summary>
-        private const float largest_feasible_aspect_ratio = 21f / 9;
+        private const float largest_feasible_aspect_ratio = 23f / 9;
 
         private readonly BindableNumber<float> aspectRatio = new BindableFloat(1)
         {
@@ -143,6 +143,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                                 areaOffset.SetDefault();
                                 areaSize.SetDefault();
                             },
+                            CanBeShown = { BindTarget = enabled }
                         },
                         new SettingsButton
                         {
@@ -150,25 +151,29 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                             Action = () =>
                             {
                                 forceAspectRatio((float)host.Window.ClientSize.Width / host.Window.ClientSize.Height);
-                            }
+                            },
+                            CanBeShown = { BindTarget = enabled }
                         },
                         new SettingsSlider<float>
                         {
                             TransferValueOnCommit = true,
                             LabelText = TabletSettingsStrings.XOffset,
-                            Current = offsetX
+                            Current = offsetX,
+                            CanBeShown = { BindTarget = enabled }
                         },
                         new SettingsSlider<float>
                         {
                             TransferValueOnCommit = true,
                             LabelText = TabletSettingsStrings.YOffset,
-                            Current = offsetY
+                            Current = offsetY,
+                            CanBeShown = { BindTarget = enabled }
                         },
                         new SettingsSlider<float>
                         {
                             TransferValueOnCommit = true,
                             LabelText = TabletSettingsStrings.Rotation,
-                            Current = rotation
+                            Current = rotation,
+                            CanBeShown = { BindTarget = enabled }
                         },
                         new RotationPresetButtons(tabletHandler)
                         {
@@ -181,24 +186,28 @@ namespace osu.Game.Overlays.Settings.Sections.Input
                         {
                             TransferValueOnCommit = true,
                             LabelText = TabletSettingsStrings.AspectRatio,
-                            Current = aspectRatio
+                            Current = aspectRatio,
+                            CanBeShown = { BindTarget = enabled }
                         },
                         new SettingsCheckbox
                         {
                             LabelText = TabletSettingsStrings.LockAspectRatio,
-                            Current = aspectLock
+                            Current = aspectLock,
+                            CanBeShown = { BindTarget = enabled }
                         },
                         new SettingsSlider<float>
                         {
                             TransferValueOnCommit = true,
                             LabelText = CommonStrings.Width,
-                            Current = sizeX
+                            Current = sizeX,
+                            CanBeShown = { BindTarget = enabled }
                         },
                         new SettingsSlider<float>
                         {
                             TransferValueOnCommit = true,
                             LabelText = CommonStrings.Height,
-                            Current = sizeY
+                            Current = sizeY,
+                            CanBeShown = { BindTarget = enabled }
                         },
                     }
                 },

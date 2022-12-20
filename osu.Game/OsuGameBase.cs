@@ -82,6 +82,8 @@ namespace osu.Game
 
         public const int SAMPLE_CONCURRENCY = 6;
 
+        public const double SFX_STEREO_STRENGTH = 0.75;
+
         /// <summary>
         /// Length of debounce (in milliseconds) for commonly occuring sample playbacks that could stack.
         /// </summary>
@@ -235,7 +237,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "d4af08837eb33a89877136fb00f1cd11";
+            VersionHash = "7c87c2aa4cd4a4050b01da556510d271";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 

@@ -19,6 +19,7 @@ using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
+using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays;
 using osu.Game.Screens.LLin.Plugins;
 using osuTK;
@@ -26,12 +27,12 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.LLin.SideBar.PluginsPage
 {
-    public class PluginPiece : CompositeDrawable, IHasTooltip
+    public partial class PluginPiece : CompositeDrawable, IHasTooltip
     {
         public readonly LLinPlugin Plugin;
-        private TriangleButton unloadButton;
-        private TriangleButton disableButton;
-        private TriangleButton enableButton;
+        private RoundedButton unloadButton;
+        private RoundedButton disableButton;
+        private RoundedButton enableButton;
 
         [Resolved]
         private CustomColourProvider colourProvider { get; set; }
@@ -164,7 +165,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                             {
                                 new Drawable[]
                                 {
-                                    unloadButton = new DangerousTriangleButton
+                                    unloadButton = new DangerousRoundedButton()
                                     {
                                         Height = 30,
                                         RelativeSizeAxes = Axes.X,
@@ -178,7 +179,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                                         Anchor = Anchor.BottomCentre,
                                         Origin = Anchor.BottomCentre,
                                     },
-                                    disableButton = new TriangleButton
+                                    disableButton = new RoundedButton
                                     {
                                         Height = 30,
                                         RelativeSizeAxes = Axes.X,
@@ -189,7 +190,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                                         Anchor = Anchor.BottomCentre,
                                         Origin = Anchor.BottomCentre,
                                     },
-                                    enableButton = new TriangleButton
+                                    enableButton = new RoundedButton
                                     {
                                         Height = 30,
                                         RelativeSizeAxes = Axes.X,
@@ -340,7 +341,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
             return true;
         }
 
-        private class PluginBackgroundSprite : Sprite
+        private partial class PluginBackgroundSprite : Sprite
         {
             private readonly string target;
 

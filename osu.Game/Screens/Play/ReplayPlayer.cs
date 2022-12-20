@@ -24,7 +24,7 @@ using osu.Game.Screens.Ranking;
 
 namespace osu.Game.Screens.Play
 {
-    public class ReplayPlayer : Player, IKeyBindingHandler<GlobalAction>
+    public partial class ReplayPlayer : Player, IKeyBindingHandler<GlobalAction>
     {
         private readonly Func<IBeatmap, IReadOnlyList<Mod>, Score> createScore;
 
@@ -126,7 +126,7 @@ namespace osu.Game.Screens.Play
 
             void keyboardSeek(int direction)
             {
-                double target = Math.Clamp(GameplayClockContainer.CurrentTime + direction * keyboard_seek_amount, 0, GameplayState.Beatmap.HitObjects.Last().GetEndTime());
+                double target = Math.Clamp(GameplayClockContainer.CurrentTime + direction * keyboard_seek_amount, 0, GameplayState.Beatmap.GetLastObjectTime());
 
                 Seek(target);
             }

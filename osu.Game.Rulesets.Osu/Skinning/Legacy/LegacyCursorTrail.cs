@@ -13,7 +13,7 @@ using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Skinning.Legacy
 {
-    public class LegacyCursorTrail : CursorTrail
+    public partial class LegacyCursorTrail : CursorTrail
     {
         private readonly ISkin skin;
         private readonly BindableBool forceLong = new BindableBool();

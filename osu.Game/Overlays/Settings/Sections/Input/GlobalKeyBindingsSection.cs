@@ -9,7 +9,7 @@ using osu.Game.Localisation;
 
 namespace osu.Game.Overlays.Settings.Sections.Input
 {
-    public class GlobalKeyBindingsSection : SettingsSection
+    public partial class GlobalKeyBindingsSection : SettingsSection
     {
         public override Drawable CreateIcon() => new SpriteIcon
         {
@@ -29,7 +29,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
             Add(new EditorKeyBindingsSubsection(manager));
         }
 
-        private class DefaultBindingsSubsection : KeyBindingsSubsection
+        private partial class DefaultBindingsSubsection : KeyBindingsSubsection
         {
             protected override LocalisableString Header => string.Empty;
 
@@ -40,7 +40,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
             }
         }
 
-        private class OverlayBindingsSubsection : KeyBindingsSubsection
+        private partial class OverlayBindingsSubsection : KeyBindingsSubsection
         {
             protected override LocalisableString Header => InputSettingsStrings.OverlaysSection;
 
@@ -51,7 +51,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
             }
         }
 
-        private class SongSelectKeyBindingSubsection : KeyBindingsSubsection
+        private partial class SongSelectKeyBindingSubsection : KeyBindingsSubsection
         {
             protected override LocalisableString Header => InputSettingsStrings.SongSelectSection;
 
@@ -62,7 +62,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
             }
         }
 
-        private class InGameKeyBindingsSubsection : KeyBindingsSubsection
+        private partial class InGameKeyBindingsSubsection : KeyBindingsSubsection
         {
             protected override LocalisableString Header => InputSettingsStrings.InGameSection;
 
@@ -73,7 +73,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
             }
         }
 
-        private class AudioControlKeyBindingsSubsection : KeyBindingsSubsection
+        private partial class AudioControlKeyBindingsSubsection : KeyBindingsSubsection
         {
             protected override LocalisableString Header => InputSettingsStrings.AudioSection;
 
@@ -84,7 +84,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
             }
         }
 
-        private class EditorKeyBindingsSubsection : KeyBindingsSubsection
+        private partial class EditorKeyBindingsSubsection : KeyBindingsSubsection
         {
             protected override LocalisableString Header => InputSettingsStrings.EditorSection;
 

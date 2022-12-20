@@ -24,7 +24,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Graphics.Backgrounds
 {
-    public class Triangles : Drawable
+    public partial class Triangles : Drawable
     {
         [Resolved]
         private Bindable<WorkingBeatmap> b { get; set; }

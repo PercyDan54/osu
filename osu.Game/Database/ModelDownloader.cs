@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -15,7 +14,7 @@ using osu.Game.Overlays.Notifications;
 
 namespace osu.Game.Database
 {
-    public abstract class ModelDownloader<TModel, T> : IModelDownloader<T>
+    public abstract partial class ModelDownloader<TModel, T> : IModelDownloader<T>
         where TModel : class, IHasGuidPrimaryKey, ISoftDelete, IEquatable<TModel>, T
         where T : class
     {
@@ -44,11 +43,11 @@ namespace osu.Game.Database
         /// <returns>The request object.</returns>
         protected abstract ArchiveDownloadRequest<T> CreateDownloadRequest(T model, bool minimiseDownloadSize);
 
-        public bool Download(T model, bool minimiseDownloadSize = false, bool import = true) => Download(model, minimiseDownloadSize, null, import);
+        public bool Download(T model, bool minimiseDownloadSize = false) => Download(model, minimiseDownloadSize, null);
 
         public void DownloadAsUpdate(TModel originalModel, bool minimiseDownloadSize) => Download(originalModel, minimiseDownloadSize, originalModel);
 
-        protected bool Download(T model, bool minimiseDownloadSize, TModel? originalModel, bool import = true)
+        protected bool Download(T model, bool minimiseDownloadSize, TModel? originalModel)
         {
             if (!canDownload(model)) return false;
 
@@ -69,30 +68,18 @@ namespace osu.Game.Database
             {
                 Task.Factory.StartNew(async () =>
                 {
-                    if (import)
-                    {
-                        bool importSuccessful;
+                    bool importSuccessful;
 
-                        if (originalModel != null)
-                            importSuccessful = (await importer.ImportAsUpdate(notification, new ImportTask(filename), originalModel)) != null;
-                        else
-                            importSuccessful = (await importer.Import(notification, new ImportTask(filename))).Any();
-
-                        // for now a failed import will be marked as a failed download for simplicity.
-                        if (!importSuccessful)
-                            DownloadFailed?.Invoke(request);
-
-                        CurrentDownloads.Remove(request);
-                    }
+                    if (originalModel != null)
+                        importSuccessful = (await importer.ImportAsUpdate(notification, new ImportTask(filename), originalModel).ConfigureAwait(false)) != null;
                     else
-                    {
-                        string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "osu\\downloads");
+                        importSuccessful = (await importer.Import(notification, new[] { new ImportTask(filename) }).ConfigureAwait(false)).Any();
 
-                        if (!Directory.Exists(path))
-                            Directory.CreateDirectory(path);
-                        File.Move(filename, Path.Combine(path, $"{model.GetDisplayString().GetValidFilename()}{Path.GetExtension(filename)}"));
-                        notification.State = ProgressNotificationState.Completed;
-                    }
+                    // for now a failed import will be marked as a failed download for simplicity.
+                    if (!importSuccessful)
+                        DownloadFailed?.Invoke(request);
+
+                    CurrentDownloads.Remove(request);
                 }, TaskCreationOptions.LongRunning);
             };
 
@@ -137,7 +124,7 @@ namespace osu.Game.Database
 
         private bool canDownload(T model) => GetExistingDownload(model) == null && api != null;
 
-        private class DownloadNotification : ProgressNotification
+        private partial class DownloadNotification : ProgressNotification
         {
             public override bool IsImportant => false;
 
@@ -147,7 +134,7 @@ namespace osu.Game.Database
                 Text = CompletionText
             };
 
-            private class SilencedProgressCompletionNotification : ProgressCompletionNotification
+            private partial class SilencedProgressCompletionNotification : ProgressCompletionNotification
             {
                 public override bool IsImportant => false;
             }
