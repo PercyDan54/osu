@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
@@ -14,9 +9,11 @@ using osu.Game.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
 
+#nullable disable
+
 namespace osu.Game.Screens.LLin.SideBar
 {
-    public class SongSelectPage : CompositeDrawable, ISidebarContent
+    public partial class SongSelectPage : CompositeDrawable, ISidebarContent
     {
         public string Title => "Song select";
         public IconUsage Icon => FontAwesome.Solid.MousePointer;

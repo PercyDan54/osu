@@ -11,7 +11,7 @@ using osu.Game.Rulesets.Objects;
 
 namespace osu.Game.Screens.Edit
 {
-    public class ClipboardContent
+    public partial class ClipboardContent
     {
         [JsonConverter(typeof(TypedListConverter<HitObject>))]
         public IList<HitObject> HitObjects;

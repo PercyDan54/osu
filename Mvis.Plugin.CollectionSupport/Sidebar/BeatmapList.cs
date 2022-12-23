@@ -14,9 +14,11 @@ using osu.Game.Graphics.Containers;
 using osu.Game.Screens.LLin;
 using osuTK;
 
+#nullable disable
+
 namespace Mvis.Plugin.CollectionSupport.Sidebar
 {
-    public class BeatmapList : CompositeDrawable
+    public partial class BeatmapList : CompositeDrawable
     {
         [Resolved]
         private BeatmapManager beatmaps { get; set; }

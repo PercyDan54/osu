@@ -9,7 +9,7 @@ using osu.Game.Overlays.Settings.Sections.Mf;
 
 namespace osu.Game.Overlays
 {
-    public class MfMvisSection : SettingsSection
+    public partial class MfMvisSection : SettingsSection
     {
         public override Drawable CreateIcon() => new SpriteIcon
         {

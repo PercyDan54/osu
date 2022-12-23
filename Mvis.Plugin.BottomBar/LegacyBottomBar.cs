@@ -9,10 +9,11 @@ using osu.Game.Screens.LLin.Plugins;
 using osu.Game.Screens.LLin.Plugins.Types;
 using osu.Game.Screens.LLin.SideBar.Settings.Items;
 using osuTK;
+using osuTK.Graphics;
 
 namespace Mvis.Plugin.BottomBar
 {
-    internal class LegacyBottomBar : LLinPlugin, IFunctionBarProvider
+    internal partial class LegacyBottomBar : LLinPlugin, IFunctionBarProvider
     {
         protected override Drawable CreateContent() => new PlaceHolder();
 
@@ -28,7 +29,7 @@ namespace Mvis.Plugin.BottomBar
         private readonly SongProgressBar progressBar;
         private readonly Container contentContainer;
 
-        public override int Version => 9;
+        public override int Version => 10;
 
         public override TargetLayer Target => TargetLayer.FunctionBar;
 
@@ -108,15 +109,18 @@ namespace Mvis.Plugin.BottomBar
         [BackgroundDependencyLoader]
         private void load()
         {
-            LLin.OnIdle += Hide;
+            LLin!.OnIdle += Hide;
             LLin.OnActive += Show;
 
-            progressBar.OnSeek = LLin.SeekTo;
+            progressBar.OnSeek = target =>
+            {
+                if (!LLin.SeekTo(target)) progressBar.FlashColour(Color4.Red, 1000, Easing.OutQuint);
+            };
         }
 
         protected override void Update()
         {
-            progressBar.CurrentTime = LLin.CurrentTrack.CurrentTime;
+            progressBar.CurrentTime = LLin!.CurrentTrack.CurrentTime;
             progressBar.EndTime = LLin.CurrentTrack.Length;
             base.Update();
         }
@@ -178,6 +182,12 @@ namespace Mvis.Plugin.BottomBar
                     throw new InvalidOperationException("???");
             }
 
+            provider.OnActive = success =>
+            {
+                if (!success) button.FlashColour(Color4.Red, 1000, Easing.OutQuint);
+                else button.DoFlash();
+            };
+
             return true;
         }
 
@@ -205,7 +215,7 @@ namespace Mvis.Plugin.BottomBar
 
         public void Remove(IFunctionProvider provider)
         {
-            BottomBarButton target;
+            BottomBarButton? target;
 
             switch (provider.Type)
             {
@@ -244,7 +254,7 @@ namespace Mvis.Plugin.BottomBar
         public void ShowFunctionControlTemporary() => pluginEntriesFillFlow.FadeIn(500, Easing.OutQuint).Then().Delay(2000).FadeOut(500, Easing.OutQuint);
 
         public List<IPluginFunctionProvider> GetAllPluginFunctionButton() => pluginButtons;
-        public Action OnDisable { get; set; }
+        public Action? OnDisable { get; set; }
 
         public override bool Disable()
         {

@@ -1,10 +1,12 @@
 using System;
+using M.Resources.Localisation.LLin.Plugins;
 using Mvis.Plugin.CloudMusicSupport.Config;
+using Mvis.Plugin.CloudMusicSupport.Helper;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
+using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
@@ -15,9 +17,8 @@ using osuTK.Graphics;
 
 namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
 {
-    public class Toolbox : CompositeDrawable
+    public partial class Toolbox : CompositeDrawable
     {
-        private readonly Box bgBox;
         private readonly FillFlowContainer buttonFillFlow;
         private readonly OsuSpriteText idText;
 
@@ -30,11 +31,13 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
             Origin = Anchor.Centre
         };
 
-        private readonly FillFlowContainer contentFillFlow;
-        private OsuTextBox textBox;
+        private readonly FillFlowContainer contentFillFlow = null!;
+        private OsuTextBox textBox = null!;
 
         [Resolved]
-        private LyricPlugin plugin { get; set; }
+        private LyricPlugin plugin { get; set; } = null!;
+
+        private UserDefinitionHelper? udh;
 
         public Toolbox()
         {
@@ -49,10 +52,6 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
 
             InternalChildren = new Drawable[]
             {
-                bgBox = new Box
-                {
-                    RelativeSizeAxes = Axes.Both
-                },
                 contentFillFlow = new FillFlowContainer
                 {
                     AutoSizeAxes = Axes.Both,
@@ -64,8 +63,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                         idText = new OsuSpriteText
                         {
                             Margin = new MarginPadding { Horizontal = 15, Top = 15 },
-                            Font = OsuFont.GetFont(size: 20),
-                            Colour = Color4.Black
+                            Font = OsuFont.GetFont(size: 20)
                         },
                         new TrackTimeIndicator(),
                         buttonFillFlow = new FillFlowContainer
@@ -83,7 +81,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
             };
         }
 
-        public Action OnBackAction { get; set; }
+        public Action? OnBackAction { get; set; }
 
         public string IdText
         {
@@ -96,7 +94,6 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
 
             foreach (var btn in range)
             {
-                btn.IconColour = Color4.Black;
                 btn.Anchor = btn.Origin = Anchor.Centre;
 
                 buttonFillFlow.Add(btn);
@@ -109,16 +106,10 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
             }
         }
 
-        [Resolved]
-        private CustomColourProvider colourProvider { get; set; }
-
         [BackgroundDependencyLoader]
-        private void load(LyricConfigManager config)
+        private void load(LyricConfigManager lcm, IImplementLLin llin)
         {
-            colourProvider.HueColour.BindValueChanged(_ =>
-            {
-                bgBox.Colour = colourProvider.ActiveColor;
-            }, true);
+            udh ??= plugin.UserDefinitionHelper;
 
             contentFillFlow.AddRange(new Drawable[]
             {
@@ -127,29 +118,74 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight,
                     Current = plugin.Offset,
-                    LabelText = "Local offset",
+                    LabelText = CloudMusicStrings.LocalOffset,
                     RelativeSizeAxes = Axes.X,
-                    Padding = new MarginPadding { Right = 10 },
-                    Colour = Color4.Black
+                    Padding = new MarginPadding { Right = 10 }
                 },
                 textBox = new OsuTextBox
                 {
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight,
-                    Width = 225,
-                    PlaceholderText = "Search by song ID"
+                    PlaceholderText = "Search by song ID",
+                    RelativeSizeAxes = Axes.X,
+                },
+                new FillFlowContainer
+                {
+                    RelativeSizeAxes = Axes.X,
+                    AutoSizeAxes = Axes.Y,
+                    Children = new Drawable[]
+                    {
+                        new IconButton
+                        {
+                            Height = 30,
+                            Width = 1,
+                            RelativeSizeAxes = Axes.X,
+                            TooltipText = "Update definition",
+                            Action = () =>
+                            {
+                                udh.UpdateDefinition();
+
+                                if (lcm.Get<bool>(LyricSettings.OutputDefinitionInLogs))
+                                    udh.Debug();
+                            },
+                            Icon = FontAwesome.Solid.Cloud
+                        },
+                        new IconButton
+                        {
+                            Height = 30,
+                            Width = 1,
+                            RelativeSizeAxes = Axes.X,
+                            TooltipText = "复制谱面参考信息",
+                            Action = () =>
+                            {
+                                SDL2.SDL.SDL_SetClipboardText(resolveBeatmapVerboseString(plugin.CurrentWorkingBeatmap));
+                                llin.PostNotification(plugin, FontAwesome.Regular.CheckCircle, "复制成功！");
+                            },
+                            Icon = FontAwesome.Solid.Clipboard
+                        }
+                    }
                 }
             });
 
             textBox.OnCommit += (sender, isNewText) =>
             {
-                if (int.TryParse(sender.Text, out int id))
+                if (int.TryParse(sender.Text, out var id))
                     plugin.GetLyricFor(id);
                 else
                 {
                     textBox.Text = "";
                 }
             };
+        }
+
+        private string resolveBeatmapVerboseString(WorkingBeatmap working)
+        {
+            return $"{working.BeatmapSetInfo.OnlineID},"
+                   + $" // Title: {working.Metadata.TitleUnicode}"
+                   + $"({working.Metadata.Title})"
+                   + $" Artist: {working.Metadata.ArtistUnicode}"
+                   + $"({working.Metadata.Artist})"
+                   + $" Source: {working.Metadata.Source}";
         }
     }
 }

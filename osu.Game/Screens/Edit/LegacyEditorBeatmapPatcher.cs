@@ -24,7 +24,7 @@ namespace osu.Game.Screens.Edit
     /// <summary>
     /// Patches an <see cref="EditorBeatmap"/> based on the difference between two legacy (.osu) states.
     /// </summary>
-    public class LegacyEditorBeatmapPatcher
+    public partial class LegacyEditorBeatmapPatcher
     {
         private readonly EditorBeatmap editorBeatmap;
 

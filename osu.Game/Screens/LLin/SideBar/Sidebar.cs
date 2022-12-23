@@ -1,11 +1,5 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
@@ -19,31 +13,29 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.LLin.SideBar
 {
-    internal class Sidebar : VisibilityContainer
+    internal partial class Sidebar : VisibilityContainer
     {
         [Resolved]
-        private CustomColourProvider colourProvider { get; set; }
+        private CustomColourProvider colourProvider { get; set; } = null!;
 
-        [CanBeNull]
         [Resolved(CanBeNull = true)]
-        private IImplementLLin mvisScreen { get; set; }
+        private IImplementLLin? mvisScreen { get; set; }
 
         public readonly List<ISidebarContent> Components = new List<ISidebarContent>();
 
-        [CanBeNull]
-        public TabControl Header;
+        public TabControl Header = null!;
 
         private const float duration = 400;
-        private TabControlItem prevTab;
+        private TabControlItem? prevTab;
 
         public Bindable<Drawable> CurrentDisplay = new Bindable<Drawable>();
 
         private readonly Container<Drawable> contentContainer;
         protected override Container<Drawable> Content => contentContainer;
 
-        private Sample sampleToggle;
-        private Sample samplePopIn;
-        private Sample samplePopOut;
+        private Sample? sampleToggle;
+        private Sample? samplePopIn;
+        private Sample? samplePopOut;
 
         private bool startFromHiddenState;
         private bool isFirstHide = true;
@@ -117,7 +109,7 @@ namespace osu.Game.Screens.LLin.SideBar
             base.UpdateAfterChildren();
         }
 
-        public void ShowComponent(Drawable d, bool allowHide = false)
+        public void ShowComponent(Drawable? d, bool allowHide = false)
         {
             if (d == null)
             {
@@ -193,7 +185,7 @@ namespace osu.Game.Screens.LLin.SideBar
                 {
                     if (t.Value == sc)
                     {
-                        Header.Tabs.Remove(t, disposeImmediately);
+                        Header.Tabs.Remove(t, true);
                         drawable.Expire();
                         return true;
                     }

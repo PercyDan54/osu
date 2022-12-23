@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using osu.Framework.Audio.Track;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
@@ -12,7 +7,7 @@ using osu.Game.Graphics.Containers;
 
 namespace osu.Game.Screens.LLin.Misc
 {
-    public class Flash : BeatSyncedContainer
+    public partial class Flash : BeatSyncedContainer
     {
         private readonly Box flashBox = new Box
         {

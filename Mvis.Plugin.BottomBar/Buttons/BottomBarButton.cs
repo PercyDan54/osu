@@ -10,6 +10,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
+using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Screens.LLin;
@@ -17,9 +18,11 @@ using osu.Game.Screens.LLin.Plugins.Types;
 using osuTK;
 using osuTK.Graphics;
 
+#nullable disable
+
 namespace Mvis.Plugin.BottomBar.Buttons
 {
-    public class BottomBarButton : CompositeDrawable, IHasTooltip
+    public partial class BottomBarButton : CompositeDrawable, IHasTooltip
     {
         [Resolved]
         private CustomColourProvider colourProvider { get; set; }
@@ -50,6 +53,7 @@ namespace Mvis.Plugin.BottomBar.Buttons
         {
             Anchor = Anchor.Centre,
             Origin = Anchor.Centre,
+            Font = OsuFont.GetFont()
         };
 
         protected SpriteIcon SpriteIcon = new SpriteIcon
@@ -216,10 +220,12 @@ namespace Mvis.Plugin.BottomBar.Buttons
 
         protected virtual void OnClickAnimation()
         {
-            flashBox.FadeTo(0.2f).Then().FadeTo(IsHovered ? 0.1f : 0f, 300);
+            flashBox?.FadeTo(0.2f).Then().FadeTo(IsHovered ? 0.1f : 0f, 300);
         }
 
-        private class RippleSprite : Sprite
+        public void DoFlash() => OnClickAnimation();
+
+        private partial class RippleSprite : Sprite
         {
             [BackgroundDependencyLoader]
             private void load(LargeTextureStore textureStore)

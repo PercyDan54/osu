@@ -12,7 +12,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.Edit
 {
-    public class BindableBeatDivisor : BindableInt
+    public partial class BindableBeatDivisor : BindableInt
     {
         public static readonly int[] PREDEFINED_DIVISORS = { 1, 2, 3, 4, 6, 8, 12, 16 };
 

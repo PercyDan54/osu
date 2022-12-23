@@ -23,12 +23,12 @@ using osuTK;
 
 namespace Mvis.Plugin.CollectionSupport.Sidebar
 {
-    public class CollectionPanel : CompositeDrawable
+    public partial class CollectionPanel : CompositeDrawable
     {
         ///<summary>
         ///判断该panel所显示的BeatmapCollection
         ///</summary>
-        public readonly BeatmapCollection Collection;
+        public readonly BeatmapCollection Collection = null!;
 
         ///<summary>
         ///用于触发<see cref="CollectionPluginPage"/>的SelectedCollection变更
@@ -40,18 +40,18 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
         private readonly List<IBeatmapSetInfo> beatmapSets = new List<IBeatmapSetInfo>();
 
         [Resolved]
-        private BeatmapManager beatmaps { get; set; }
+        private BeatmapManager beatmaps { get; set; } = null!;
 
         [Resolved]
-        private CustomColourProvider colourProvider { get; set; }
+        private CustomColourProvider colourProvider { get; set; } = null!;
 
-        private OsuSpriteText collectionName;
-        private OsuSpriteText collectionBeatmapCount;
-        private OsuScrollContainer thumbnailScroll;
-        private readonly Action doubleClick;
+        private OsuSpriteText collectionName = null!;
+        private OsuSpriteText collectionBeatmapCount = null!;
+        private OsuScrollContainer thumbnailScroll = null!;
+        private readonly Action? doubleClick;
 
         public Bindable<ActiveState> State = new Bindable<ActiveState>();
-        private Box stateBox;
+        private Box stateBox = null!;
 
         /// <summary>
         /// ...
@@ -165,7 +165,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                 ? ActiveState.Idle
                 : ActiveState.Disabled;
 
-            collectionName.Text = Collection.Name.Value;
+            collectionName.Text = Collection.Name;
             collectionBeatmapCount.Text = CollectionStrings.SongCount(beatmapSets.Count);
 
             State.BindValueChanged(onStateChanged, true);
@@ -222,13 +222,20 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             }
         }
 
+        [Resolved]
+        private BeatmapHashResolver hashResolver { get; set; } = null!;
+
         private void sortBeatmapCollection()
         {
             //From CollectionHelper.cs
-            foreach (var item in Collection.Beatmaps)
+            foreach (string hash in Collection.BeatmapMD5Hashes)
             {
+                var item = hashResolver.ResolveHash(hash);
+
                 //获取当前BeatmapSet
-                var currentSet = item.BeatmapSet;
+                var currentSet = item?.BeatmapSet;
+
+                if (currentSet == null) continue;
 
                 //进行比对，如果beatmapList中不存在，则添加。
                 if (!beatmapSets.Contains(currentSet))
@@ -288,10 +295,10 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             }
         }
 
-        private class BeatmapThumbnailFlow : FillFlowContainer
+        private partial class BeatmapThumbnailFlow : FillFlowContainer<TooltipContainer>
         {
             [Resolved]
-            private BeatmapManager beatmaps { get; set; }
+            private BeatmapManager beatmaps { get; set; } = null!;
 
             private readonly List<IBeatmapSetInfo> beatmapSetList;
 
@@ -358,7 +365,7 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
             }
         }
 
-        private class ThumbnailScrollContainer : OsuScrollContainer
+        private partial class ThumbnailScrollContainer : OsuScrollContainer
         {
             protected override bool OnMouseDown(MouseDownEvent e)
             {

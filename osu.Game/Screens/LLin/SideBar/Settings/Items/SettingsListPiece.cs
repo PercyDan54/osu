@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -12,9 +7,11 @@ using osu.Framework.Localisation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 
+#nullable disable
+
 namespace osu.Game.Screens.LLin.SideBar.Settings.Items
 {
-    public class SettingsListPiece<T> : SettingsPieceBasePanel, ISettingsItem<T>
+    public partial class SettingsListPiece<T> : SettingsPieceBasePanel, ISettingsItem<T>
     {
         public Bindable<T> Bindable { get; set; }
 
@@ -29,7 +26,7 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Items
 
         protected override Drawable CreateSideDrawable() => valueText;
 
-        protected virtual string GetValueText(T newValue) => newValue.ToString();
+        protected virtual string GetValueText(T newValue) => newValue?.ToString() ?? "无值";
 
         [BackgroundDependencyLoader]
         private void load()
@@ -70,7 +67,7 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Items
             base.OnMiddleClick();
         }
 
-        private class CurrentValueText : CompositeDrawable
+        private partial class CurrentValueText : CompositeDrawable
         {
             public LocalisableString Text
             {

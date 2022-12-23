@@ -11,7 +11,7 @@ using osu.Game.Graphics.UserInterface;
 
 namespace osu.Game.Overlays.Settings.Sections.Mf
 {
-    public class DanceSettings : SettingsSubsection
+    public partial class DanceSettings : SettingsSubsection
     {
         protected override LocalisableString Header => "osu! cursor dance settings";
 
@@ -217,17 +217,17 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
             };
         }
 
-        public class MultiplierSlider : OsuSliderBar<float>
+        public partial class MultiplierSlider : OsuSliderBar<float>
         {
             public override LocalisableString TooltipText => Current.Value.ToString("g2") + "x";
         }
 
-        private class AngleSlider : OsuSliderBar<float>
+        private partial class AngleSlider : OsuSliderBar<float>
         {
             public override LocalisableString TooltipText => (Current.Value * 180).ToString("g2") + "deg";
         }
 
-        private class FramerateSlider : OsuSliderBar<float>
+        private partial class FramerateSlider : OsuSliderBar<float>
         {
             public override LocalisableString TooltipText => Current.Value.ToString("g0") + "fps";
         }

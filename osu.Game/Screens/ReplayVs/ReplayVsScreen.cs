@@ -18,7 +18,7 @@ using osu.Game.Screens.Play.HUD;
 
 namespace osu.Game.Screens.ReplayVs
 {
-    public class ReplayVsScreen : OsuScreen
+    public partial class ReplayVsScreen : OsuScreen
     {
         // Isolates beatmap/ruleset to this screen.
         public override bool DisallowExternalBeatmapRulesetChanges => true;
@@ -141,7 +141,7 @@ namespace osu.Game.Screens.ReplayVs
             {
                 currentAudioSource = instances.Where(i => isCandidateAudioSource(i.SpectatorPlayerClock))
                                               .OrderBy(i => Math.Abs(i.SpectatorPlayerClock.CurrentTime - syncManager.CurrentMasterTime))
-                                              .FirstOrDefault();
+                                              .FirstOrDefault() ?? throw new InvalidOperationException();
 
                 foreach (var instance in instances)
                     instance.Mute = instance != currentAudioSource;

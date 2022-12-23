@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +13,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
 {
-    public class FunctionBar : LLinPlugin, IFunctionBarProvider
+    public partial class FunctionBar : LLinPlugin, IFunctionBarProvider
     {
         public float GetSafeAreaPadding() => Height;
 
@@ -89,8 +84,11 @@ namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
         [BackgroundDependencyLoader]
         private void load()
         {
-            LLin.OnIdle += onIdle;
-            LLin.OnActive += resumeFromIdle;
+            if (LLin != null)
+            {
+                LLin.OnIdle += onIdle;
+                LLin.OnActive += resumeFromIdle;
+            }
         }
 
         private void resumeFromIdle()
@@ -135,6 +133,12 @@ namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
                     break;
             }
 
+            provider.OnActive = b =>
+            {
+                if (!b) button.FlashColour(Color4.Red, 1000, Easing.OutQuint);
+                else button.DoFlash();
+            };
+
             return true;
         }
 
@@ -177,7 +181,7 @@ namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
 
         public List<IPluginFunctionProvider> GetAllPluginFunctionButton() => pluginButtons;
 
-        public Action OnDisable { get; set; }
+        public Action? OnDisable { get; set; }
 
         public override bool Disable()
         {

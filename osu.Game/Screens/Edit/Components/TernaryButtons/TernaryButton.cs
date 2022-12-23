@@ -10,7 +10,7 @@ using osu.Game.Graphics.UserInterface;
 
 namespace osu.Game.Screens.Edit.Components.TernaryButtons
 {
-    public class TernaryButton
+    public partial class TernaryButton
     {
         public readonly Bindable<TernaryState> Bindable;
 

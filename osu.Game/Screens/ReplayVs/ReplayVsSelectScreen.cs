@@ -17,7 +17,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
-using osu.Game.Graphics.UserInterface;
+using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Rulesets;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
@@ -26,7 +26,7 @@ using osuTK;
 
 namespace osu.Game.Screens.ReplayVs
 {
-    public class ReplayVsSelectScreen : OsuScreen
+    public partial class ReplayVsSelectScreen : OsuScreen
     {
         private TeamContainer teamRedContainer;
         private TeamContainer teamBlueContainer;
@@ -70,7 +70,7 @@ namespace osu.Game.Screens.ReplayVs
                             },
                         }
                     },
-                    new TriangleButton
+                    new RoundedButton
                     {
                         Text = "Start",
                         Action = validateReplays,
@@ -93,7 +93,7 @@ namespace osu.Game.Screens.ReplayVs
             };
         }
 
-        private class TeamContainer : Container
+        private partial class TeamContainer : Container
         {
             private readonly string name;
             private readonly ColourInfo colour;
@@ -152,7 +152,7 @@ namespace osu.Game.Screens.ReplayVs
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre
                     },
-                    new OsuButton
+                    new RoundedButton
                     {
                         Text = "+",
                         Size = new Vector2(30, 30),

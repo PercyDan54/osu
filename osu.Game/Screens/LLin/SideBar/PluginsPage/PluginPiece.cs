@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using M.Resources.Localisation.LLin;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
@@ -24,6 +19,8 @@ using osu.Game.Overlays;
 using osu.Game.Screens.LLin.Plugins;
 using osuTK;
 using osuTK.Graphics;
+
+#nullable disable
 
 namespace osu.Game.Screens.LLin.SideBar.PluginsPage
 {

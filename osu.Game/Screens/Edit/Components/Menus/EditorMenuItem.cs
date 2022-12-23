@@ -6,7 +6,7 @@ using osu.Game.Graphics.UserInterface;
 
 namespace osu.Game.Screens.Edit.Components.Menus
 {
-    public class EditorMenuItem : OsuMenuItem
+    public partial class EditorMenuItem : OsuMenuItem
     {
         private const int min_text_length = 40;
 

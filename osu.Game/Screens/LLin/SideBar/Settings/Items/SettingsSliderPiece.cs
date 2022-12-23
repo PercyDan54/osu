@@ -1,17 +1,14 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 
+#nullable disable
+
 namespace osu.Game.Screens.LLin.SideBar.Settings.Items
 {
-    public class SettingsSliderPiece<T> : SettingsPieceBasePanel, ISettingsItem<T>
+    public partial class SettingsSliderPiece<T> : SettingsPieceBasePanel, ISettingsItem<T>
         where T : struct, IEquatable<T>, IComparable<T>, IConvertible
     {
         public Bindable<T> Bindable { get; set; }
@@ -19,10 +16,10 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Items
         public LocalisableString TooltipText
         {
             get => tooltip;
-            set => tooltip = value + " (点击重置)";
+            set => tooltip = value + " (点按中键重置)";
         }
 
-        private string tooltip = "点击重置";
+        private string tooltip = "点按中键重置";
 
         public bool DisplayAsPercentage;
         public bool TransferValueOnCommit;
@@ -37,11 +34,9 @@ namespace osu.Game.Screens.LLin.SideBar.Settings.Items
             TransferValueOnCommit = TransferValueOnCommit,
         };
 
-        protected override void OnLeftClick()
+        protected override void OnMiddleClick()
         {
             Bindable.Value = Bindable.Default;
         }
-
-        protected override void OnMiddleClick() => OnLeftClick();
     }
 }

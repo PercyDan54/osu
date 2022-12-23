@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Linq;
 using M.DBus.Tray;
 using M.DBus.Utils.Canonical.DBusMenuFlags;
@@ -12,31 +12,36 @@ using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Audio;
+using osu.Framework.Logging;
 using osu.Framework.Platform;
-using osu.Game;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
+using osu.Game.Database;
 using osu.Game.Overlays;
+using osu.Game.Screens.LLin.Misc;
 using osu.Game.Screens.LLin.Plugins;
 using osu.Game.Screens.LLin.Plugins.Config;
 using osu.Game.Screens.LLin.Plugins.Types;
 using osu.Game.Screens.LLin.SideBar.Settings.Items;
+using Realms;
 
 namespace Mvis.Plugin.CollectionSupport
 {
-    public class CollectionHelper : BindableControlledPlugin, IProvideAudioControlPlugin
+    public partial class CollectionHelper : BindableControlledPlugin, IProvideAudioControlPlugin
     {
         [Resolved]
-        private CollectionManager collectionManager { get; set; }
+        private RealmAccess realm { get; set; } = null!;
+
+        private IDisposable? realmSubscription;
 
         [Resolved]
-        private BeatmapManager beatmaps { get; set; }
+        private BeatmapManager beatmaps { get; set; } = null!;
 
         [Resolved]
-        private Bindable<WorkingBeatmap> b { get; set; }
+        private Bindable<WorkingBeatmap> b { get; set; } = null!;
 
         [Resolved]
-        private MusicController controller { get; set; }
+        private MusicController controller { get; set; } = null!;
 
         private readonly List<IBeatmapSetInfo> beatmapList = new List<IBeatmapSetInfo>();
 
@@ -64,7 +69,7 @@ namespace Mvis.Plugin.CollectionSupport
 
         protected override bool PostInit() => true;
 
-        public override int Version => 9;
+        public override int Version => 10;
 
         public override PluginSidebarPage CreateSidebarPage()
             => new CollectionPluginPage(this);
@@ -87,10 +92,7 @@ namespace Mvis.Plugin.CollectionSupport
 
         private bool trackChangedAfterDisable = true;
 
-        [Resolved]
-        private OsuGame game { get; set; }
-
-        private CollectionDBusObject dBusObject;
+        private readonly CollectionDBusObject dBusObject = new CollectionDBusObject();
 
         private readonly SimpleEntry trayEntry = new SimpleEntry
         {
@@ -109,26 +111,26 @@ namespace Mvis.Plugin.CollectionSupport
                 if (!IsCurrent) trackChangedAfterDisable = true;
             });
 
-            PluginManager.RegisterDBusObject(dBusObject = new CollectionDBusObject());
+            PluginManager!.RegisterDBusObject(dBusObject);
 
             if (LLin != null)
             {
                 LLin.Resuming += UpdateBeatmaps;
                 LLin.Exiting += onMvisExiting;
             }
+
+            realmSubscription = realm.RegisterForNotifications(r => r.All<BeatmapCollection>().OrderBy(c => c.Name), onCollectionChange);
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            CurrentCollection.BindValueChanged(onCollectionChanged);
-
-            collectionManager.Collections.CollectionChanged += triggerRefresh;
+            CurrentCollection.BindValueChanged(OnCollectionChanged);
         }
 
         private void onMvisExiting()
         {
-            PluginManager.UnRegisterDBusObject(new CollectionDBusObject());
+            PluginManager!.UnRegisterDBusObject(new CollectionDBusObject());
 
             if (!Disabled.Value)
                 PluginManager.RemoveDBusMenuEntry(trayEntry);
@@ -138,17 +140,28 @@ namespace Mvis.Plugin.CollectionSupport
 
         public void Play(WorkingBeatmap b) => changeBeatmap(b);
 
-        public void NextTrack() => changeBeatmap(getBeatmap(beatmapList, b.Value, true));
+        public bool NextTrack()
+        {
+            changeBeatmap(getBeatmap(beatmapList, b.Value, true));
 
-        public void PrevTrack() =>
+            return beatmapList.Count != 0;
+        }
+
+        public bool PrevTrack()
+        {
             changeBeatmap(getBeatmap(beatmapList, b.Value, true, -1));
 
-        public void TogglePause()
+            return beatmapList.Count != 0;
+        }
+
+        public bool TogglePause()
         {
             if (drawableTrack.IsRunning)
                 drawableTrack.Stop();
             else
                 drawableTrack.Start();
+
+            return true;
         }
 
         public override bool Disable()
@@ -156,7 +169,7 @@ namespace Mvis.Plugin.CollectionSupport
             this.MoveToX(-10, 300, Easing.OutQuint).FadeOut(300, Easing.OutQuint);
 
             resetDBusMessage();
-            PluginManager.RemoveDBusMenuEntry(trayEntry);
+            PluginManager!.RemoveDBusMenuEntry(trayEntry);
 
             return base.Disable();
         }
@@ -165,9 +178,9 @@ namespace Mvis.Plugin.CollectionSupport
         {
             if (RuntimeInfo.OS == RuntimeInfo.Platform.Linux)
             {
-                dBusObject.Position = currentPosition;
-                dBusObject.CollectionName = CurrentCollection.Value?.Name.Value ?? "-";
-                PluginManager.AddDBusMenuEntry(trayEntry);
+                dBusObject!.Position = currentPosition;
+                dBusObject.CollectionName = CurrentCollection.Value?.Name ?? "-";
+                PluginManager!.AddDBusMenuEntry(trayEntry);
             }
 
             return base.Enable();
@@ -177,16 +190,21 @@ namespace Mvis.Plugin.CollectionSupport
         {
             if (RuntimeInfo.OS == RuntimeInfo.Platform.Linux)
             {
-                dBusObject.Position = -1;
+                dBusObject!.Position = -1;
                 dBusObject.CollectionName = string.Empty;
             }
         }
 
-        public void Seek(double position) => b.Value.Track.Seek(position);
+        public bool Seek(double position)
+        {
+            b.Value.Track.Seek(position);
 
-        private DrawableTrack drawableTrack;
+            return true;
+        }
 
-        public DrawableTrack GetCurrentTrack() => drawableTrack ??= new DrawableTrack(b.Value.Track);
+        private DrawableTrack drawableTrack = null!;
+
+        public DrawableTrack GetCurrentTrack() => drawableTrack;
 
         private bool isCurrent;
 
@@ -200,7 +218,7 @@ namespace Mvis.Plugin.CollectionSupport
                     drawableTrack = new DrawableTrack(b.Value.Track);
                     drawableTrack.Completed += () =>
                     {
-                        if (IsCurrent) Schedule(NextTrack);
+                        if (IsCurrent) Schedule(() => NextTrack());
                     };
                     trackChangedAfterDisable = false;
                 }
@@ -219,7 +237,7 @@ namespace Mvis.Plugin.CollectionSupport
             drawableTrack = new DrawableTrack(b.Value.Track);
             drawableTrack.Completed += () =>
             {
-                if (IsCurrent) Schedule(NextTrack);
+                if (IsCurrent) Schedule(() => NextTrack());
             };
             controller.Play();
         }
@@ -260,6 +278,9 @@ namespace Mvis.Plugin.CollectionSupport
             return newBeatmap;
         }
 
+        [Resolved]
+        private BeatmapHashResolver hashResolver { get; set; } = null!;
+
         ///<summary>
         ///用来更新<see cref="beatmapList"/>
         ///</summary>
@@ -269,12 +290,21 @@ namespace Mvis.Plugin.CollectionSupport
             beatmapList.Clear();
             trayEntry.Children.Clear();
 
-            if (collection == null) return;
+            if (collection?.BeatmapMD5Hashes == null) return;
 
-            foreach (var item in collection.Beatmaps)
+            foreach (string hash in collection.BeatmapMD5Hashes)
             {
+                var item = hashResolver.ResolveHash(hash);
+
                 //获取当前BeatmapSet
-                var currentSet = item.BeatmapSet;
+                var currentSet = item?.BeatmapSet;
+
+                if (currentSet == null)
+                {
+                    Logger.Log($"{hash}解析到的谱面是null，将不会继续处理此Hash");
+                    continue;
+                }
+
                 //进行比对，如果beatmapList中不存在，则添加。
                 if (!beatmapList.Contains(currentSet))
                     beatmapList.Add(currentSet);
@@ -283,7 +313,7 @@ namespace Mvis.Plugin.CollectionSupport
                 {
                     var subEntry = new SimpleEntry
                     {
-                        Label = item.BeatmapSet?.Metadata.GetDisplayTitleRomanisable().GetPreferred(true) ?? item.ToString(),
+                        Label = item!.BeatmapSet?.Metadata.GetDisplayTitleRomanisable().GetPreferred(true) ?? item.ToString(),
                         OnActive = () =>
                         {
                             Schedule(() => Play(beatmaps.GetWorkingBeatmap(item.AsBeatmapInfo())));
@@ -296,13 +326,13 @@ namespace Mvis.Plugin.CollectionSupport
             }
 
             if (RuntimeInfo.OS == RuntimeInfo.Platform.Linux)
-                dBusObject.CollectionName = collection.Name.Value;
+                dBusObject.CollectionName = collection.Name;
 
             updateCurrentPosition(true);
             trayEntry.Label = $"Collection({collection.Name})";
         }
 
-        private SimpleEntry currentSubEntry;
+        private SimpleEntry? currentSubEntry;
 
         private void updateCurrentPosition(bool triggerDBusSubmenu = false)
         {
@@ -328,22 +358,37 @@ namespace Mvis.Plugin.CollectionSupport
 
         public void UpdateBeatmaps() => updateBeatmaps(CurrentCollection.Value);
 
-        private void triggerRefresh(object sender, NotifyCollectionChangedEventArgs e)
-            => updateBeatmaps(CurrentCollection.Value);
+        public List<BeatmapCollection> AvaliableCollections { get; private set; } = new List<BeatmapCollection>();
 
-        private void onCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
+        public static readonly BeatmapCollection DEFAULT_COLLECTION = new BeatmapCollection("未选择任何收藏夹");
+
+        private void onCollectionChange(IRealmCollection<BeatmapCollection> collections, ChangeSet? changes, Exception error)
+        {
+            AvaliableCollections = collections.AsEnumerable().Select(c => c).ToList();
+
+            if (CurrentCollection.Value != null)
+            {
+                var collectionMatch = AvaliableCollections.Find(c => c.ID == CurrentCollection.Value.ID);
+
+                CurrentCollection.Value = collectionMatch ?? DEFAULT_COLLECTION;
+            }
+        }
+
+        private void OnCollectionChanged(ValueChangedEvent<BeatmapCollection> v)
         {
             updateBeatmaps(CurrentCollection.Value);
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            if (collectionManager != null)
-                collectionManager.Collections.CollectionChanged -= triggerRefresh;
+            //collectionManager.Collections.CollectionChanged -= triggerRefresh;
 
-            if (LLin != null) LLin.Resuming -= UpdateBeatmaps;
+            if (LLin != null)
+                LLin.Resuming -= UpdateBeatmaps;
 
             base.Dispose(isDisposing);
+
+            realmSubscription?.Dispose();
         }
     }
 }

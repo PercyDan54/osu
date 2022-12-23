@@ -1,16 +1,13 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics.Audio;
 using osu.Game.Screens.LLin.Plugins.Types;
 
+#nullable disable
+
 namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
 {
-    public class SongProgressButton : ToggleableBarButton
+    public partial class SongProgressButton : ToggleableBarButton
     {
         public SongProgressButton(IToggleableFunctionProvider provider)
             : base(provider)

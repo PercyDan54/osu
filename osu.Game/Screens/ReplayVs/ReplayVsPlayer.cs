@@ -17,7 +17,7 @@ using osu.Game.Screens.Play;
 
 namespace osu.Game.Screens.ReplayVs
 {
-    public class ReplayVsPlayer : Player
+    public partial class ReplayVsPlayer : Player
     {
         private readonly SpectatorPlayerClock spectatorPlayerClock;
         private readonly Score score;

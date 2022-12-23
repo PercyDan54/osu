@@ -8,7 +8,7 @@ using osu.Game.Overlays.Settings.Sections.Mf;
 
 namespace osu.Game.Overlays
 {
-    public class MfSettingsPanel : SettingsSubPanel
+    public partial class MfSettingsPanel : SettingsSubPanel
     {
         protected override Drawable CreateHeader() => new SettingsHeader("Custom osu! settings", "some extra cusom settings");
 

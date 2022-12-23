@@ -18,7 +18,7 @@ namespace osu.Game.Screens.Edit
     /// <summary>
     /// A beatmap skin which is being edited.
     /// </summary>
-    public class EditorBeatmapSkin : ISkin
+    public partial class EditorBeatmapSkin : ISkin
     {
         public event Action BeatmapSkinChanged;
 

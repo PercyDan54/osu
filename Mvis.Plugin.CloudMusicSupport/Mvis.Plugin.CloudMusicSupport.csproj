@@ -15,16 +15,12 @@
     <ProjectReference Include="..\osu.Game\osu.Game.csproj" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <Nullable>disable</Nullable>
-  </PropertyGroup>
-
   <ItemGroup>
     <EmbeddedResource Include="Textures\**\*" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
   </ItemGroup>
 </Project>

@@ -1,12 +1,9 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Localisation;
 using osu.Game.Rulesets.Mods;
+
+#nullable disable
 
 namespace osu.Game.Screens.LLin.Misc
 {
@@ -14,8 +11,9 @@ namespace osu.Game.Screens.LLin.Misc
     {
         public override string Name => ToString();
         public override string Acronym => "RA";
-        public override LocalisableString Description => "missingno";
+        public override LocalisableString Description => "no";
         public override double ScoreMultiplier => 0;
+        public override bool UserPlayable => false;
 
         public override BindableNumber<double> SpeedChange { get; } = new BindableDouble
         {

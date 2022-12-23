@@ -9,9 +9,11 @@ using osu.Framework.Graphics.Pooling;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Cursor;
 
+#nullable disable
+
 namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
 {
-    public abstract class LyricScreen<T> : SidebarScreen
+    public abstract partial class LyricScreen<T> : SidebarScreen
         where T : DrawableLyric, new()
     {
         protected abstract T CreatePiece(Lyric lyric);
@@ -41,7 +43,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
                     Child = LyricScroll = new OsuScrollContainer<T>
                     {
                         RelativeSizeAxes = Axes.Both,
-                        ScrollContent = { AutoSizeAxes = Axes.None },
+                        ScrollContent = { AutoSizeAxes = Axes.None, Padding = new MarginPadding { Right = 20 } },
                         Padding = new MarginPadding(5)
                     }
                 }
@@ -119,7 +121,8 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
                 foreach (var p in LyricScroll.Children)
                 {
                     //如果已经在显示了，则从toDisplay里去掉
-                    if (toDisplay.Remove(toDisplay.Find(d => d.Value.Equals(p.Value)))) continue;
+                    var toRemove = toDisplay.Find(d => d.Value.Equals(p.Value));
+                    if (toRemove != null && toDisplay.Remove(toRemove)) continue;
 
                     //如果面板不在显示区，则直接Expire
                     if (p.Y + p.DrawHeight < visibleTop - distanceLoadUnload
@@ -170,8 +173,9 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Screens
 
         protected virtual void RefreshLrcInfo(List<Lyric> lyrics)
         {
-            LyricScroll.Clear();
+            LyricScroll.Clear(false);
             AvaliablePieces.Clear();
+            //lyricPool.Clear();
 
             LyricScroll.ScrollToStart();
 

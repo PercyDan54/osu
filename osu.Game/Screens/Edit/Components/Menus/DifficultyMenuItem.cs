@@ -8,7 +8,7 @@ using osu.Game.Graphics.UserInterface;
 
 namespace osu.Game.Screens.Edit.Components.Menus
 {
-    public class DifficultyMenuItem : StatefulMenuItem<bool>
+    public partial class DifficultyMenuItem : StatefulMenuItem<bool>
     {
         public BeatmapInfo BeatmapInfo { get; }
 

@@ -6,9 +6,9 @@ using osu.Framework.Graphics;
 using osu.Framework.Localisation;
 using osu.Game.Configuration;
 
-namespace osu.Game.Overlays.Settings.Sections.General
+namespace osu.Game.Overlays.Settings.Sections.Mf
 {
-    public class MvisStoryBoardSettings : SettingsSubsection
+    public partial class MvisStoryBoardSettings : SettingsSubsection
     {
         protected override LocalisableString Header => "Storyboard";
 

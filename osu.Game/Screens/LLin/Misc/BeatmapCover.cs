@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System.Threading;
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
@@ -16,13 +11,13 @@ using osu.Game.Beatmaps;
 
 namespace osu.Game.Screens.LLin.Misc
 {
-    public class BeatmapCover : CompositeDrawable
+    public partial class BeatmapCover : CompositeDrawable
     {
         private readonly WorkingBeatmap b;
 
-        private Drawable cover;
+        private Drawable? cover;
 
-        private CancellationTokenSource changeCoverTask;
+        private CancellationTokenSource? changeCoverTask;
 
         public bool BackgroundBox = true;
 
@@ -118,11 +113,11 @@ namespace osu.Game.Screens.LLin.Misc
             }
         }
 
-        public class Cover : Sprite
+        public partial class Cover : Sprite
         {
-            private readonly WorkingBeatmap b;
+            private readonly WorkingBeatmap? b;
 
-            public Cover(WorkingBeatmap beatmap = null)
+            public Cover(WorkingBeatmap? beatmap = null)
             {
                 RelativeSizeAxes = Axes.Both;
                 FillMode = FillMode.Fill;

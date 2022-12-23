@@ -11,9 +11,11 @@ using osu.Game.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
 
+#nullable disable
+
 namespace Mvis.Plugin.CloudMusicSupport.UI
 {
-    public class LyricLineHandler : CompositeDrawable
+    public partial class LyricLineHandler : CompositeDrawable
     {
         private OsuSpriteText currentLine;
         private OsuSpriteText currentLineTranslated;
@@ -151,7 +153,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 if (v.NewValue)
                 {
                     if (outlineEffectContainer.Contains(lyricContainer))
-                        outlineEffectContainer.Remove(lyricContainer, true);
+                        outlineEffectContainer.Remove(lyricContainer, false);
 
                     AddInternal(lyricContainer);
                     outlineEffectContainer.Hide();
@@ -159,7 +161,7 @@ namespace Mvis.Plugin.CloudMusicSupport.UI
                 else
                 {
                     if (InternalChildren.Contains(lyricContainer))
-                        RemoveInternal(lyricContainer, true);
+                        RemoveInternal(lyricContainer, false);
 
                     outlineEffectContainer.Add(lyricContainer);
                     outlineEffectContainer.Show();

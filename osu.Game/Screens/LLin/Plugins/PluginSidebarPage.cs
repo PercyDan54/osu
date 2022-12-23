@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -15,9 +10,11 @@ using osu.Game.Screens.LLin.SideBar;
 using osuTK;
 using osuTK.Input;
 
+#nullable disable
+
 namespace osu.Game.Screens.LLin.Plugins
 {
-    public abstract class PluginSidebarPage : Container, ISidebarContent
+    public abstract partial class PluginSidebarPage : Container, ISidebarContent
     {
         private readonly ClickablePlaceholder placeholder;
         private readonly Container content;
@@ -71,7 +68,7 @@ namespace osu.Game.Screens.LLin.Plugins
                     RelativeSizeAxes = Axes.Both,
                     Alpha = 0
                 },
-                placeholder = new ClickablePlaceholder("Enable this plugin first!", FontAwesome.Solid.Plug)
+                placeholder = new ClickablePlaceholder("请先启用该插件!", FontAwesome.Solid.Plug)
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,

@@ -8,7 +8,7 @@ using osu.Game.Configuration;
 
 namespace osu.Game.Overlays.Settings.Sections.Mf
 {
-    public class MvisAudioSettings : SettingsSubsection
+    public partial class MvisAudioSettings : SettingsSubsection
     {
         protected override LocalisableString Header => "Audio";
 

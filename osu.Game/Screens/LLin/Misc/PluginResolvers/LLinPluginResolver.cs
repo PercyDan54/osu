@@ -1,11 +1,6 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using osu.Game.Screens.LLin.Plugins;
 using osu.Game.Screens.LLin.Plugins.Types;
 
@@ -22,8 +17,23 @@ namespace osu.Game.Screens.LLin.Misc.PluginResolvers
 
         public string ToPath(object target)
         {
-            return target.GetType().Name + "@" + target.GetType().Namespace;
+            Type targetType;
+
+            if (target is Type) targetType = (Type)target;
+            else if (target is TypeWrapper) targetType = ((TypeWrapper)target).Type;
+            else targetType = target.GetType();
+
+            return targetType.Name + "@" + targetType.Namespace;
         }
+
+        internal bool RemoveFunctionBarProvider(IFunctionBarProvider functionBarProvider)
+            => functionBarDictionary.Remove(ToPath(functionBarProvider), out _);
+
+        internal bool RemoveAudioControlProvider(IProvideAudioControlPlugin provideAudioControlPlugin)
+            => audioPluginDictionary.Remove(ToPath(provideAudioControlPlugin), out _);
+
+        private readonly ConcurrentDictionary<string, TypeWrapper> audioPluginDictionary = new ConcurrentDictionary<string, TypeWrapper>();
+        private readonly ConcurrentDictionary<string, TypeWrapper> functionBarDictionary = new ConcurrentDictionary<string, TypeWrapper>();
 
         internal void UpdatePluginDictionary(List<LLinPlugin> newPluginList)
         {
@@ -32,59 +42,59 @@ namespace osu.Game.Screens.LLin.Misc.PluginResolvers
 
             foreach (var plugin in newPluginList)
             {
-                var pluginPath =
-                    plugin.GetType().Name
-                    + "@"
-                    + plugin.GetType().Namespace;
+                string pluginPath = ToPath(plugin);
 
                 if (plugin is IFunctionBarProvider functionBarProvider)
-                    functionBarDictionary[pluginPath] = functionBarProvider;
+                {
+                    var typeWrapper = new TypeWrapper
+                    {
+                        Type = functionBarProvider.GetType(),
+                        Name = $"{plugin.Name} ({plugin.Author})"
+                    };
+                    functionBarDictionary[pluginPath] = typeWrapper;
+                }
 
                 if (plugin is IProvideAudioControlPlugin audioControlPlugin)
-                    audioPluginDictionary[pluginPath] = audioControlPlugin;
+                {
+                    var typeWrapper = new TypeWrapper
+                    {
+                        Type = audioControlPlugin.GetType(),
+                        Name = $"{plugin.Name} ({plugin.Author})"
+                    };
+                    audioPluginDictionary[pluginPath] = typeWrapper;
+                }
             }
 
-            var defaultAudioControlPath = pluginManager.DefaultAudioController.GetType().Name
-                                          + "@"
-                                          + pluginManager.DefaultAudioController.GetType().Namespace;
+            var defaultAudio = pluginManager.DefaultAudioControllerType;
+            var defaultFunctionbar = pluginManager.DefaultFunctionBarType;
 
-            audioPluginDictionary[defaultAudioControlPath] = pluginManager.DefaultAudioController;
+            audioPluginDictionary[ToPath(defaultAudio)] = defaultAudio;
+            functionBarDictionary[ToPath(defaultFunctionbar)] = defaultFunctionbar;
         }
 
-        internal bool RemoveFunctionBarProvider(IFunctionBarProvider functionBarProvider)
-            => functionBarDictionary.Remove(ToPath(functionBarProvider), out functionBarProvider);
-
-        internal bool RemoveAudioControlProvider(IProvideAudioControlPlugin provideAudioControlPlugin)
-            => audioPluginDictionary.Remove(ToPath(provideAudioControlPlugin), out provideAudioControlPlugin);
-
-        private readonly ConcurrentDictionary<string, IProvideAudioControlPlugin> audioPluginDictionary = new ConcurrentDictionary<string, IProvideAudioControlPlugin>();
-        private readonly ConcurrentDictionary<string, IFunctionBarProvider> functionBarDictionary = new ConcurrentDictionary<string, IFunctionBarProvider>();
-
-        [CanBeNull]
-        internal IProvideAudioControlPlugin GetAudioControlPluginByPath(string path)
+        internal Type? GetAudioControlPluginByPath(string path)
         {
-            IProvideAudioControlPlugin result;
+            TypeWrapper? result;
             if (audioPluginDictionary.TryGetValue(path, out result))
-                return result;
+                return result.Type;
 
             return null;
         }
 
-        [CanBeNull]
-        internal IFunctionBarProvider GetFunctionBarProviderByPath(string path)
+        internal Type? GetFunctionBarProviderByPath(string path)
         {
-            IFunctionBarProvider result;
+            TypeWrapper? result;
             if (functionBarDictionary.TryGetValue(path, out result))
-                return result;
+                return result.Type;
 
             return null;
         }
 
-        private List<IProvideAudioControlPlugin> cachedAudioControlPluginList;
+        private List<TypeWrapper>? cachedAudioControlPluginList;
 
-        internal List<IProvideAudioControlPlugin> GetAllAudioControlPlugin()
+        internal List<TypeWrapper> GetAllAudioControlPlugin()
         {
-            var list = new List<IProvideAudioControlPlugin>();
+            var list = new List<TypeWrapper>();
 
             foreach (var keyPair in audioPluginDictionary)
             {
@@ -97,11 +107,11 @@ namespace osu.Game.Screens.LLin.Misc.PluginResolvers
             return list;
         }
 
-        private List<IFunctionBarProvider> cachedFunctionBarPluginList;
+        private List<TypeWrapper>? cachedFunctionBarPluginList;
 
-        internal List<IFunctionBarProvider> GetAllFunctionBarProviders()
+        internal List<TypeWrapper> GetAllFunctionBarProviders()
         {
-            var list = new List<IFunctionBarProvider>();
+            var list = new List<TypeWrapper>();
 
             foreach (var keyPair in functionBarDictionary)
             {

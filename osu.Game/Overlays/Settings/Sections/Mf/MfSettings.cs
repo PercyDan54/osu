@@ -8,7 +8,7 @@ using osu.Game.Configuration;
 
 namespace osu.Game.Overlays.Settings.Sections.Mf
 {
-    public class MfSettings : SettingsSubsection
+    public partial class MfSettings : SettingsSubsection
     {
         protected override LocalisableString Header => "Custom osu settings";
 

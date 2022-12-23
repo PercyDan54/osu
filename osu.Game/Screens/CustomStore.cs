@@ -64,9 +64,9 @@ namespace osu.Game.Screens
             //From RulesetStore
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                string name = assembly.GetName().Name;
+                string? name = assembly.GetName().Name;
 
-                if (!name.StartsWith("Mvis.Plugin", StringComparison.InvariantCultureIgnoreCase))
+                if (name != null && !name.StartsWith("Mvis.Plugin", StringComparison.InvariantCultureIgnoreCase))
                     continue;
 
                 loadAssembly(assembly);
@@ -111,7 +111,7 @@ namespace osu.Game.Screens
                         loadedMvisPluginAssemblies[assembly] = type;
                         loadedAssemblies[assembly] = type;
                         //Logger.Log($"{type}是插件Provider");
-                        addMvisPlugin(type, assembly.FullName);
+                        addMvisPlugin(type, assembly.FullName!);
                     }
 
                     //Logger.Log($"{type}不是任何一个SubClass");
@@ -138,7 +138,7 @@ namespace osu.Game.Screens
 
             try
             {
-                var providerInstance = (LLinPluginProvider)Activator.CreateInstance(pluginType);
+                var providerInstance = (LLinPluginProvider)Activator.CreateInstance(pluginType)!;
                 LoadedPluginProviders.Add(providerInstance);
                 //Logger.Log($"[OK] 载入 {fullName}");
             }

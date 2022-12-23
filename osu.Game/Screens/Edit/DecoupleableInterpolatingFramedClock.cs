@@ -18,7 +18,7 @@ namespace osu.Game.Screens.Edit
     /// If a <see cref="InterpolatingFramedClock.Source"/> is set, it is presumed that we have exclusive control over operations on it.
     /// This is used to our advantage to allow correct <see cref="IsRunning"/> state tracking in the event of cross-thread communication delays (with an audio thread, for instance).
     /// </summary>
-    public class DecoupleableInterpolatingFramedClock : InterpolatingFramedClock, IAdjustableClock
+    public partial class DecoupleableInterpolatingFramedClock : InterpolatingFramedClock, IAdjustableClock
     {
         /// <summary>
         /// Specify whether we are coupled 1:1 to SourceClock. If not, we can independently continue operation.

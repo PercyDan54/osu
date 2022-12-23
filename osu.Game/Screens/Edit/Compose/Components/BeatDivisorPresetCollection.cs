@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace osu.Game.Screens.Edit.Compose.Components
 {
-    public class BeatDivisorPresetCollection
+    public partial class BeatDivisorPresetCollection
     {
         public BeatDivisorType Type { get; }
         public IReadOnlyList<int> Presets { get; }

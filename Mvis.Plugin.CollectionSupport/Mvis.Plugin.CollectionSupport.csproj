@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Label="Project">
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Description>CollectionSupport</Description>
@@ -9,9 +9,6 @@
     <PackageProjectUrl>https://github.com/MATRIX-feather/osu</PackageProjectUrl>
     <RepositoryUrl>https://github.com/MATRIX-feather/osu</RepositoryUrl>
     <Company />
-  </PropertyGroup>
-  <PropertyGroup>
-    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup Label="Project References">

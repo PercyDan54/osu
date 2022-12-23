@@ -48,6 +48,9 @@ namespace osu.Game.Configuration
             SetDefault(MSetting.MvisTabControlPosition, TabControlPosition.Right);
             SetDefault(MSetting.MvisCurrentAudioProvider, "a@b");
             SetDefault(MSetting.MvisCurrentFunctionBar, "LegacyBottomBar@Mvis.Plugin.BottomBar");
+            SetDefault(MSetting.MvisAutoVSync, true);
+            SetDefault(MSetting.MvisPlayerSettingsMaxWidth, 0.6f, 0.2f, 1f);
+            SetDefault(MSetting.MvisUseTriangleV2, false);
 
             //Dance settings
             SetDefault(MSetting.DanceMover, OsuDanceMover.Momentum);
@@ -179,6 +182,9 @@ namespace osu.Game.Configuration
         CursorTrailSize,
         CursorTrailHue,
         CursorTrailHueOverride,
+        MvisAutoVSync,
+        MvisPlayerSettingsMaxWidth,
+        MvisUseTriangleV2
     }
 
     public enum OsuDanceMover

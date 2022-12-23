@@ -1,5 +1,6 @@
+using M.Resources.Localisation.LLin;
+using M.Resources.Localisation.LLin.Plugins;
 using Mvis.Plugin.Yasp.Config;
-using Mvis.Plugin.Yasp.UI;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
@@ -7,6 +8,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Framework.Platform;
 using osu.Game.Beatmaps;
@@ -16,14 +18,15 @@ using osu.Game.Screens.LLin.Misc;
 using osu.Game.Screens.LLin.Plugins;
 using osu.Game.Screens.LLin.Plugins.Config;
 using osu.Game.Screens.LLin.Plugins.Types;
+using osu.Game.Screens.LLin.Plugins.Types.SettingsItems;
 using osuTK;
 using osuTK.Graphics;
 
 namespace Mvis.Plugin.Yasp
 {
-    public class YaspPlugin : BindableControlledPlugin
+    public partial class YaspPlugin : BindableControlledPlugin
     {
-        private Drawable currentContent;
+        private Drawable? currentContent;
 
         /// <summary>
         /// 请参阅 <see cref="LLinPlugin.TargetLayer"/>
@@ -33,13 +36,26 @@ namespace Mvis.Plugin.Yasp
         public override IPluginConfigManager CreateConfigManager(Storage storage)
             => new YaspConfigManager(storage);
 
-        public override PluginSettingsSubSection CreateSettingsSubSection()
-            => new YaspSettingsSubSection(this);
+        public override SettingsEntry[] GetSettingEntries(IPluginConfigManager pluginConfigManager)
+        {
+            return new SettingsEntry[]
+            {
+                new NumberSettingsEntry<float>
+                {
+                    Icon = FontAwesome.Solid.ExpandArrowsAlt,
+                    Name = YaspStrings.Scale,
+                    Bindable = ((YaspConfigManager)pluginConfigManager).GetBindable<float>(YaspSettings.Scale),
+                    DisplayAsPercentage = true,
+                },
+                new BooleanSettingsEntry
+                {
+                    Name = LLinGenericStrings.EnablePlugin,
+                    Bindable = ((YaspConfigManager)pluginConfigManager).GetBindable<bool>(YaspSettings.EnablePlugin)
+                }
+            };
+        }
 
-        public override PluginSidebarSettingsSection CreateSidebarSettingsSection()
-            => new YaspSidebarSection(this);
-
-        public override int Version => 9;
+        public override int Version => 10;
 
         public YaspPlugin()
         {
@@ -56,7 +72,7 @@ namespace Mvis.Plugin.Yasp
             AutoSizeAxes = Axes.Both;
         }
 
-        private WorkingBeatmap currentWorkingBeatmap;
+        private WorkingBeatmap? currentWorkingBeatmap;
 
         /// <summary>
         /// 请参阅 <see cref="LLinPlugin.CreateContent()"/>
@@ -97,17 +113,17 @@ namespace Mvis.Plugin.Yasp
                         new OsuSpriteText
                         {
                             Font = OsuFont.GetFont(size: 30, weight: FontWeight.Bold),
-                            Text = new RomanisableString(currentWorkingBeatmap.Metadata.TitleUnicode, currentWorkingBeatmap.Metadata.Title)
+                            Text = new RomanisableString(currentWorkingBeatmap?.Metadata.TitleUnicode, currentWorkingBeatmap?.Metadata.Title)
                         },
                         new OsuSpriteText
                         {
                             Font = OsuFont.GetFont(size: 25),
-                            Text = new RomanisableString(currentWorkingBeatmap.Metadata.ArtistUnicode, currentWorkingBeatmap.Metadata.Artist)
+                            Text = new RomanisableString(currentWorkingBeatmap?.Metadata.ArtistUnicode, currentWorkingBeatmap?.Metadata.Artist)
                         },
                         new OsuSpriteText
                         {
                             Font = OsuFont.GetFont(size: 25),
-                            Text = currentWorkingBeatmap.Metadata.Source
+                            Text = currentWorkingBeatmap?.Metadata.Source ?? "???"
                         }
                     }
                 }
@@ -146,7 +162,7 @@ namespace Mvis.Plugin.Yasp
             return result;
         }
 
-        private Bindable<float> scaleBindable;
+        private Bindable<float> scaleBindable = new BindableFloat();
 
         [BackgroundDependencyLoader]
         private void load()
@@ -154,7 +170,7 @@ namespace Mvis.Plugin.Yasp
             var config = (YaspConfigManager)Dependencies.Get<LLinPluginManager>().GetConfigManager(this);
 
             config.BindWith(YaspSettings.EnablePlugin, Value);
-            scaleBindable = config.GetBindable<float>(YaspSettings.Scale);
+            config.BindWith<float>(YaspSettings.Scale, scaleBindable);
             scaleBindable.BindValueChanged(v =>
             {
                 this.ScaleTo(v.NewValue, 300, Easing.OutQuint);
@@ -163,7 +179,7 @@ namespace Mvis.Plugin.Yasp
 
         protected override bool PostInit()
         {
-            currentWorkingBeatmap ??= LLin.Beatmap.Value;
+            currentWorkingBeatmap ??= LLin?.Beatmap.Value;
             return true;
         }
 

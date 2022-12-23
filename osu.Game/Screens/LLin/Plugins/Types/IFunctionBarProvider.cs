@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using osu.Framework.Graphics;
@@ -76,6 +71,6 @@ namespace osu.Game.Screens.LLin.Plugins.Types
         /// <summary>
         /// 被禁用时触发
         /// </summary>
-        public Action OnDisable { get; set; }
+        public Action? OnDisable { get; set; }
     }
 }

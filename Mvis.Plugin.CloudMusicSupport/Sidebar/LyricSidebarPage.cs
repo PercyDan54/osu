@@ -1,4 +1,3 @@
-using System;
 using Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic;
 using Mvis.Plugin.CloudMusicSupport.Sidebar.Screens;
 using osu.Framework.Allocation;
@@ -14,9 +13,9 @@ using osu.Game.Screens.LLin.Plugins.Types;
 
 namespace Mvis.Plugin.CloudMusicSupport.Sidebar
 {
-    public class LyricSidebarSectionContainer : PluginSidebarPage
+    public partial class LyricSidebarSectionContainer : PluginSidebarPage
     {
-        private LoadingSpinner loading;
+        private LoadingSpinner loading = null!;
 
         public LyricSidebarSectionContainer(LLinPlugin plugin)
             : base(plugin)
@@ -28,15 +27,15 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
             => new LyricFunctionProvider(this);
 
         [Resolved]
-        private IImplementLLin mvisScreen { get; set; }
+        private IImplementLLin mvisScreen { get; set; } = null!;
 
         private LyricPlugin plugin => (LyricPlugin)Plugin;
 
-        public Guid BeatmapSetId;
+        public int BeatmapSetId;
 
-        private ScreenStack screenStack;
+        private ScreenStack screenStack = null!;
 
-        private Toolbox toolbox;
+        private Toolbox toolbox = null!;
 
         [BackgroundDependencyLoader]
         private void load(CustomColourProvider provider)
@@ -105,7 +104,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar
 
         private void refreshBeatmap(WorkingBeatmap working)
         {
-            BeatmapSetId = working.BeatmapSetInfo.ID;
+            BeatmapSetId = working.BeatmapSetInfo.OnlineID;
             toolbox.IdText = $"ID: {BeatmapSetId}";
         }
     }

@@ -1,8 +1,6 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -16,7 +14,7 @@ namespace osu.Game.Screens.LLin
     ///<summary>
     ///更改自<see cref="OverlayColourProvider"/>
     ///</summary>
-    public class CustomColourProvider : Component
+    public partial class CustomColourProvider : Component
     {
         public Color4 ActiveColor => Highlight2;
         public Color4 InActiveColor => Dark4;

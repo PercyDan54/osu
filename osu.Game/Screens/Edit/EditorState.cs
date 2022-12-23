@@ -6,7 +6,7 @@ namespace osu.Game.Screens.Edit
     /// <summary>
     /// Structure used to convey the general state of an <see cref="Editor"/> instance.
     /// </summary>
-    public class EditorState
+    public partial class EditorState
     {
         /// <summary>
         /// The current audio time.

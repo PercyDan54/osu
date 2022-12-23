@@ -1,7 +1,7 @@
 using System;
+using M.Resources.Localisation.LLin;
 using Mvis.Plugin.StoryboardSupport.Config;
 using Mvis.Plugin.StoryboardSupport.Storyboard;
-using Mvis.Plugin.StoryboardSupport.UI;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -13,6 +13,7 @@ using osu.Game.Overlays;
 using osu.Game.Screens.LLin.Plugins;
 using osu.Game.Screens.LLin.Plugins.Config;
 using osu.Game.Screens.LLin.Plugins.Types;
+using osu.Game.Screens.LLin.Plugins.Types.SettingsItems;
 using osu.Game.Screens.Play;
 
 namespace Mvis.Plugin.StoryboardSupport
@@ -20,7 +21,7 @@ namespace Mvis.Plugin.StoryboardSupport
     ///<summary>
     /// 负责故事版的异步加载功能
     ///</summary>
-    public class BackgroundStoryBoardLoader : BindableControlledPlugin
+    public partial class BackgroundStoryBoardLoader : BindableControlledPlugin
     {
         public const float STORYBOARD_FADEIN_DURATION = 750;
         public const float STORYBOARD_FADEOUT_DURATION = STORYBOARD_FADEIN_DURATION / 2;
@@ -33,20 +34,20 @@ namespace Mvis.Plugin.StoryboardSupport
         public readonly BindableBool NeedToHideTriangles = new BindableBool();
         public readonly BindableBool StoryboardReplacesBackground = new BindableBool();
 
-        private BackgroundStoryboard currentStoryboard;
+        private BackgroundStoryboard? currentStoryboard;
 
-        private WorkingBeatmap targetBeatmap;
+        private WorkingBeatmap targetBeatmap = null!;
 
         [Resolved]
-        private MusicController music { get; set; }
+        private MusicController music { get; set; } = null!;
 
-        public override int Version => 9;
+        public override int Version => 10;
 
         public BackgroundStoryBoardLoader()
         {
             RelativeSizeAxes = Axes.Both;
 
-            Name = "故事版加载器";
+            Name = "Storyboard loader";
             Description = "在播放器的背景显示谱面故事版";
             Author = "mf-osu";
 
@@ -124,7 +125,23 @@ namespace Mvis.Plugin.StoryboardSupport
 
         public override IPluginConfigManager CreateConfigManager(Storage storage) => new SbLoaderConfigManager(storage);
 
-        public override PluginSettingsSubSection CreateSettingsSubSection() => new StoryboardSettings(this);
+        private SettingsEntry[]? entries;
+
+        public override SettingsEntry[] GetSettingEntries(IPluginConfigManager pluginConfigManager)
+        {
+            var config = (SbLoaderConfigManager)pluginConfigManager;
+
+            entries ??= new SettingsEntry[]
+            {
+                new BooleanSettingsEntry
+                {
+                    Name = LLinGenericStrings.EnablePlugin,
+                    Bindable = config.GetBindable<bool>(SbLoaderSettings.EnableStoryboard)
+                }
+            };
+
+            return entries;
+        }
 
         protected override bool PostInit()
         {
@@ -145,7 +162,7 @@ namespace Mvis.Plugin.StoryboardSupport
             return true;
         }
 
-        private Drawable prevProxy;
+        private Drawable? prevProxy;
 
         protected override bool OnContentLoaded(Drawable content)
         {

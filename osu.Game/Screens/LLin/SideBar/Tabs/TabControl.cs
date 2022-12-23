@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -12,9 +7,11 @@ using osu.Game.Configuration;
 using osu.Game.Graphics.Containers;
 using osuTK;
 
+#nullable disable
+
 namespace osu.Game.Screens.LLin.SideBar.Tabs
 {
-    internal class TabControl : CompositeDrawable
+    internal partial class TabControl : CompositeDrawable
     {
         public FillFlowContainer<TabControlItem> Tabs;
 
@@ -158,7 +155,7 @@ namespace osu.Game.Screens.LLin.SideBar.Tabs
 
                 if (!horizonalScroll.Contains(Tabs))
                 {
-                    verticalScroll.Remove(Tabs, true);
+                    verticalScroll.Remove(Tabs, false);
                     horizonalScroll.Add(Tabs);
                 }
 

@@ -11,7 +11,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
     /// <summary>
     /// An event which occurs when a <see cref="SelectionBlueprint{T}"/> is moved.
     /// </summary>
-    public class MoveSelectionEvent<T>
+    public partial class MoveSelectionEvent<T>
     {
         /// <summary>
         /// The <see cref="SelectionBlueprint{T}"/> that triggered this <see cref="MoveSelectionEvent{T}"/>.

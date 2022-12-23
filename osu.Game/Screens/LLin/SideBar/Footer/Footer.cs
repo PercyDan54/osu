@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
@@ -10,9 +5,11 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 
+#nullable disable
+
 namespace osu.Game.Screens.LLin.SideBar.Footer
 {
-    public class Footer : CompositeDrawable
+    public partial class Footer : CompositeDrawable
     {
         [CanBeNull]
         private Box bgBox;

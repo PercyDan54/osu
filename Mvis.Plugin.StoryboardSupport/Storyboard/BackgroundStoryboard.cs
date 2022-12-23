@@ -5,10 +5,12 @@ using osu.Game.Beatmaps;
 using osu.Game.Skinning;
 using osu.Game.Storyboards.Drawables;
 
+#nullable disable
+
 namespace Mvis.Plugin.StoryboardSupport.Storyboard
 {
     [LongRunningLoad]
-    public class BackgroundStoryboard : BeatmapSkinProvidingContainer
+    public partial class BackgroundStoryboard : BeatmapSkinProvidingContainer
     {
         public InterpolatingFramedClock RunningClock;
         private DrawableStoryboard drawableStoryboard;

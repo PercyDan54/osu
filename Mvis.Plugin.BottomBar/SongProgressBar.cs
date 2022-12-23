@@ -8,16 +8,16 @@ using osu.Game.Screens.LLin.Misc;
 
 namespace Mvis.Plugin.BottomBar
 {
-    public class SongProgressBar : ProgressBar
+    public partial class SongProgressBar : ProgressBar
     {
-        private Indicator indicator;
-        private Indicator songProgressIndicator;
+        private Indicator indicator = null!;
+        private Indicator songProgressIndicator = null!;
 
         [Resolved]
-        private CustomColourProvider colourProvider { get; set; }
+        private CustomColourProvider colourProvider { get; set; } = null!;
 
         [Resolved]
-        private IImplementLLin mvis { get; set; }
+        private IImplementLLin mvis { get; set; } = null!;
 
         private const float idle_alpha = 0.5f;
 
@@ -118,10 +118,10 @@ namespace Mvis.Plugin.BottomBar
         {
             if (mvis.InterfacesHidden)
             {
-                float indicatorX = indicator.X - 5;
-                float indicatorEnd = indicatorX + indicator.Width + 5;
-                float songX = songProgressIndicator.X - 5;
-                float songEnd = songX + songProgressIndicator.Width + 5;
+                var indicatorX = indicator.X - 5;
+                var indicatorEnd = indicatorX + indicator.Width + 5;
+                var songX = songProgressIndicator.X - 5;
+                var songEnd = songX + songProgressIndicator.Width + 5;
 
                 overlap = (indicatorX >= songX && indicatorX <= songEnd)
                           || (indicatorEnd >= songX && indicatorEnd <= songEnd);
@@ -133,7 +133,7 @@ namespace Mvis.Plugin.BottomBar
         private float getFinalPosX(Indicator target, float xPos)
         {
             //DrawWidth: 总宽度, target.Width: 指示器宽度, 5: 右侧Margin
-            float rightMargin = DrawWidth - target.Width - 5;
+            var rightMargin = DrawWidth - target.Width - 5;
 
             if (xPos > rightMargin) return rightMargin;
             //5: 左侧Margin

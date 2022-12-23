@@ -17,7 +17,7 @@ namespace osu.Game.Screens.ReplayVs
     /// <summary>
     /// Used to load a single <see cref="MultiSpectatorPlayer"/> in a <see cref="MultiSpectatorScreen"/>.
     /// </summary>
-    public class ReplayVsPlayerLoader : PlayerLoader
+    public partial class ReplayVsPlayerLoader : PlayerLoader
     {
         public readonly ScoreInfo Score;
 

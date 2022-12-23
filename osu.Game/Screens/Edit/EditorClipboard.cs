@@ -10,7 +10,7 @@ namespace osu.Game.Screens.Edit
     /// <summary>
     /// Wraps the contents of the editor clipboard.
     /// </summary>
-    public class EditorClipboard
+    public partial class EditorClipboard
     {
         public Bindable<string> Content { get; } = new Bindable<string>();
     }

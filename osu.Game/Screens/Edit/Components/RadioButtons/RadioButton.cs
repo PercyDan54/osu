@@ -9,7 +9,7 @@ using osu.Framework.Graphics;
 
 namespace osu.Game.Screens.Edit.Components.RadioButtons
 {
-    public class RadioButton
+    public partial class RadioButton
     {
         /// <summary>
         /// Whether this <see cref="RadioButton"/> is selected.

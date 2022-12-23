@@ -1,12 +1,6 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using JetBrains.Annotations;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -14,10 +8,11 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Game.Screens.LLin.Plugins.Config;
+using osu.Game.Screens.LLin.Plugins.Types.SettingsItems;
 
 namespace osu.Game.Screens.LLin.Plugins
 {
-    public abstract class LLinPlugin : Container
+    public abstract partial class LLinPlugin : Container
     {
         /// <summary>
         /// 加载插件要提供的内容
@@ -29,15 +24,27 @@ namespace osu.Game.Screens.LLin.Plugins
         /// 为游戏设置创建设置页面
         /// </summary>
         /// <returns>创建的设置页面</returns>
-        public virtual PluginSettingsSubSection CreateSettingsSubSection() => null;
+        [Obsolete("请使用GetSettingEntries")]
+        public virtual PluginSettingsSubSection? CreateSettingsSubSection() => null;
 
         /// <summary>
         /// 为Mvis侧边栏创建设置页面
         /// </summary>
         /// <returns>创建的设置页面</returns>
-        public virtual PluginSidebarSettingsSection CreateSidebarSettingsSection() => null;
+        [Obsolete("请使用GetSettingEntries")]
+        public virtual PluginSidebarSettingsSection? CreateSidebarSettingsSection() => null;
 
-        public virtual IPluginConfigManager CreateConfigManager(Storage storage) => null;
+        public virtual IPluginConfigManager CreateConfigManager(Storage storage)
+        {
+            if (storage == null) throw new ArgumentNullException(nameof(storage));
+
+            return new DefaultPluginConfigManager(storage);
+        }
+
+        public virtual SettingsEntry[] GetSettingEntries(IPluginConfigManager pluginConfigManager) => Array.Empty<SettingsEntry>();
+
+        [Obsolete("请使用带IPluginConfigManager作为参数的新方法")]
+        public virtual SettingsEntry[]? GetSettingEntries() => null;
 
         /// <summary>
         /// 内容加载完毕后要执行的步骤
@@ -61,7 +68,7 @@ namespace osu.Game.Screens.LLin.Plugins
         /// <summary>
         /// 插件对应的侧边栏页面(未完全实现)
         /// </summary>
-        public virtual PluginSidebarPage CreateSidebarPage() => null;
+        public virtual PluginSidebarPage? CreateSidebarPage() => null;
 
         /// <summary>
         /// 插件Flags，决定了插件的一系列属性
@@ -81,17 +88,17 @@ namespace osu.Game.Screens.LLin.Plugins
         public string Author = "插件作者";
         public string Website = "???";
 
+        public bool HideFromPluginManagement { get; internal set; } = false;
+
         public abstract int Version { get; }
 
         [Resolved(CanBeNull = true)]
-        private IImplementLLin llin { get; set; }
+        private IImplementLLin? llin { get; set; }
 
-        [CanBeNull]
         [Obsolete("Mvis => LLin")]
-        protected IImplementLLin Mvis => llin;
+        protected IImplementLLin? Mvis => llin;
 
-        [CanBeNull]
-        protected IImplementLLin LLin => llin;
+        protected IImplementLLin? LLin => llin;
 
         #region 异步加载任务相关
 
@@ -109,9 +116,12 @@ namespace osu.Game.Screens.LLin.Plugins
             Value = true
         };
 
-        protected DependencyContainer DependenciesContainer;
+        protected DependencyContainer DependenciesContainer = null!;
 
-        protected LLinPluginManager PluginManager;
+        /// <summary>
+        /// 在load结束前会保持null值
+        /// </summary>
+        public LLinPluginManager? PluginManager { get; internal set; }
 
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
             DependenciesContainer = new DependencyContainer(base.CreateChildDependencies(parent));
@@ -119,10 +129,9 @@ namespace osu.Game.Screens.LLin.Plugins
         [BackgroundDependencyLoader]
         private void load()
         {
-            var pluginManager = DependenciesContainer.Get<LLinPluginManager>();
-            PluginManager = pluginManager;
+            PluginManager ??= DependenciesContainer.Get<LLinPluginManager>();
 
-            var config = pluginManager.GetConfigManager(this);
+            var config = PluginManager.GetConfigManager(this);
 
             if (config != null)
                 DependenciesContainer.Cache(config);

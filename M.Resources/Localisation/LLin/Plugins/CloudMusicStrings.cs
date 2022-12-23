@@ -31,7 +31,9 @@ namespace M.Resources.Localisation.LLin.Plugins
 
         public static LocalisableString LyricAutoScrollSub => @"Incompatible with DrawablePool";
 
-        public static LocalisableString AudioControlRequest => @"E";
+        public static LocalisableString LocalOffset => "Local offset";
+
+        public static LocalisableString AudioControlRequest => @"编辑歌词需要禁用切歌功能";
 
         public static LocalisableString EntryTooltip => @"Open lyrics";
 

@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
@@ -19,7 +14,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
 {
-    public class SimpleBarButton : CompositeDrawable, IHasTooltip
+    public partial class SimpleBarButton : CompositeDrawable, IHasTooltip
     {
         private readonly SpriteIcon spriteIcon = new SpriteIcon
         {
@@ -36,7 +31,7 @@ namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
             Colour = Color4.White
         };
 
-        private readonly Box flashBox;
+        private readonly Box hoverBox;
 
         public LocalisableString TooltipText { get; }
 
@@ -89,7 +84,7 @@ namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
                         spriteText,
                     }
                 },
-                flashBox = new Box
+                hoverBox = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
                     Colour = Color4.White,
@@ -98,16 +93,21 @@ namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
             };
         }
 
+        public void DoFlash()
+        {
+            hoverBox.FadeTo(0.2f).Then().FadeTo(IsHovered ? 0.1f : 0f, 300);
+        }
+
         protected override bool OnHover(HoverEvent e)
         {
-            flashBox.FadeTo(0.1f, 300);
+            hoverBox.FadeTo(0.1f, 300);
             return base.OnHover(e);
         }
 
         protected override void OnHoverLost(HoverLostEvent e)
         {
             base.OnHoverLost(e);
-            flashBox.FadeTo(0f, 300);
+            hoverBox.FadeTo(0f, 300);
         }
 
         protected override bool OnClick(ClickEvent e)

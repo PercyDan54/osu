@@ -7,13 +7,13 @@ using osu.Game.Screens.LLin.Plugins.Types;
 
 namespace Mvis.Plugin.BottomBar.Buttons
 {
-    public class SongProgressButton : BottomBarSwitchButton
+    public partial class SongProgressButton : BottomBarSwitchButton
     {
-        private string timeCurrent;
-        private string timeTotal;
+        private string? timeCurrent;
+        private string? timeTotal;
 
         [Resolved]
-        private IImplementLLin mvis { get; set; }
+        private IImplementLLin mvis { get; set; } = null!;
 
         private DrawableTrack track => mvis.CurrentTrack;
 

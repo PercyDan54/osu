@@ -1,19 +1,15 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Game.Configuration;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Backgrounds;
+using osu.Game.Graphics.Mf;
+
+#nullable disable
 
 namespace osu.Game.Screens.LLin.Misc
 {
-    public class BgTrianglesContainer : VisibilityContainer
+    public partial class BgTrianglesContainer : VisibilityContainer
     {
         private const float triangles_alpha = 0.65f;
         private readonly Bindable<bool> enableBgTriangles = new Bindable<bool>();
@@ -25,19 +21,10 @@ namespace osu.Game.Screens.LLin.Misc
             RelativeSizeAxes = Axes.Both;
             State.Value = Visibility.Visible;
 
-            Child = trianglesContainer = new Container
+            Child = trianglesContainer = new MBgTriangles(triangleScale: 4f, sync: true)
             {
                 Alpha = triangles_alpha,
-                RelativeSizeAxes = Axes.Both,
-                Child = new Triangles
-                {
-                    Anchor = Anchor.BottomCentre,
-                    Origin = Anchor.BottomCentre,
-                    RelativeSizeAxes = Axes.Both,
-                    TriangleScale = 5f,
-                    EnableBeatSync = true,
-                    Colour = OsuColour.Gray(0.2f),
-                }
+                RelativeSizeAxes = Axes.Both
             };
             config.BindWith(MSetting.MvisEnableBgTriangles, enableBgTriangles);
         }

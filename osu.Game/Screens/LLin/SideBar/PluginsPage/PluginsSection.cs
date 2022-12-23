@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
@@ -17,26 +12,24 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.LLin.SideBar.PluginsPage
 {
-    internal class PluginsSection : Section
+    internal partial class PluginsSection : Section
     {
-        public override int Columns => 2;
+        [Resolved]
+        private LLinPluginManager manager { get; set; } = null!;
 
-        private LLinPluginManager manager;
-        private FillFlowContainer placeholder;
+        private FillFlowContainer? placeholder;
 
         public PluginsSection()
         {
-            Title = "Plugins";
+            Title = "插件";
             Icon = FontAwesome.Solid.Boxes;
         }
 
-        protected override float PieceWidth => 300;
-
         [BackgroundDependencyLoader]
-        private void load(LLinPluginManager pluginManager)
+        private void load()
         {
-            manager = pluginManager;
-            FillFlow.Width = 600;
+            FillFlow.RelativeSizeAxes = Axes.None;
+            FillFlow.AutoSizeAxes = Axes.Both;
             FillFlow.Direction = FillDirection.Vertical;
 
             AddInternal(placeholder = new FillFlowContainer
@@ -58,7 +51,7 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                     },
                     new OsuSpriteText
                     {
-                        Text = "No plugin",
+                        Text = "没有插件",
                         Font = OsuFont.GetFont(size: 45, weight: FontWeight.Bold),
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre,
@@ -66,15 +59,16 @@ namespace osu.Game.Screens.LLin.SideBar.PluginsPage
                 }
             });
 
-            pluginManager.OnPluginAdd += addPiece;
-            pluginManager.OnPluginUnLoad += removePiece;
+            manager.OnPluginAdd += addPiece;
+            manager.OnPluginUnLoad += removePiece;
         }
 
         protected override void LoadComplete()
         {
             foreach (var pl in manager.GetAllPlugins(false))
             {
-                addPiece(pl);
+                if (!pl.HideFromPluginManagement)
+                    addPiece(pl);
             }
 
             FillFlow.LayoutEasing = Easing.OutQuint;

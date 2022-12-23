@@ -95,7 +95,7 @@ namespace osu.Game.Overlays.Settings.Sections.Input
             }
         }
 
-        private class MvisBindingsSection : KeyBindingsSubsection
+        private partial class MvisBindingsSection : KeyBindingsSubsection
         {
             protected override LocalisableString Header => "Mvis player";
 

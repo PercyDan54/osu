@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -13,9 +8,9 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.LLin.Plugins.Internal.FallbackFunctionBar
 {
-    public class ToggleableBarButton : SimpleBarButton
+    public partial class ToggleableBarButton : SimpleBarButton
     {
-        private Box indicator;
+        private Box indicator = null!;
 
         public BindableBool Value = new BindableBool();
 

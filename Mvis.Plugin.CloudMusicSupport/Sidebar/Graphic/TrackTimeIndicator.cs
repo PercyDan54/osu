@@ -8,11 +8,12 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Screens.LLin;
 using osu.Game.Screens.LLin.Plugins;
-using osuTK.Graphics;
+
+#nullable disable
 
 namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
 {
-    public class TrackTimeIndicator : CompositeDrawable
+    public partial class TrackTimeIndicator : CompositeDrawable
     {
         [Resolved]
         private IImplementLLin mvisScreen { get; set; }
@@ -56,14 +57,12 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                     timer = new OsuSpriteText
                     {
                         Font = OsuFont.GetFont(size: 25, weight: FontWeight.Bold),
-                        Colour = Color4.Black,
                         Anchor = Anchor.TopRight,
                         Origin = Anchor.TopRight,
                     },
                     offsetText = new OsuSpriteText
                     {
                         Font = OsuFont.GetFont(weight: FontWeight.Medium, size: 16),
-                        Colour = Color4.Black,
                         Anchor = Anchor.TopRight,
                         Origin = Anchor.TopRight,
                     }

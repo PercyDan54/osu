@@ -15,7 +15,7 @@ using osu.Game.Screens.LLin;
 
 namespace osu.Game.Overlays.Settings.Sections.Mf
 {
-    public class MvisUISettings : SettingsSubsection
+    public partial class MvisUISettings : SettingsSubsection
     {
         protected override LocalisableString Header => "UI";
         private readonly BindableFloat iR = new BindableFloat();
@@ -87,7 +87,7 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
 
         private void updateColor() => preview.UpdateColor(iR.Value, iG.Value, iB.Value);
 
-        private class ColourPreviewer : Container, IHasTooltip
+        private partial class ColourPreviewer : Container, IHasTooltip
         {
             private readonly CustomColourProvider provider = new CustomColourProvider();
             private Box bg6;

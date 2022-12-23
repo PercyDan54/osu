@@ -1,8 +1,3 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
-// See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using osu.Framework.Graphics;
@@ -15,6 +10,8 @@ namespace osu.Game.Screens.LLin.Plugins.Internal
         public DummyFunctionBar()
         {
             Name = "无";
+            Description = "默认底栏";
+            Author = "mf-osu";
         }
 
         protected override Drawable CreateContent()
@@ -74,6 +71,6 @@ namespace osu.Game.Screens.LLin.Plugins.Internal
             throw new NotImplementedException();
         }
 
-        public Action OnDisable { get; set; }
+        public Action? OnDisable { get; set; }
     }
 }
