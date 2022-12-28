@@ -17,6 +17,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Rulesets;
 using osu.Game.Scoring;
@@ -93,6 +94,10 @@ namespace osu.Game.Screens.ReplayVs
             };
         }
 
+        private partial class BasicOsuButton : OsuButton
+        {
+        }
+
         private partial class TeamContainer : Container
         {
             private readonly string name;
@@ -116,6 +121,8 @@ namespace osu.Game.Screens.ReplayVs
             {
                 this.name = name;
                 this.colour = colour;
+                CornerRadius = 15;
+                Masking = true;
             }
 
             [BackgroundDependencyLoader]
@@ -127,7 +134,7 @@ namespace osu.Game.Screens.ReplayVs
                     {
                         Colour = colours.GreySeaFoamDark,
                         RelativeSizeAxes = Axes.Both,
-                        Width = 1
+                        Width = 1,
                     },
                     new OsuScrollContainer
                     {
@@ -152,10 +159,10 @@ namespace osu.Game.Screens.ReplayVs
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre
                     },
-                    new RoundedButton
+                    new BasicOsuButton
                     {
                         Text = "+",
-                        Size = new Vector2(30, 30),
+                        Size = new Vector2(30),
                         Action = addFileChooser,
                         Anchor = Anchor.TopCentre,
                         Origin = Anchor.TopCentre,
@@ -179,8 +186,8 @@ namespace osu.Game.Screens.ReplayVs
 
             public string[] Files => flowContainer.Children
                                                   .Cast<LabelledFileChooser>()
-                                                  .Where(f => f.Current.Value.FullName != string.Empty)
-                                                  .Select(f => f.Current.Value.FullName)
+                                                  .Where(f => f.Current.Value?.FullName != string.Empty)
+                                                  .Select(f => f.Current.Value?.FullName)
                                                   .ToArray();
         }
 

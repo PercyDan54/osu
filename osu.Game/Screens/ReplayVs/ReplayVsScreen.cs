@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.ObjectExtensions;
 using osu.Framework.Graphics;
@@ -42,12 +43,13 @@ namespace osu.Game.Screens.ReplayVs
         private MasterGameplayClockContainer masterClockContainer = null!;
         private SpectatorSyncManager syncManager = null!;
         private PlayerGrid grid = null!;
-        private PlayerArea currentAudioSource = null!;
+        private PlayerArea? currentAudioSource = null!;
         private readonly int replayCount;
         private readonly Score[] teamRedScores;
         private readonly Score[] teamBlueScores;
         private readonly BindableLong teamRedScore = new BindableLong();
         private readonly BindableLong teamBlueScore = new BindableLong();
+        private IAggregateAudioAdjustment? boundAdjustments;
 
         public ReplayVsScreen(Score[] teamRedScores, Score[] teamBlueScores, WorkingBeatmap beatmap)
         {
@@ -133,15 +135,26 @@ namespace osu.Game.Screens.ReplayVs
             }
         }
 
+        private void bindAudioAdjustments(PlayerArea first)
+        {
+            if (boundAdjustments != null)
+                masterClockContainer.AdjustmentsFromMods.UnbindAdjustments(boundAdjustments);
+
+            boundAdjustments = first.ClockAdjustmentsFromMods;
+            masterClockContainer.AdjustmentsFromMods.BindAdjustments(boundAdjustments);
+        }
+
         protected override void Update()
         {
             base.Update();
 
             if (!isCandidateAudioSource(currentAudioSource?.SpectatorPlayerClock))
             {
-                currentAudioSource = instances.Where(i => isCandidateAudioSource(i.SpectatorPlayerClock))
-                                              .OrderBy(i => Math.Abs(i.SpectatorPlayerClock.CurrentTime - syncManager.CurrentMasterTime))
-                                              .FirstOrDefault() ?? throw new InvalidOperationException();
+                currentAudioSource = instances.Where(i => isCandidateAudioSource(i.SpectatorPlayerClock)).MinBy(i => Math.Abs(i.SpectatorPlayerClock.CurrentTime - syncManager.CurrentMasterTime));
+
+                // Only bind adjustments if there's actually a valid source, else just use the previous ones to ensure no sudden changes to audio.
+                if (currentAudioSource != null)
+                    bindAudioAdjustments(currentAudioSource);
 
                 foreach (var instance in instances)
                     instance.Mute = instance != currentAudioSource;

@@ -16,7 +16,6 @@ using osu.Game.Beatmaps;
 using osu.Game.Input.Bindings;
 using osu.Game.IO.Archives;
 using osu.Game.Rulesets.Mods;
-using osu.Game.Rulesets.Objects;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
 using osu.Game.Screens.Play.HUD;
