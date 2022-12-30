@@ -354,7 +354,10 @@ namespace osu.Game
                     break;
 
                 case LinkAction.SearchBeatmapSet:
-                    SearchBeatmapSet(argString);
+                    if (link.Argument is RomanisableString romanisable)
+                        SearchBeatmapSet(romanisable.GetPreferred(Localisation.CurrentParameters.Value.PreferOriginalScript));
+                    else
+                        SearchBeatmapSet(argString);
                     break;
 
                 case LinkAction.OpenEditorTimestamp:
@@ -724,7 +727,7 @@ namespace osu.Game
         {
             base.LoadComplete();
 
-            var languages = Enum.GetValues(typeof(Language)).OfType<Language>();
+            var languages = Enum.GetValues<Language>();
 
             var mappings = languages.Select(language =>
             {
@@ -1043,9 +1046,7 @@ namespace osu.Game
 
             Logger.NewEntry += entry =>
             {
-                if (entry.Level < LogLevel.Important || entry.Target > LoggingTarget.Database) return;
-
-                Debug.Assert(entry.Target != null);
+                if (entry.Level < LogLevel.Important || entry.Target > LoggingTarget.Database || entry.Target == null) return;
 
                 const int short_term_display_limit = 3;
 
