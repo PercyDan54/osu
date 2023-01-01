@@ -67,7 +67,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Helper
             //处理要搜索的歌名: "艺术家 标题"
             string title = beatmap.Metadata.TitleUnicode;
             string artist = beatmap.Metadata.ArtistUnicode;
-            string target = encoder.Encode($"{artist} {title}");
+            string target = encoder.Encode($"{title} {artist}");
 
             var req = new OsuJsonWebRequest<APISearchResponseRoot>(
                 $"https://music.163.com/api/search/get/web?hlpretag=&hlposttag=&s={target}&type=1&total=true&limit=1");

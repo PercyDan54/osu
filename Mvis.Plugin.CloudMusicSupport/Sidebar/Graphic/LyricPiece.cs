@@ -216,7 +216,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
 
         protected override bool OnClick(ClickEvent e)
         {
-            mvisScreen.SeekTo(Value.Time + 1);
+            mvisScreen.SeekTo(Value.Time - plugin.Offset.Value + 1);
             return base.OnClick(e);
         }
 

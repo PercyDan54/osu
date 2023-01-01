@@ -180,8 +180,8 @@ namespace Mvis.Plugin.CloudMusicSupport
 
         public readonly BindableDouble Offset = new BindableDouble
         {
-            MaxValue = 3000,
-            MinValue = -3000
+            MaxValue = 30000,
+            MinValue = -30000
         };
 
         private readonly Bindable<bool> autoSave = new Bindable<bool>();

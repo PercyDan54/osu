@@ -120,6 +120,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Sidebar.Graphic
                     Current = plugin.Offset,
                     LabelText = CloudMusicStrings.LocalOffset,
                     RelativeSizeAxes = Axes.X,
+                    KeyboardStep = 5,
                     Padding = new MarginPadding { Right = 10 }
                 },
                 textBox = new OsuTextBox
