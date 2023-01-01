@@ -20,7 +20,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Helper
     {
         #region 歌词获取
 
-        private OsuJsonWebRequest<APISearchResponseRoot>? currentSearchRequest;
+        private APISearchSongRequest? currentSearchRequest;
         private OsuJsonWebRequest<APILyricResponseRoot>? currentLyricRequest;
 
         private CancellationTokenSource cancellationTokenSource = null!;
@@ -31,7 +31,7 @@ namespace Mvis.Plugin.CloudMusicSupport.Helper
             WorkingBeatmap beatmap,
             bool noLocalFile,
             Action<APILyricResponseRoot>? onFinish,
-            Action<string>? onFail)
+            Action<string>? onFail, bool includeArtist = true)
         {
             if (!noLocalFile)
             {
@@ -66,13 +66,12 @@ namespace Mvis.Plugin.CloudMusicSupport.Helper
 
             //处理要搜索的歌名: "艺术家 标题"
             string title = beatmap.Metadata.TitleUnicode;
-            string artist = beatmap.Metadata.ArtistUnicode;
-            string target = encoder.Encode($"{title} {artist}");
+            string artist = includeArtist ? beatmap.Metadata.ArtistUnicode : string.Empty;
+            string target = encoder.Encode($"{title} {artist}".Trim());
 
-            var req = new OsuJsonWebRequest<APISearchResponseRoot>(
-                $"https://music.163.com/api/search/get/web?hlpretag=&hlposttag=&s={target}&type=1&total=true&limit=1");
+            var req = new APISearchSongRequest(target);
 
-            req.Finished += () => onRequestFinish(req.ResponseObject, onFinish, onFail);
+            req.Finished += () => onRequestFinish(req.ResponseObject, onFinish, onFail, beatmap);
             req.Failed += e =>
             {
                 string message = "查询歌曲失败";
@@ -112,12 +111,18 @@ namespace Mvis.Plugin.CloudMusicSupport.Helper
             onRequestFinish(fakeResponse, onFinish, onFail);
         }
 
-        private void onRequestFinish(APISearchResponseRoot responseRoot, Action<APILyricResponseRoot>? onFinish, Action<string>? onFail)
+        private void onRequestFinish(APISearchResponseRoot responseRoot, Action<APILyricResponseRoot>? onFinish, Action<string>? onFail, WorkingBeatmap beatmap = null!)
         {
             int id = responseRoot.Result?.Songs?.First().ID ?? -1;
 
             if (id <= 0)
             {
+                if (currentSearchRequest != null && currentSearchRequest.Keyword != beatmap.Metadata.TitleUnicode)
+                {
+                    StartFetchByBeatmap(beatmap, true, onFinish, onFail, false);
+                    return;
+                }
+
                 onFail?.Invoke("未搜索到对应歌曲!");
                 return;
             }
