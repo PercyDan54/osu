@@ -120,6 +120,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                 }));
             }
             else
+            {
                 stack.Push(new ReplayVsPlayerLoader(Score, () =>
                 {
                     var player = new ReplayVsPlayer(Score, SpectatorPlayerClock, teamColor);
@@ -128,6 +129,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
                     clockAdjustmentsFromMods.BindAdjustments(player.ClockAdjustmentsFromMods);
                     return player;
                 }));
+            }
 
             loadingLayer.Hide();
         }
