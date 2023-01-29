@@ -3,37 +3,26 @@
 
 #nullable disable
 
-using System;
-using System.Collections.Generic;
-using osu.Framework.Allocation;
-using osu.Framework.Bindables;
-using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Colour;
-using osu.Framework.Graphics.Primitives;
-using osu.Framework.Graphics.Rendering;
-using osu.Framework.Graphics.Rendering.Vertices;
-using osu.Framework.Graphics.Shaders;
-using osu.Framework.Graphics.Textures;
-using osu.Framework.Lists;
 using osu.Framework.Utils;
-using osu.Game.Beatmaps;
-using osu.Game.Configuration;
 using osuTK;
 using osuTK.Graphics;
+using System;
+using osu.Framework.Graphics.Shaders;
+using osu.Framework.Graphics.Textures;
+using osu.Framework.Graphics.Colour;
+using osu.Framework.Graphics.Primitives;
+using osu.Framework.Allocation;
+using System.Collections.Generic;
+using osu.Framework.Graphics.Rendering;
+using osu.Framework.Graphics.Rendering.Vertices;
+using osu.Framework.Lists;
+using osu.Framework.Bindables;
 
 namespace osu.Game.Graphics.Backgrounds
 {
     public partial class Triangles : Drawable
     {
-        [Resolved]
-        private Bindable<WorkingBeatmap> b { get; set; }
-
-        private readonly Bindable<bool> trianglesEnabled = new Bindable<bool>();
-        private float extraY;
-        public bool IgnoreSettings;
-        public bool EnableBeatSync;
-        private float alpha_orig = 1;
         private const float triangle_size = 100;
         private const float base_velocity = 50;
 
@@ -41,12 +30,6 @@ namespace osu.Game.Graphics.Backgrounds
         /// sqrt(3) / 2
         /// </summary>
         private const float equilateral_triangle_ratio = 0.866f;
-
-        /// <summary>
-        /// How many screen-space pixels are smoothed over.
-        /// Same behavior as Sprite's EdgeSmoothness.
-        /// </summary>
-        private const float edge_smoothness = 1;
 
         private Color4 colourLight = Color4.White;
 
@@ -95,6 +78,12 @@ namespace osu.Game.Graphics.Backgrounds
         }
 
         /// <summary>
+        /// If enabled, only the portion of triangles that falls within this <see cref="Drawable"/>'s
+        /// shape is drawn to the screen.
+        /// </summary>
+        public bool Masking { get; set; }
+
+        /// <summary>
         /// Whether we should drop-off alpha values of triangles more quickly to improve
         /// the visual appearance of fading. This defaults to on as it is generally more
         /// aesthetically pleasing, but should be turned off in buffered containers.
@@ -123,45 +112,10 @@ namespace osu.Game.Graphics.Backgrounds
         }
 
         [BackgroundDependencyLoader]
-        private void load(IRenderer renderer, ShaderManager shaders, MConfigManager config)
+        private void load(IRenderer renderer, ShaderManager shaders)
         {
             texture = renderer.WhitePixel;
-            shader = shaders.Load(VertexShaderDescriptor.TEXTURE_2, FragmentShaderDescriptor.TEXTURE);
-
-            alpha_orig = Alpha;
-            config.BindWith(MSetting.TrianglesEnabled, trianglesEnabled);
-
-            trianglesEnabled.ValueChanged += _ => updateIcons();
-        }
-
-        private void updateFreq()
-        {
-            float[] sum = b.Value?.Track.CurrentAmplitudes.FrequencyAmplitudes.ToArray() ?? new float[256];
-            float totalSum = 0.25f;
-            bool IsKiai = b.Value?.Beatmap.ControlPointInfo.EffectPointAt(b.Value?.Track?.CurrentTime ?? 0).KiaiMode ?? false;
-
-            sum.ForEach(a => totalSum += a);
-
-            if (IsKiai) totalSum *= 1.5f;
-
-            extraY = totalSum;
-        }
-
-        private void updateIcons()
-        {
-            if (!IgnoreSettings)
-            {
-                switch (trianglesEnabled.Value)
-                {
-                    case true:
-                        this.FadeTo(alpha_orig, 250);
-                        break;
-
-                    case false:
-                        this.FadeOut(250);
-                        break;
-                }
-            }
+            shader = shaders.Load(VertexShaderDescriptor.TEXTURE_2, "TriangleBorder");
         }
 
         protected override void LoadComplete()
@@ -173,15 +127,6 @@ namespace osu.Game.Graphics.Backgrounds
         protected override void Update()
         {
             base.Update();
-
-            if (EnableBeatSync)
-            {
-                updateFreq();
-            }
-            else
-            {
-                extraY = 1;
-            }
 
             Invalidate(Invalidation.DrawNode);
 
@@ -307,14 +252,18 @@ namespace osu.Game.Graphics.Backgrounds
 
         private class TrianglesDrawNode : DrawNode
         {
+            private float fill = 1f;
+
             protected new Triangles Source => (Triangles)base.Source;
 
             private IShader shader;
             private Texture texture;
+            private bool masking;
 
             private readonly List<TriangleParticle> parts = new List<TriangleParticle>();
-            private Vector2 size;
+            private readonly Vector2 triangleSize = new Vector2(1f, equilateral_triangle_ratio) * triangle_size;
 
+            private Vector2 size;
             private IVertexBatch<TexturedVertex2D> vertexBatch;
 
             public TrianglesDrawNode(Triangles source)
@@ -329,6 +278,7 @@ namespace osu.Game.Graphics.Backgrounds
                 shader = Source.shader;
                 texture = Source.texture;
                 size = Source.DrawSize;
+                masking = Source.Masking;
 
                 parts.Clear();
                 parts.AddRange(Source.parts);
@@ -345,32 +295,50 @@ namespace osu.Game.Graphics.Backgrounds
                 }
 
                 shader.Bind();
-
-                Vector2 localInflationAmount = edge_smoothness * DrawInfo.MatrixInverse.ExtractScale().Xy;
+                shader.GetUniform<float>("thickness").UpdateValue(ref fill);
 
                 foreach (TriangleParticle particle in parts)
                 {
-                    var offset = triangle_size * new Vector2(particle.Scale * 0.5f, particle.Scale * equilateral_triangle_ratio);
+                    Vector2 relativeSize = Vector2.Divide(triangleSize * particle.Scale, size);
 
-                    var triangle = new Triangle(
-                        Vector2Extensions.Transform(particle.Position * size, DrawInfo.Matrix),
-                        Vector2Extensions.Transform(particle.Position * size + offset, DrawInfo.Matrix),
-                        Vector2Extensions.Transform(particle.Position * size + new Vector2(-offset.X, offset.Y), DrawInfo.Matrix)
+                    Vector2 topLeft = particle.Position - new Vector2(relativeSize.X * 0.5f, 0f);
+
+                    Quad triangleQuad = masking ? clampToDrawable(topLeft, relativeSize) : new Quad(topLeft.X, topLeft.Y, relativeSize.X, relativeSize.Y);
+
+                    var drawQuad = new Quad(
+                        Vector2Extensions.Transform(triangleQuad.TopLeft * size, DrawInfo.Matrix),
+                        Vector2Extensions.Transform(triangleQuad.TopRight * size, DrawInfo.Matrix),
+                        Vector2Extensions.Transform(triangleQuad.BottomLeft * size, DrawInfo.Matrix),
+                        Vector2Extensions.Transform(triangleQuad.BottomRight * size, DrawInfo.Matrix)
                     );
 
                     ColourInfo colourInfo = DrawColourInfo.Colour;
                     colourInfo.ApplyChild(particle.Colour);
 
-                    renderer.DrawTriangle(
-                        texture,
-                        triangle,
-                        colourInfo,
-                        null,
-                        vertexBatch.AddAction,
-                        Vector2.Divide(localInflationAmount, new Vector2(2 * offset.X, offset.Y)));
+                    RectangleF textureCoords = new RectangleF(
+                        triangleQuad.TopLeft.X - topLeft.X,
+                        triangleQuad.TopLeft.Y - topLeft.Y,
+                        triangleQuad.Width,
+                        triangleQuad.Height
+                    ) / relativeSize;
+
+                    renderer.DrawQuad(texture, drawQuad, colourInfo, new RectangleF(0, 0, 1, 1), vertexBatch.AddAction, textureCoords: textureCoords);
                 }
 
                 shader.Unbind();
+            }
+
+            private static Quad clampToDrawable(Vector2 topLeft, Vector2 size)
+            {
+                float leftClamped = Math.Clamp(topLeft.X, 0f, 1f);
+                float topClamped = Math.Clamp(topLeft.Y, 0f, 1f);
+
+                return new Quad(
+                    leftClamped,
+                    topClamped,
+                    Math.Clamp(topLeft.X + size.X, 0f, 1f) - leftClamped,
+                    Math.Clamp(topLeft.Y + size.Y, 0f, 1f) - topClamped
+                );
             }
 
             protected override void Dispose(bool isDisposing)

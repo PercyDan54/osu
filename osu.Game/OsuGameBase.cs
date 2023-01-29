@@ -97,8 +97,8 @@ namespace osu.Game
 
         public virtual bool UseDevelopmentServer => false;
 
-        internal EndpointConfiguration CreateEndpoints() =>
-            UseDevelopmentServer ? new DevelopmentEndpointConfiguration() : new ProductionEndpointConfiguration();
+        public virtual EndpointConfiguration CreateEndpoints() =>
+            UseDevelopmentServer ? new DevelopmentEndpointConfiguration() : new ExperimentalEndpointConfiguration();
 
         public virtual Version AssemblyVersion => Assembly.GetEntryAssembly()?.GetName().Version ?? new Version();
 
@@ -161,9 +161,12 @@ namespace osu.Game
 
         protected Bindable<WorkingBeatmap> Beatmap { get; private set; } // cached via load() method
 
+        /// <summary>
+        /// The current ruleset selection for the local user.
+        /// </summary>
         [Cached]
         [Cached(typeof(IBindable<RulesetInfo>))]
-        protected readonly Bindable<RulesetInfo> Ruleset = new Bindable<RulesetInfo>();
+        protected internal readonly Bindable<RulesetInfo> Ruleset = new Bindable<RulesetInfo>();
 
         /// <summary>
         /// The current mod selection for the local user.
@@ -190,7 +193,7 @@ namespace osu.Game
 
         private RulesetConfigCache rulesetConfigCache;
 
-        private SpectatorClient spectatorClient;
+        protected SpectatorClient SpectatorClient { get; private set; }
 
         protected MultiplayerClient MultiplayerClient { get; private set; }
 
@@ -239,7 +242,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "672bb36cff489dc63b056e6debc70aae";
+            VersionHash = "7b8c2b756d1e0d5799ce113ad4b99f1b";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -290,28 +293,28 @@ namespace osu.Game
             dependencies.Cache(ScoreDownloader = new ScoreModelDownloader(ScoreManager, API));
 
             // Add after all the above cache operations as it depends on them.
-            AddInternal(difficultyCache);
+            base.Content.Add(difficultyCache);
 
             // TODO: OsuGame or OsuGameBase?
             dependencies.CacheAs(beatmapUpdater = new BeatmapUpdater(BeatmapManager, difficultyCache, API, Storage));
-            dependencies.CacheAs(spectatorClient = new OnlineSpectatorClient(endpoints));
+            dependencies.CacheAs(SpectatorClient = new OnlineSpectatorClient(endpoints));
             dependencies.CacheAs(MultiplayerClient = new OnlineMultiplayerClient(endpoints));
             dependencies.CacheAs(metadataClient = new OnlineMetadataClient(endpoints));
             dependencies.CacheAs(soloStatisticsWatcher = new SoloStatisticsWatcher());
 
-            AddInternal(new BeatmapOnlineChangeIngest(beatmapUpdater, realm, metadataClient));
+            base.Content.Add(new BeatmapOnlineChangeIngest(beatmapUpdater, realm, metadataClient));
 
             BeatmapManager.ProcessBeatmap = args => beatmapUpdater.Process(args.beatmapSet, !args.isBatch);
 
             dependencies.Cache(userCache = new UserLookupCache());
-            AddInternal(userCache);
+            base.Content.Add(userCache);
 
             dependencies.Cache(beatmapCache = new BeatmapLookupCache());
-            AddInternal(beatmapCache);
+            base.Content.Add(beatmapCache);
 
             var scorePerformanceManager = new ScorePerformanceCache();
             dependencies.Cache(scorePerformanceManager);
-            AddInternal(scorePerformanceManager);
+            base.Content.Add(scorePerformanceManager);
 
             dependencies.CacheAs<IRulesetConfigCache>(rulesetConfigCache = new RulesetConfigCache(realm, RulesetStore));
 
@@ -338,14 +341,24 @@ namespace osu.Game
 
             // add api components to hierarchy.
             if (API is APIAccess apiAccess)
-                AddInternal(apiAccess);
+                base.Content.Add(apiAccess);
 
-            AddInternal(spectatorClient);
-            AddInternal(MultiplayerClient);
-            AddInternal(metadataClient);
-            AddInternal(soloStatisticsWatcher);
+            base.Content.Add(SpectatorClient);
+            base.Content.Add(MultiplayerClient);
+            base.Content.Add(metadataClient);
+            base.Content.Add(soloStatisticsWatcher);
 
-            AddInternal(rulesetConfigCache);
+            base.Content.Add(rulesetConfigCache);
+
+            PreviewTrackManager previewTrackManager;
+            dependencies.Cache(previewTrackManager = new PreviewTrackManager(BeatmapManager.BeatmapTrackStore));
+            base.Content.Add(previewTrackManager);
+
+            base.Content.Add(MusicController = new MusicController());
+            dependencies.CacheAs(MusicController);
+
+            MusicController.TrackChanged += onTrackChanged;
+            base.Content.Add(beatmapClock);
 
             GlobalActionContainer globalBindings;
 
@@ -371,16 +384,6 @@ namespace osu.Game
             KeyBindingStore.Register(globalBindings, RulesetStore.AvailableRulesets);
 
             dependencies.Cache(globalBindings);
-
-            PreviewTrackManager previewTrackManager;
-            dependencies.Cache(previewTrackManager = new PreviewTrackManager(BeatmapManager.BeatmapTrackStore));
-            Add(previewTrackManager);
-
-            AddInternal(MusicController = new MusicController());
-            dependencies.CacheAs(MusicController);
-
-            MusicController.TrackChanged += onTrackChanged;
-            AddInternal(beatmapClock);
 
             Ruleset.BindValueChanged(onRulesetChanged);
             Beatmap.BindValueChanged(onBeatmapChanged);
@@ -549,8 +552,8 @@ namespace osu.Game
                     case JoystickHandler jh:
                         return new JoystickSettings(jh);
 
-                    case TouchHandler:
-                        return new InputSection.HandlerSection(handler);
+                    case TouchHandler th:
+                        return new TouchSettings(th);
                 }
             }
 
