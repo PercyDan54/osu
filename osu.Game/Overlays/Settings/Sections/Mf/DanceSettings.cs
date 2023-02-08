@@ -217,17 +217,17 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
             };
         }
 
-        public partial class MultiplierSlider : OsuSliderBar<float>
+        public partial class MultiplierSlider : RoundedSliderBar<float>
         {
             public override LocalisableString TooltipText => Current.Value.ToString("g2") + "x";
         }
 
-        private partial class AngleSlider : OsuSliderBar<float>
+        private partial class AngleSlider : RoundedSliderBar<float>
         {
             public override LocalisableString TooltipText => (Current.Value * 180).ToString("g2") + "deg";
         }
 
-        private partial class FramerateSlider : OsuSliderBar<float>
+        private partial class FramerateSlider : RoundedSliderBar<float>
         {
             public override LocalisableString TooltipText => Current.Value.ToString("g0") + "fps";
         }

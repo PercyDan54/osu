@@ -6,7 +6,6 @@
         <PackageProjectUrl>https://github.com/matrix-feather/osu</PackageProjectUrl>
         <RepositoryUrl>https://github.com/matrix-feather/osu</RepositoryUrl>
         <PackageTags />
-        <Company></Company>
     </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Fonts\**\*" />
@@ -17,6 +16,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
-    <PackageReference Include="ppy.osu.Framework" Version="2023.120.0" />
+    <PackageReference Include="ppy.osu.Framework" Version="2023.131.0" />
   </ItemGroup>
 </Project>
