@@ -9,6 +9,7 @@ using System.Linq;
 using osu.Framework.Input.StateChanges;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Replays;
+using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
 
 namespace osu.Game.Rulesets.Osu.Mods
@@ -48,7 +49,7 @@ namespace osu.Game.Rulesets.Osu.Mods
             gameplayClock = drawableRuleset.FrameStableClock;
 
             // Grab the input manager to disable the user's cursor, and for future use
-            inputManager = (OsuInputManager)drawableRuleset.KeyBindingInputManager;
+            inputManager = ((DrawableOsuRuleset)drawableRuleset).KeyBindingInputManager;
             inputManager.AllowUserCursorMovement = false;
 
             // Generate the replay frames the cursor should follow

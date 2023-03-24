@@ -102,6 +102,9 @@ namespace osu.Game.Audio
 
             Track.Stop();
 
+            // Ensure the track is reset immediately on stopping, so the next time it is started it has a correct time value.
+            Track.Seek(0);
+
             Stopped?.Invoke();
         }
 
