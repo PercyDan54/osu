@@ -90,6 +90,11 @@ namespace osu.Game.Rulesets.Osu.UI
                     LabelText = "Cursor trail fade duration",
                     Current = mConfig.GetBindable<float>(MSetting.CursorTrailFadeDuration)
                 },
+                new SettingsCheckbox
+                {
+                    LabelText = RulesetSettingsStrings.CursorRipples,
+                    Current = config.GetBindable<bool>(OsuRulesetSetting.ShowCursorRipples)
+                },
                 new SettingsEnumDropdown<PlayfieldBorderStyle>
                 {
                     LabelText = RulesetSettingsStrings.PlayfieldBorderStyle,

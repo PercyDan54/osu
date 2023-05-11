@@ -70,7 +70,7 @@ namespace osu.Game
     [Cached(typeof(OsuGameBase))]
     public partial class OsuGameBase : Framework.Game, ICanAcceptFiles, IBeatSyncProvider
     {
-        public static readonly string[] VIDEO_EXTENSIONS = { ".mp4", ".mov", ".avi", ".flv" };
+        public static readonly string[] VIDEO_EXTENSIONS = { ".mp4", ".mov", ".avi", ".flv", ".mpg", ".wmv", ".m4v" };
 
         public const string OSU_PROTOCOL = "osu://";
 
@@ -242,7 +242,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider)
         {
-            VersionHash = "b14f7f587ba67899b94299e013a35edc";
+            VersionHash = "91cecc5d30e025deccc6c4541c41ea55";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -304,7 +304,7 @@ namespace osu.Game
 
             base.Content.Add(new BeatmapOnlineChangeIngest(beatmapUpdater, realm, metadataClient));
 
-            BeatmapManager.ProcessBeatmap = args => beatmapUpdater.Process(args.beatmapSet, !args.isBatch);
+            BeatmapManager.ProcessBeatmap = (beatmapSet, scope) => beatmapUpdater.Process(beatmapSet, scope);
 
             dependencies.Cache(userCache = new UserLookupCache());
             base.Content.Add(userCache);
@@ -622,15 +622,22 @@ namespace osu.Game
                 return;
             }
 
-            var previouslySelectedMods = SelectedMods.Value.ToArray();
-
-            if (!SelectedMods.Disabled)
-                SelectedMods.Value = Array.Empty<Mod>();
-
             AvailableMods.Value = dict;
 
-            if (!SelectedMods.Disabled)
-                SelectedMods.Value = previouslySelectedMods.Select(m => instance.CreateModFromAcronym(m.Acronym)).Where(m => m != null).ToArray();
+            if (SelectedMods.Disabled)
+                return;
+
+            var convertedMods = SelectedMods.Value.Select(mod =>
+            {
+                var newMod = instance.CreateModFromAcronym(mod.Acronym);
+                newMod?.CopyCommonSettingsFrom(mod);
+                return newMod;
+            }).Where(newMod => newMod != null).ToList();
+
+            if (!ModUtils.CheckValidForGameplay(convertedMods, out var invalid))
+                invalid.ForEach(newMod => convertedMods.Remove(newMod));
+
+            SelectedMods.Value = convertedMods;
 
             void revertRulesetChange() => Ruleset.Value = r.OldValue?.Available == true ? r.OldValue : RulesetStore.AvailableRulesets.First();
         }
