@@ -1,8 +1,6 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,24 +14,24 @@ using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu.Beatmaps;
 using osu.Game.Rulesets.Osu.Objects;
-using osu.Game.Rulesets.Osu.Replays.Movers;
+using osu.Game.Rulesets.Osu.Replays.Danse.Movers;
 using osu.Game.Rulesets.Osu.UI;
 using osuTK;
 using static osu.Game.Configuration.OsuDanceMover;
-using static osu.Game.Rulesets.Osu.Replays.Movers.MoverUtilExtensions;
+using static osu.Game.Rulesets.Osu.Replays.Danse.Movers.MoverUtilExtensions;
 
-namespace osu.Game.Rulesets.Osu.Replays
+namespace osu.Game.Rulesets.Osu.Replays.Danse
 {
     public class OsuDanceGenerator : OsuAutoGeneratorBase
     {
         public static Mover GetMover(OsuDanceMover mover) =>
             mover switch
             {
-                AxisAligned => new AxisAlignedMover(),
-                Aggresive => new AggressiveMover(),
-                Bezier => new BezierMover(),
-                HalfCircle => new HalfCircleMover(),
-                Flower => new FlowerMover(),
+                //AxisAligned => new AxisAlignedMover(),
+                //Aggresive => new AggressiveMover(),
+                //Bezier => new BezierMover(),
+                //HalfCircle => new HalfCircleMover(),
+                //Flower => new FlowerMover(),
                 Pippi => new PippiMover(),
                 Linear => new LinearMover(),
                 _ => new MomentumMover()
@@ -48,11 +46,12 @@ namespace osu.Game.Rulesets.Osu.Replays
         private readonly bool pippiStream;
         private readonly bool skipShortSliders;
         private readonly bool spinnerChangeFramerate;
-        private bool isStream;
+        private bool isStream = false;
         private readonly MConfigManager config;
         private readonly double frameDelay;
         private int buttonIndex;
-        private List<OsuHitObject> hitObjects = new List<OsuHitObject>();
+        private List<DanceHitObject> hitObjects = null!;
+        private List<DanceHitObject> inputHitObjects = null!;
         private readonly bool isPippi;
         private readonly double[] keyUpTime = { -10000, -10000 };
 
@@ -76,18 +75,122 @@ namespace osu.Game.Rulesets.Osu.Replays
 
         private void preProcessObjects()
         {
-            for (int i = 0; i < Beatmap.HitObjects.Count; i++)
+            hitObjects = Beatmap.HitObjects.SkipWhile(h => h is Spinner { SpinsRequired: 0 }).Select(h => new DanceHitObject(h)).ToList();
+
+            for (int i = 0; i < hitObjects.Count; i++)
             {
-                var h = Beatmap.HitObjects[i];
-
-                if (h is Spinner { SpinsRequired: 0 })
-                    continue;
-
-                hitObjects.Add(h);
+                if (hitObjects[i].BaseObject is Slider slider)
+                {
+                    if (slider.IsRetarded())
+                    {
+                        replaceSlider(i, hitObjects);
+                    }
+                }
             }
 
-            hitObjects = hitObjects.OrderBy(h => h.StartTime).ToList();
-            mover.HitObjects = hitObjects;
+            for (int i = 0; i < hitObjects.Count; i++)
+            {
+                var h = hitObjects[i].BaseObject;
+
+                bool found = false;
+
+                if (h is Slider)
+                {
+                    // Resolving 2B conflicts
+                    for (int j = i - 1; j >= 0; j--)
+                    {
+                        var o = hitObjects[Math.Max(0, i - 1)].BaseObject;
+
+                        if (o.GetEndTime() >= h.StartTime)
+                        {
+                            found = true;
+                            replaceSlider(i, hitObjects);
+
+                            break;
+                        }
+                    }
+
+                    if (!found && i + 1 < hitObjects.Count)
+                    {
+                        var o = hitObjects[Math.Min(hitObjects.Count, i + 1)];
+
+                        if (o.StartTime <= h.GetEndTime())
+                        {
+                            replaceSlider(i, hitObjects);
+                        }
+                    }
+                }
+            }
+
+            // Second 2B pass for spinners
+            for (int i = 0; i < hitObjects.Count; i++)
+            {
+                if (hitObjects[i].BaseObject is Spinner s)
+                {
+                    var subSpinners = new List<Spinner>();
+                    double startTime = s.StartTime;
+
+                    for (int j = i + 1; j < hitObjects.Count; j++)
+                    {
+                        var o = hitObjects[j];
+
+                        if (o.StartTime >= s.EndTime) break;
+
+                        double endTime = o.StartTime - 30;
+
+                        if (endTime > startTime)
+                        {
+                            subSpinners.Add(new Spinner { StartTime = startTime, EndTime = endTime });
+                        }
+
+                        startTime = o.EndTime + 30;
+                    }
+
+                    if (subSpinners.Count > 0)
+                    {
+                        if (s.EndTime > startTime)
+                        {
+                            subSpinners.Add(new Spinner { StartTime = startTime, EndTime = s.EndTime });
+                        }
+
+                        hitObjects.RemoveAt(i);
+                        hitObjects.InsertRange(i, subSpinners.Select(h => new DanceHitObject(h)));
+
+                        hitObjects = hitObjects.OrderBy(h => h.StartTime).ToList();
+                    }
+                }
+            }
+
+            inputHitObjects = hitObjects.ToList();
+            hitObjects.Add(new DanceHitObject(new HitCircle { Position = new Vector2(), StartTime = -1000 }));
+
+            for (int i = 0; i < inputHitObjects.Count; i++)
+            {
+                var current = inputHitObjects[i];
+
+                for (int j = i + 1; j < inputHitObjects.Count; j++)
+                {
+                    var o = inputHitObjects[j].BaseObject;
+
+                    if (current.EndTime < o.StartTime) break;
+
+                    if (o is HitCircle || o is Slider)
+                    {
+                        inputHitObjects[j].StartTime++;
+                    }
+                }
+            }
+        }
+
+        private void replaceSlider(int index, List<DanceHitObject> queue)
+        {
+            if (queue[index].BaseObject is Slider s)
+            {
+                queue.RemoveAt(index);
+                queue.InsertRange(index, s.NestedHitObjects.Cast<OsuHitObject>().Select(h => new DanceHitObject(h)));
+
+                queue = queue.OrderBy(h => h.StartTime).ToList();
+            }
         }
 
         private void updateAction(OsuHitObject h, OsuHitObject last)
@@ -220,7 +323,7 @@ namespace osu.Game.Rulesets.Osu.Replays
         {
             var h = hitObjects[0];
 
-            AddFrameToReplay(new OsuReplayFrame(-10000, h.StackedPosition));
+            AddFrameToReplay(new OsuReplayFrame(-10000, h.StartPos));
 
             Vector2 baseSize = OsuPlayfield.BASE_SIZE;
 
@@ -232,21 +335,14 @@ namespace osu.Game.Rulesets.Osu.Replays
             float y0 = (baseSize.Y - yf) / 2f;
             float y1 = yf + y0;
 
-            mover.StartPos = h.StackedPosition;
-            mover.OnObjChange();
+            int remove = mover.SetObjects(hitObjects);
 
             for (int i = 0; i < hitObjects.Count; i++)
             {
-                var prev = h;
-                h = hitObjects[i];
-                mover.StartPos = addHitObjectClickFrames(h, prev);
-                var next = hitObjects[Math.Min(i + 1, hitObjects.Count - 1)];
-                isStream = pippiStream && IsStream(h, next, hitObjects[Math.Min(hitObjects.Count - 1, i + 2)]) && !(mover is PippiMover);
-                mover.EndPos = next.StackedPosition;
-                mover.ObjectIndex = Math.Min(Math.Max(hitObjects.Count - 2, 0), i);
-                mover.OnObjChange();
+                double lastEndTime = 0;
+                lastEndTime = Math.Max(lastEndTime, hitObjects[i].EndTime);
 
-                for (double time = h.GetEndTime() + frameDelay; time < mover.End.StartTime; time += frameDelay)
+                for (double time = mover.StartTime; time < mover.EndTime; time += frameDelay)
                 {
                     var currentPosition = ApplyPippiOffset(mover.Update(time), time, isStream ? -1 : 0);
 
@@ -276,12 +372,32 @@ namespace osu.Game.Rulesets.Osu.Replays
 
                     AddFrameToReplay(new OsuReplayFrame(time, currentPosition, getAction(time)));
                 }
+
+                int upperLimit = hitObjects.Count;
+
+                for (int j = i; j < hitObjects.Count; j++)
+                {
+                    if (hitObjects[j].EndTime >= lastEndTime)
+                    {
+                        break;
+                    }
+
+                    upperLimit = j + 1;
+                }
+
+                if (upperLimit - i > 1)
+                {
+                    remove = mover.SetObjects(hitObjects.GetRange(i, upperLimit - i)) - 1;
+                }
+
+                hitObjects.RemoveRange(0, remove - 1);
+                //i--;
             }
 
             // idk how to fix this
             if (!(h is IHasDuration))
             {
-                addHitObjectClickFrames(hitObjects[^1], hitObjects[^2]);
+                //addHitObjectClickFrames(hitObjects[^1].BaseObject, hitObjects[^2].BaseObject);
             }
 
             var lastFrame = (OsuReplayFrame)Frames[^1];

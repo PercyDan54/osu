@@ -9,6 +9,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Configuration;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.Osu.Replays;
+using osu.Game.Rulesets.Osu.Replays.Danse;
 
 namespace osu.Game.Rulesets.Osu.Mods
 {

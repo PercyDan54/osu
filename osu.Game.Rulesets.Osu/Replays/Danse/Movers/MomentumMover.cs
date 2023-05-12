@@ -1,16 +1,15 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System;
+using System.Collections.Generic;
 using osu.Game.Configuration;
 using osu.Game.Rulesets.Objects.Types;
 using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
-using static osu.Game.Rulesets.Osu.Replays.Movers.MoverUtilExtensions;
+using static osu.Game.Rulesets.Osu.Replays.Danse.Movers.MoverUtilExtensions;
 
-namespace osu.Game.Rulesets.Osu.Replays.Movers
+namespace osu.Game.Rulesets.Osu.Replays.Danse.Movers
 {
     public class MomentumMover : Mover
     {
@@ -18,6 +17,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
 
         private Vector2 last;
         private BezierCurveCubic curve;
+        private bool first = true;
         private readonly float jumpMult;
         private readonly float offsetMult;
         private readonly bool skipStacks;
@@ -60,71 +60,77 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             invertAngleInterpolation = config.Get<bool>(MSetting.InvertAngleInterpolation);
         }
 
-        private bool isSame(OsuHitObject o1, OsuHitObject o2) => isSame(o1, o2, skipStacks);
+        private bool isSame(DanceHitObject o1, DanceHitObject o2) => isSame(o1.BaseObject, o2.BaseObject, skipStacks);
 
         private bool isSame(OsuHitObject o1, OsuHitObject o2, bool skipStacks)
         {
-            return o1.StackedPosition == o2.StackedPosition || skipStacks && o1.Position == o2.Position;
+            return o1.StackedPosition == o2.StackedPosition || (skipStacks && o1.Position == o2.Position);
         }
 
-        private (float, bool) nextAngle()
+        public override int SetObjects(List<DanceHitObject> objects)
         {
-            var h = HitObjects;
+            OsuHitObject? next = null;
 
-            for (int i = ObjectIndex + 1; i < h.Count - 1; ++i)
-            {
-                var o = h[i];
-                if (o is Slider s) return (s.GetStartAngle(), true);
-                if (!isSame(o, h[i + 1])) return (o.StackedPosition.AngleRV(h[i + 1].StackedPosition), false);
-            }
-
-            return ((h[^1] as Slider)?.GetEndAngle()
-                    ?? ((Start as Slider)?.GetEndAngle() ?? StartPos.AngleRV(last)) + MathF.PI, false);
-        }
-
-        public override void OnObjChange()
-        {
-            OsuHitObject next = null;
-
-            if (HitObjects.Count - 1 > ObjectIndex + 2) next = HitObjects[ObjectIndex + 2];
+            if (objects.Count > 2) next = objects[2].BaseObject;
+            var start = objects[0];
+            var end = objects[Math.Min(objects.Count - 1, 1)];
+            var startPos = start.EndPos;
+            var endPos = end.StartPos;
+            StartTime = start.EndTime;
+            EndTime = end.StartTime;
 
             bool stream = false;
             float sq1 = 0, sq2 = 0;
 
             if (next != null)
             {
-                stream = IsStream(Start, End, next) && streamRestrict;
-                sq1 = Vector2.DistanceSquared(StartPos, EndPos);
-                sq2 = Vector2.DistanceSquared(EndPos, next.StackedPosition);
+                stream = IsStream(start.BaseObject, end.BaseObject, next) && streamRestrict;
+                sq1 = Vector2.DistanceSquared(startPos, endPos);
+                sq2 = Vector2.DistanceSquared(endPos, next.StackedPosition);
             }
 
             float area = restrictArea * MathF.PI / 180f;
             float sarea = streamArea * MathF.PI / 180f;
             float mult = jumpMult;
-            float distance = Vector2.Distance(StartPos, EndPos);
+            float distance = Vector2.Distance(startPos, endPos);
 
-            var startSlider = Start as Slider;
-            (float a2, bool fromLong) = nextAngle();
-            float a1 = startSlider?.GetEndAngle() ?? (ObjectIndex == 0 ? a2 + MathF.PI : StartPos.AngleRV(last));
-            float ac = a2 - EndPos.AngleRV(StartPos);
+            bool fromLong = false;
+            float a, a2 = start.StartPos.AngleRV(endPos);
 
-            if (End is Slider s2 && !isSame(Start, End) && sliderPredict)
+            for (int i = 1; i < objects.Count; i++)
             {
-                var pos = Start.StackedPosition;
-                var pos2 = EndPos;
+                var o = objects[i];
+
+                if (o.BaseObject is Slider s)
+                {
+                    a2 = s.GetStartAngle();
+                    fromLong = true;
+                    break;
+                }
+
+                if (i == objects.Count - 1)
+                {
+                    a2 = last.AngleRV(startPos);
+                    break;
+                }
+            }
+
+            if (end.BaseObject is Slider s2 && !isSame(start, end) && sliderPredict)
+            {
+                var pos = startPos;
+                var pos2 = endPos;
                 float s2a = s2.GetStartAngle();
                 float dst2 = Vector2.Distance(pos, pos2);
                 pos2 = new Vector2(s2a, dst2 * mult) + pos2;
                 a2 = pos.AngleRV(pos2);
             }
-            else
-                a2 = Start.StackedPosition.AngleRV(EndPos);
 
-            float a;
+            float a1 = (start.BaseObject as Slider)?.GetEndAngle() ?? (first ? a2 + MathF.PI : startPos.AngleRV(last));
+            float ac = a2 - endPos.AngleRV(startPos);
 
             if (sarea > 0 && stream && anorm(ac) < anorm(2 * MathF.PI - sarea))
             {
-                a = StartPos.AngleRV(EndPos);
+                a = startPos.AngleRV(endPos);
                 const float sangle = MathF.PI * 0.5f;
 
                 if (anorm(a1 - a) > MathF.PI)
@@ -136,7 +142,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             }
             else if (!fromLong && area > 0 && MathF.Abs(anorm2(ac)) < area)
             {
-                a = EndPos.AngleRV(StartPos);
+                a = endPos.AngleRV(startPos);
 
                 if (anorm(a2 - a) < offset != restrictInvert)
                     a2 = a + restrictAngleAdd * MathF.PI / 180f;
@@ -148,24 +154,24 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             else if (next != null && !fromLong && interpolateAngles)
             {
                 float r = sq1 / (sq1 + sq2);
-                a = StartPos.AngleRV(EndPos);
+                a = startPos.AngleRV(endPos);
 
                 if (invertAngleInterpolation)
                     r = sq2 / (sq1 + sq2);
 
-                if (!isSame(Start, End))
+                if (!isSame(start, end))
                     a2 = a + r * anorm2(a2 - a);
 
                 mult = offsetMult;
             }
 
-            bool bounce = !(End is IHasDuration) && isSame(Start, End, true);
+            bool bounce = !(end.BaseObject is IHasDuration) && isSame(start.BaseObject, end.BaseObject, true);
 
             if (equalPosBounce > 0 && bounce)
             {
-                a1 = StartPos.AngleRV(last);
+                a1 = startPos.AngleRV(last);
                 a2 = a1 + MathF.PI;
-                distance = Vector2.Distance(last, StartPos);
+                distance = Vector2.Distance(last, startPos);
                 mult = equalPosBounce;
             }
 
@@ -174,12 +180,15 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             if (durationTrigger > 0 && duration >= durationTrigger)
                 mult *= durationMult * (duration / durationTrigger);
 
-            var p1 = V2FromRad(a1, distance * mult) + StartPos;
-            var p2 = V2FromRad(a2, distance * mult) + EndPos;
+            var p1 = V2FromRad(a1, distance * mult) + startPos;
+            var p2 = V2FromRad(a2, distance * mult) + endPos;
 
             if (!bounce) last = p2;
 
-            curve = new BezierCurveCubic(StartPos, EndPos, p1, p2);
+            curve = new BezierCurveCubic(startPos, endPos, p1, p2);
+            first = false;
+
+            return 3;
         }
 
         private float anorm(float a)
@@ -203,6 +212,6 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             return a;
         }
 
-        public override Vector2 Update(double time) => curve.CalculatePoint(T(time));
+        public override Vector2 Update(double time) => curve.CalculatePoint(ProgressAt(time));
     }
 }

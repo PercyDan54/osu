@@ -9,6 +9,7 @@ using System.Linq;
 using osu.Framework.Input.StateChanges;
 using osu.Game.Rulesets.Osu.Objects;
 using osu.Game.Rulesets.Osu.Replays;
+using osu.Game.Rulesets.Osu.Replays.Danse;
 using osu.Game.Rulesets.Osu.UI;
 using osu.Game.Rulesets.UI;
 

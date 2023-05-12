@@ -1,15 +1,14 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using System;
+using osu.Framework.Utils;
 using osu.Game.Configuration;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 
-namespace osu.Game.Rulesets.Osu.Replays.Movers
+namespace osu.Game.Rulesets.Osu.Replays.Danse.Movers
 {
     public static class MoverUtilExtensions
     {
@@ -23,6 +22,8 @@ namespace osu.Game.Rulesets.Osu.Replays.Movers
             (start ? s.StackedPosition : s.StackedEndPosition).AngleRV(s.StackedPositionAt(
                 start ? 1 / s.Duration : (s.Duration - 1) / s.Duration
             ));
+
+        public static bool IsRetarded(this Slider s) => s.Distance == 0 || Precision.AlmostEquals(s.StartTime, s.EndTime);
 
         public static float AngleBetween(Vector2 centre, Vector2 v1, Vector2 v2)
         {
