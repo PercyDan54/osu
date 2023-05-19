@@ -9,11 +9,11 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
 {
     public class DanceHitObject
     {
+        public readonly OsuHitObject BaseObject = null!;
         public Vector2 StartPos;
         public Vector2 EndPos;
         public double StartTime;
         public double EndTime;
-        public readonly OsuHitObject BaseObject = null!;
 
         public DanceHitObject()
         {

@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using osu.Framework.Graphics;
 using osu.Framework.Utils;
 using osu.Game.Configuration;
-using osu.Game.Rulesets.Objects;
-using osu.Game.Rulesets.Osu.Objects;
 using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Replays.Danse.Movers
@@ -18,10 +16,6 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse.Movers
     {
         protected readonly bool WaitForPreempt = MConfigManager.Instance.Get<bool>(MSetting.WaitForPreempt);
         protected new double StartTime;
-        protected OsuHitObject Start;
-        protected OsuHitObject End;
-        protected Vector2 StartPos;
-        protected Vector2 EndPos;
 
         protected double GetReactionTime(double timeInstant) => ApplyModsToRate(timeInstant, 100);
 
@@ -34,7 +28,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse.Movers
 
         public override Vector2 Update(double time)
         {
-            double waitTime = End.StartTime - Math.Max(0, End.TimePreempt - GetReactionTime(EndTime - End.TimePreempt));
+            double waitTime = End.StartTime - Math.Max(0, End.BaseObject.TimePreempt - GetReactionTime(EndTime - End.BaseObject.TimePreempt));
 
             if (WaitForPreempt && waitTime > time)
             {
@@ -45,15 +39,10 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse.Movers
             return Interpolation.ValueAt(time, StartPos, EndPos, StartTime, EndTime, Easing.Out);
         }
 
-        public override int SetObjects(List<DanceHitObject> objects)
+        public override void SetObjects(List<DanceHitObject> objects)
         {
-            Start = objects[0].BaseObject;
-            End = objects[1].BaseObject;
-            StartPos = objects[0].EndPos;
-            EndPos = objects[1].StartPos;
-            StartTime = base.StartTime = Start.GetEndTime();
-            EndTime = End.StartTime;
-            return 2;
+            base.SetObjects(objects);
+            StartTime = base.StartTime;
         }
     }
 }
