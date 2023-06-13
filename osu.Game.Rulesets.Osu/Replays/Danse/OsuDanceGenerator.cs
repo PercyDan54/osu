@@ -26,7 +26,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
             {
                 AxisAligned => new AxisAlignedMover(),
                 Aggresive => new AggressiveMover(),
-                //Bezier => new BezierMover(),
+                Bezier => new BezierMover(),
                 HalfCircle => new HalfCircleMover(),
                 Flower => new FlowerMover(),
                 Pippi => new PippiMover(),
@@ -338,7 +338,13 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
             {
                 var prev = h;
                 h = hitObjects[i];
-                addHitObjectClickFrames(h, prev);
+
+                if (i > 1)
+                {
+                    // HACK: mover moves from hitObject[i - 1] to hitObject[i], so input has to be hitObject[i - 2] to hitObject[i - 1]
+                    var prevPrev = hitObjects[i - 2];
+                    addHitObjectClickFrames(prev, prevPrev);
+                }
 
                 for (double time = mover.StartTime; time < mover.EndTime; time += frameDelay)
                 {
@@ -368,15 +374,16 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
                         }
                     }
 
-                    AddFrameToReplay(new OsuReplayFrame(time, currentPosition));
+                    AddFrameToReplay(new OsuReplayFrame(time, currentPosition, getAction(time)));
                 }
 
                 mover.SetObjects(hitObjects.GetRange(i, hitObjects.Count - i));
             }
 
+            addHitObjectClickFrames(hitObjects[^1], hitObjects[^2]);
             var lastFrame = (OsuReplayFrame)Frames[^1];
-            lastFrame.Actions.Clear();
-            AddFrameToReplay(lastFrame);
+            var newLastFrame = new OsuReplayFrame(lastFrame.Time + 50, lastFrame.Position);
+            AddFrameToReplay(newLastFrame);
 
             return Replay;
         }
