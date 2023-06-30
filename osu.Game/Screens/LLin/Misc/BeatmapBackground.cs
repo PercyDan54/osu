@@ -32,7 +32,7 @@ namespace osu.Game.Screens.LLin.Misc
         [BackgroundDependencyLoader]
         private void load(TextureStore textures)
         {
-            sprite.Texture = beatmap?.Background ?? textures.Get(@"Backgrounds/bg4");
+            sprite.Texture = beatmap?.GetBackground() ?? textures.Get(@"Backgrounds/bg4");
         }
     }
 }

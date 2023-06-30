@@ -126,9 +126,9 @@ namespace osu.Game.Screens.LLin.Misc
             }
 
             [BackgroundDependencyLoader]
-            private void load(TextureStore textures)
+            private void load()
             {
-                Texture = b?.Background;
+                Texture = b?.GetBackground();
             }
         }
     }

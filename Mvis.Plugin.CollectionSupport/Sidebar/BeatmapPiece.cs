@@ -130,19 +130,17 @@ namespace Mvis.Plugin.CollectionSupport.Sidebar
                         Padding = new MarginPadding { Left = 15 },
                         Children = new Drawable[]
                         {
-                            new OsuSpriteText
+                            new TruncatingSpriteText
                             {
                                 Text = getRomanisableStringFor(Beatmap.Metadata.TitleUnicode, Beatmap.Metadata.Title),
                                 Font = OsuFont.GetFont(weight: FontWeight.Bold, size: 20),
                                 RelativeSizeAxes = Axes.X,
-                                Truncate = true
                             },
-                            new OsuSpriteText
+                            new TruncatingSpriteText
                             {
                                 Text = getRomanisableStringFor(Beatmap.Metadata.ArtistUnicode, Beatmap.Metadata.Artist),
                                 Font = OsuFont.GetFont(weight: FontWeight.Bold),
                                 RelativeSizeAxes = Axes.X,
-                                Truncate = true
                             }
                         }
                     },

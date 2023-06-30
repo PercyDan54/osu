@@ -237,9 +237,6 @@ namespace osu.Game.Screens.Play
 
             dependencies.CacheAs(HealthProcessor);
 
-            if (!ScoreProcessor.Mode.Disabled)
-                config.BindWith(OsuSetting.ScoreDisplayMode, ScoreProcessor.Mode);
-
             InternalChild = GameplayClockContainer = CreateGameplayClockContainer(Beatmap.Value, DrawableRuleset.GameplayStartTime);
 
             AddInternal(screenSuspension = new ScreenSuspensionHandler(GameplayClockContainer));
@@ -381,9 +378,6 @@ namespace osu.Game.Screens.Play
             IsBreakTime.BindTo(breakTracker.IsBreakTime);
             IsBreakTime.BindValueChanged(onBreakTimeChanged, true);
 
-            if (Configuration.AutomaticallySkipIntro)
-                skipIntroOverlay.SkipWhenReady();
-
             loadLeaderboard();
         }
 
@@ -435,13 +429,12 @@ namespace osu.Game.Screens.Play
                             IsPaused = { BindTarget = GameplayClockContainer.IsPaused },
                             ReplayLoaded = { BindTarget = DrawableRuleset.HasReplayLoaded },
                         },
-                        KeyCounter =
+                        InputCountController =
                         {
                             IsCounting =
                             {
                                 Value = false
                             },
-                            AlwaysVisible = { BindTarget = DrawableRuleset.HasReplayLoaded },
                         },
                         Anchor = Anchor.Centre,
                         Origin = Anchor.Centre
@@ -481,7 +474,7 @@ namespace osu.Game.Screens.Play
         {
             updateGameplayState();
             updatePauseOnFocusLostState();
-            HUDOverlay.KeyCounter.IsCounting.Value = !isBreakTime.NewValue;
+            HUDOverlay.InputCountController.IsCounting.Value = !isBreakTime.NewValue;
         }
 
         private void updateGameplayState()
@@ -1090,6 +1083,9 @@ namespace osu.Game.Screens.Play
                 throw new InvalidOperationException($"{nameof(StartGameplay)} should not be called when the gameplay clock is already running");
 
             GameplayClockContainer.Reset(startClock: true);
+
+            if (Configuration.AutomaticallySkipIntro)
+                skipIntroOverlay.SkipWhenReady();
         }
 
         public override void OnSuspending(ScreenTransitionEvent e)

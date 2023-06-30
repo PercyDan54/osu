@@ -1,7 +1,5 @@
-// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
+﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
-
-#nullable disable
 
 using System;
 using System.Diagnostics;
@@ -178,6 +176,7 @@ namespace osu.Game.Configuration
             SetDefault(OsuSetting.EditorWaveformOpacity, 0.25f, 0f, 1f, 0.25f);
             SetDefault(OsuSetting.EditorShowHitMarkers, true);
             SetDefault(OsuSetting.EditorAutoSeekOnPlacement, true);
+            SetDefault(OsuSetting.EditorLimitedDistanceSnap, false);
 
             SetDefault(OsuSetting.LastProcessedMetadataId, -1);
 
@@ -258,7 +257,7 @@ namespace osu.Game.Configuration
                     string skinName = string.Empty;
 
                     if (Guid.TryParse(skin, out var id))
-                        skinName = LookupSkinName(id) ?? string.Empty;
+                        skinName = LookupSkinName(id);
 
                     return new SettingDescription(
                         rawValue: skinName,
@@ -383,5 +382,6 @@ namespace osu.Game.Configuration
         SafeAreaConsiderations,
         ComboColourNormalisationAmount,
         ProfileCoverExpanded,
+        EditorLimitedDistanceSnap
     }
 }

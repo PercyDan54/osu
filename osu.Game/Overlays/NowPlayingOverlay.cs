@@ -246,8 +246,6 @@ namespace osu.Game.Overlays
 
         protected override void PopIn()
         {
-            base.PopIn();
-
             this.FadeIn(transition_length, Easing.OutQuint);
             dragContainer.ScaleTo(1, transition_length, Easing.OutElastic);
         }
@@ -433,7 +431,7 @@ namespace osu.Game.Overlays
             [BackgroundDependencyLoader]
             private void load(LargeTextureStore textures)
             {
-                sprite.Texture = beatmap?.Background ?? textures.Get(@"Backgrounds/bg4");
+                sprite.Texture = beatmap?.GetBackground() ?? textures.Get(@"Backgrounds/bg4");
             }
         }
 

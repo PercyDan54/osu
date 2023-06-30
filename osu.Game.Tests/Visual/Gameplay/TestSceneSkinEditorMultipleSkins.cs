@@ -22,8 +22,8 @@ namespace osu.Game.Tests.Visual.Gameplay
 {
     public partial class TestSceneSkinEditorMultipleSkins : SkinnableTestScene
     {
-        [Cached]
-        private readonly ScoreProcessor scoreProcessor = new ScoreProcessor(new OsuRuleset());
+        [Cached(typeof(ScoreProcessor))]
+        private ScoreProcessor scoreProcessor => gameplayState.ScoreProcessor;
 
         [Cached(typeof(HealthProcessor))]
         private HealthProcessor healthProcessor = new DrainingHealthProcessor(0);
@@ -58,7 +58,7 @@ namespace osu.Game.Tests.Visual.Gameplay
                     };
 
                     // Add any key just to display the key counter visually.
-                    hudOverlay.KeyCounter.Add(new KeyCounterKeyboardTrigger(Key.Space));
+                    hudOverlay.InputCountController.Add(new KeyCounterKeyboardTrigger(Key.Space));
                     scoreProcessor.Combo.Value = 1;
 
                     return new Container

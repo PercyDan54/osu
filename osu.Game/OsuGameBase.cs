@@ -14,6 +14,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Track;
 using osu.Framework.Bindables;
+using osu.Framework.Configuration;
 using osu.Framework.Development;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -26,6 +27,7 @@ using osu.Framework.Input.Handlers.Mouse;
 using osu.Framework.Input.Handlers.Tablet;
 using osu.Framework.Input.Handlers.Touch;
 using osu.Framework.IO.Stores;
+using osu.Framework.Localisation;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
 using osu.Framework.Timing;
@@ -35,11 +37,13 @@ using osu.Game.Beatmaps.ControlPoints;
 using osu.Game.Beatmaps.Formats;
 using osu.Game.Configuration;
 using osu.Game.Database;
+using osu.Game.Extensions;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Cursor;
 using osu.Game.Input;
 using osu.Game.Input.Bindings;
 using osu.Game.IO;
+using osu.Game.Localisation;
 using osu.Game.Online;
 using osu.Game.Online.API;
 using osu.Game.Online.Chat;
@@ -159,6 +163,11 @@ namespace osu.Game
 
         protected Storage Storage { get; set; }
 
+        /// <summary>
+        /// The language in which the game is currently displayed in.
+        /// </summary>
+        public Bindable<Language> CurrentLanguage { get; } = new Bindable<Language>();
+
         protected Bindable<WorkingBeatmap> Beatmap { get; private set; } // cached via load() method
 
         /// <summary>
@@ -218,6 +227,10 @@ namespace osu.Game
 
         private readonly BindableNumber<double> globalTrackVolumeAdjust = new BindableNumber<double>(global_track_volume_adjust);
 
+        private Bindable<string> frameworkLocale = null!;
+
+        private IBindable<LocalisationParameters> localisationParameters = null!;
+
         /// <summary>
         /// Number of unhandled exceptions to allow before aborting execution.
         /// </summary>
@@ -240,9 +253,9 @@ namespace osu.Game
         }
 
         [BackgroundDependencyLoader]
-        private void load(ReadableKeyCombinationProvider keyCombinationProvider)
+        private void load(ReadableKeyCombinationProvider keyCombinationProvider, FrameworkConfigManager frameworkConfig)
         {
-            VersionHash = "91cecc5d30e025deccc6c4541c41ea55";
+            VersionHash = "40a1f3ed2f49851f10755af37f65c4b3";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -278,7 +291,15 @@ namespace osu.Game
 
             MessageFormatter.WebsiteRootUrl = endpoints.WebsiteRootUrl;
 
-            dependencies.CacheAs(API ??= new APIAccess(LocalConfig, endpoints, VersionHash));
+            frameworkLocale = frameworkConfig.GetBindable<string>(FrameworkSetting.Locale);
+            frameworkLocale.BindValueChanged(_ => updateLanguage());
+
+            localisationParameters = Localisation.CurrentParameters.GetBoundCopy();
+            localisationParameters.BindValueChanged(_ => updateLanguage(), true);
+
+            CurrentLanguage.BindValueChanged(val => frameworkLocale.Value = val.NewValue.ToCultureCode());
+
+            dependencies.CacheAs(API ??= new APIAccess(this, LocalConfig, endpoints, VersionHash));
 
             var defaultBeatmap = new DummyWorkingBeatmap(Audio, Textures);
 
@@ -389,6 +410,8 @@ namespace osu.Game
             Beatmap.BindValueChanged(onBeatmapChanged);
         }
 
+        private void updateLanguage() => CurrentLanguage.Value = LanguageExtensions.GetLanguageFor(frameworkLocale.Value, localisationParameters.Value);
+
         private void addFilesWarning()
         {
             var realmStore = new RealmFileStore(realm, Storage);
@@ -488,6 +511,12 @@ namespace osu.Game
             else
                 Scheduler.AddDelayed(AttemptExit, 2000);
         }
+
+        /// <summary>
+        /// If supported by the platform, the game will automatically restart after the next exit.
+        /// </summary>
+        /// <returns>Whether a restart operation was queued.</returns>
+        public virtual bool RestartAppWhenExited() => false;
 
         public bool Migrate(string path)
         {

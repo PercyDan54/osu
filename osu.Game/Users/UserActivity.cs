@@ -1,8 +1,6 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-#nullable disable
-
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Online.Rooms;
@@ -161,7 +159,7 @@ namespace osu.Game.Users
                 Unicode = useUnicode;
             }
 
-            public override string GetStatus(bool hideIdentifiableInformation = false) => $@"Listening to {(Unicode || string.IsNullOrEmpty(Beatmap.BeatmapSet.Metadata.Title) ? Beatmap.BeatmapSet.Metadata.TitleUnicode : Beatmap.BeatmapSet.Metadata.Title)} - {(Unicode || string.IsNullOrEmpty(Beatmap.BeatmapSet.Metadata.Title) ? Beatmap.BeatmapSet.Metadata.ArtistUnicode : Beatmap.BeatmapSet.Metadata.Artist)}";
+            public override string GetStatus(bool hideIdentifiableInformation = false) => $@"Listening to {(Unicode || string.IsNullOrEmpty(Beatmap.BeatmapSet?.Metadata.Title) ? Beatmap.BeatmapSet?.Metadata.TitleUnicode : Beatmap.BeatmapSet.Metadata.Title)} - {(Unicode || string.IsNullOrEmpty(Beatmap.BeatmapSet?.Metadata.Title) ? Beatmap.BeatmapSet?.Metadata.ArtistUnicode : Beatmap.BeatmapSet.Metadata.Artist)}";
         }
     }
 }

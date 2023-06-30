@@ -1061,7 +1061,7 @@ namespace osu.Game.Screens.LLin
             base.OnResuming(e);
 
             //更新Mod
-            lastScreenMods = ((OsuScreen)e.Last).Mods.Value;
+            lastScreenMods = ((OsuScreen)(e.Last ?? null!)).Mods.Value;
 
             Mods.Value = new List<Mod> { modRateAdjust };
 

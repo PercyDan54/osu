@@ -69,9 +69,6 @@ namespace osu.Game.Screens.Select.Leaderboards
         }
 
         [Resolved]
-        private ScoreManager scoreManager { get; set; } = null!;
-
-        [Resolved]
         private IBindable<RulesetInfo> ruleset { get; set; } = null!;
 
         [Resolved]
@@ -165,7 +162,7 @@ namespace osu.Game.Screens.Select.Leaderboards
                     return;
 
                 SetScores(
-                    scoreManager.OrderByTotalScore(response.Scores.Select(s => s.ToScoreInfo(rulesets, fetchBeatmapInfo))),
+                    response.Scores.Select(s => s.ToScoreInfo(rulesets, fetchBeatmapInfo)).OrderByTotalScore(),
                     response.UserScore?.CreateScoreInfo(rulesets, fetchBeatmapInfo)
                 );
             });
@@ -224,7 +221,7 @@ namespace osu.Game.Screens.Select.Leaderboards
                     scores = scores.Where(s => selectedMods.SetEquals(s.Mods.Select(m => m.Acronym)));
                 }
 
-                scores = scoreManager.OrderByTotalScore(scores.Detach());
+                scores = scores.Detach().OrderByTotalScore();
 
                 SetScores(scores);
             }
