@@ -21,13 +21,6 @@ namespace osu.Game.Screens.LLin.Plugins
         protected abstract Drawable CreateContent();
 
         /// <summary>
-        /// 为游戏设置创建设置页面
-        /// </summary>
-        /// <returns>创建的设置页面</returns>
-        [Obsolete("请使用GetSettingEntries")]
-        public virtual PluginSettingsSubSection? CreateSettingsSubSection() => null;
-
-        /// <summary>
         /// 为Mvis侧边栏创建设置页面
         /// </summary>
         /// <returns>创建的设置页面</returns>

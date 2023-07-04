@@ -19,16 +19,6 @@ namespace osu.Game.Overlays.Settings.Sections.Mf
         {
             foreach (var pl in manager.GetAllPlugins(false))
             {
-#pragma warning disable CS0618
-                var legacyPage = pl.CreateSettingsSubSection();
-#pragma warning restore CS0618
-
-                if (legacyPage != null)
-                {
-                    Add(legacyPage);
-                    continue;
-                }
-
                 if (manager.GetSettingsFor(pl)?.Length > 0)
                     Add(new PluginSettingsSubsection(pl));
             }
