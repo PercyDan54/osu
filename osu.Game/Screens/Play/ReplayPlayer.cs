@@ -35,7 +35,7 @@ namespace osu.Game.Screens.Play
         // Disallow replays from failing. (see https://github.com/ppy/osu/issues/6108)
         protected override bool CheckModsAllowFailure()
         {
-            if (!replayIsFailedScore)
+            if (!replayIsFailedScore && !GameplayState.Mods.OfType<ModAutoplay>().Any())
                 return false;
 
             return base.CheckModsAllowFailure();

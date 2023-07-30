@@ -15,7 +15,7 @@ using osu.Game.Screens.Play;
 
 namespace osu.Game.Rulesets.Mods
 {
-    public abstract class ModAutoplay : Mod, IApplicableFailOverride, ICreateReplayData, IApplicableToHUD, IApplicableToPlayer
+    public abstract class ModAutoplay : Mod, ICreateReplayData
     {
         public override string Name => "Autoplay";
         public override string Acronym => "AT";
@@ -30,15 +30,11 @@ namespace osu.Game.Rulesets.Mods
         [SettingSource("Hide replay interface")]
         public Bindable<bool> HideInterface { get; } = new BindableBool();
 
-        public bool PerformFail() => false;
-
-        public bool RestartOnFail => false;
-
         public override bool UserPlayable => false;
         public override bool ValidForMultiplayer => false;
         public override bool ValidForMultiplayerAsFreeMod => false;
 
-        public override Type[] IncompatibleMods => new[] { typeof(ModCinema), typeof(ModRelax), typeof(ModFailCondition), typeof(ModNoFail), typeof(ModAdaptiveSpeed) };
+        public override Type[] IncompatibleMods => new[] { typeof(ModCinema), typeof(ModRelax), typeof(ModAdaptiveSpeed) };
 
         public override bool HasImplementation => GetType().GenericTypeArguments.Length == 0;
 
