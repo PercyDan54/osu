@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using osu.Framework.Bindables;
-using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
@@ -15,7 +14,7 @@ using osu.Game.Screens.Play;
 
 namespace osu.Game.Rulesets.Mods
 {
-    public abstract class ModAutoplay : Mod, ICreateReplayData
+    public abstract class ModAutoplay : Mod, IApplicableToPlayer, ICreateReplayData
     {
         public override string Name => "Autoplay";
         public override string Acronym => "AT";
@@ -27,9 +26,6 @@ namespace osu.Game.Rulesets.Mods
         [SettingSource("Save score")]
         public Bindable<bool> SaveScore { get; } = new BindableBool();
 
-        [SettingSource("Hide replay interface")]
-        public Bindable<bool> HideInterface { get; } = new BindableBool();
-
         public override bool UserPlayable => false;
         public override bool ValidForMultiplayer => false;
         public override bool ValidForMultiplayerAsFreeMod => false;
@@ -37,12 +33,6 @@ namespace osu.Game.Rulesets.Mods
         public override Type[] IncompatibleMods => new[] { typeof(ModCinema), typeof(ModRelax), typeof(ModAdaptiveSpeed) };
 
         public override bool HasImplementation => GetType().GenericTypeArguments.Length == 0;
-
-        public virtual void ApplyToHUD(HUDOverlay overlay)
-        {
-            if (HideInterface.Value)
-                overlay.PlayerSettingsOverlay.Children.ForEach(child => child.Hide());
-        }
 
         public virtual void ApplyToPlayer(Player player) => ((ReplayPlayer)player).SaveScore = SaveScore.Value;
 

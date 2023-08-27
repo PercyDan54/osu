@@ -23,14 +23,14 @@ namespace osu.Game.Rulesets.Mods
         }
     }
 
-    public class ModCinema : ModAutoplay
+    public class ModCinema : ModAutoplay, IApplicableToHUD
     {
         public override string Name => "Cinema";
         public override string Acronym => "CN";
         public override IconUsage? Icon => OsuIcon.ModCinema;
         public override LocalisableString Description => "Watch the video without visual distractions.";
 
-        public override void ApplyToHUD(HUDOverlay overlay)
+        public void ApplyToHUD(HUDOverlay overlay)
         {
             overlay.ShowHud.Value = false;
             overlay.ShowHud.Disabled = true;
