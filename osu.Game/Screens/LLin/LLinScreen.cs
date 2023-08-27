@@ -573,7 +573,7 @@ namespace osu.Game.Screens.LLin
                                               || tabControl.IsVisible.Value //TabControl可见
                                               || IsHovered == false; //隐藏界面或侧边栏可见，显示光标
 
-        public override bool? AllowTrackAdjustments => true;
+        public override bool? AllowGlobalTrackControl => true;
 
         #endregion
 

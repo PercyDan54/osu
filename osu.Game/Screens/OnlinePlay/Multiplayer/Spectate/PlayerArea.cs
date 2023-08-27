@@ -76,7 +76,6 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Spectate
             this.teamColor = teamColor;
 
             RelativeSizeAxes = Axes.Both;
-            Masking = true;
 
             AudioContainer audioContainer;
             InternalChildren = new Drawable[]

@@ -27,7 +27,7 @@ namespace osu.Game.Screens.ReplayVs
         public override bool HideOverlaysOnEnter => true;
 
         // We are managing our own adjustments. For now, this happens inside the Player instances themselves.
-        public override bool? AllowTrackAdjustments => false;
+        public override bool? ApplyModTrackAdjustments => false;
         public override bool AllowBackButton => false;
 
         /// <summary>

@@ -255,7 +255,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider, FrameworkConfigManager frameworkConfig)
         {
-            VersionHash = "b0339d0ee6880f764ce548d0b21c222d";
+            VersionHash = "b9f148007c51288301f801e3c5048037";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -387,17 +387,18 @@ namespace osu.Game
             {
                 SafeAreaOverrideEdges = SafeAreaOverrideEdges,
                 RelativeSizeAxes = Axes.Both,
-                Child = CreateScalingContainer().WithChildren(new Drawable[]
+                Child = CreateScalingContainer().WithChild(globalBindings = new GlobalActionContainer(this)
                 {
-                    (GlobalCursorDisplay = new GlobalCursorDisplay
+                    Children = new Drawable[]
                     {
-                        RelativeSizeAxes = Axes.Both
-                    }).WithChild(content = new OsuTooltipContainer(GlobalCursorDisplay.MenuCursor)
-                    {
-                        RelativeSizeAxes = Axes.Both
-                    }),
-                    // to avoid positional input being blocked by children, ensure the GlobalActionContainer is above everything.
-                    globalBindings = new GlobalActionContainer(this)
+                        (GlobalCursorDisplay = new GlobalCursorDisplay
+                        {
+                            RelativeSizeAxes = Axes.Both
+                        }).WithChild(content = new OsuTooltipContainer(GlobalCursorDisplay.MenuCursor)
+                        {
+                            RelativeSizeAxes = Axes.Both
+                        }),
+                    }
                 })
             });
 
