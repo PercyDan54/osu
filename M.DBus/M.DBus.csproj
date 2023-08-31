@@ -11,6 +11,6 @@
     </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Tmds.DBus" Version="0.9.1" />
-    <PackageReference Include="ppy.osu.Framework" Version="2023.724.0" />
+    <PackageReference Include="ppy.osu.Framework" Version="2023.823.0" />
   </ItemGroup>
 </Project>
