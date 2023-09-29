@@ -64,7 +64,7 @@ namespace osu.Game.Screens.Play
 
             if (!SaveScore) return;
 
-            LegacyByteArrayReader replayReader;
+            ByteArrayArchiveReader replayReader;
             var mods = Score.ScoreInfo.Mods.ToArray();
             var score = Score.DeepClone();
 
@@ -79,7 +79,7 @@ namespace osu.Game.Screens.Play
             using (var stream = new MemoryStream())
             {
                 new LegacyScoreEncoder(score, GameplayState.Beatmap).Encode(stream);
-                replayReader = new LegacyByteArrayReader(stream.ToArray(), "replay.osr");
+                replayReader = new ByteArrayArchiveReader(stream.ToArray(), "replay.osr");
             }
 
             ScoreManager.Instance.Import(score.ScoreInfo, replayReader);
