@@ -31,7 +31,7 @@ using osuTK;
 using osuTK.Graphics;
 using osu.Game.Online.API;
 using osu.Game.Resources.Localisation.Web;
-using osu.Game.Screens.Ranking;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Utils;
 
 namespace osu.Game.Online.Leaderboards
@@ -235,10 +235,6 @@ namespace osu.Game.Online.Leaderboards
                                                 },
                                             },
                                         },
-                                        new ReplayDownloadButton(Score)
-                                        {
-                                            Scale = new Vector2(0.8f)
-                                        }
                                     },
                                 },
                                 modsContainer = new FillFlowContainer<ModIcon>
@@ -247,7 +243,7 @@ namespace osu.Game.Online.Leaderboards
                                     Origin = Anchor.BottomRight,
                                     AutoSizeAxes = Axes.Both,
                                     Direction = FillDirection.Horizontal,
-                                    ChildrenEnumerable = Score.Mods.Select(mod => new ModIcon(mod) { Scale = new Vector2(0.375f) })
+                                    ChildrenEnumerable = Score.Mods.AsOrdered().Select(mod => new ModIcon(mod) { Scale = new Vector2(0.375f) })
                                 },
                             },
                         },
