@@ -217,7 +217,7 @@ namespace osu.Game
         /// For now, this is used as a source specifically for beat synced components.
         /// Going forward, it could potentially be used as the single source-of-truth for beatmap timing.
         /// </summary>
-        private readonly FramedBeatmapClock beatmapClock = new FramedBeatmapClock(true);
+        private readonly FramedBeatmapClock beatmapClock = new FramedBeatmapClock(applyOffsets: true, requireDecoupling: false);
 
         protected override Container<Drawable> Content => content;
 
@@ -255,7 +255,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider, FrameworkConfigManager frameworkConfig)
         {
-            VersionHash = "9b1ee346a1b083759504b48f343448ba";
+            VersionHash = "ccebd225999c37348891413d572c4600";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
@@ -436,16 +436,7 @@ namespace osu.Game
             }
         }
 
-        private void onTrackChanged(WorkingBeatmap beatmap, TrackChangeDirection direction)
-        {
-            // FramedBeatmapClock uses a decoupled clock internally which will mutate the source if it is an `IAdjustableClock`.
-            // We don't want this for now, as the intention of beatmapClock is to be a read-only source for beat sync components.
-            //
-            // Encapsulating in a FramedClock will avoid any mutations.
-            var framedClock = new FramedClock(beatmap.Track);
-
-            beatmapClock.ChangeSource(framedClock);
-        }
+        private void onTrackChanged(WorkingBeatmap beatmap, TrackChangeDirection direction) => beatmapClock.ChangeSource(beatmap.Track);
 
         protected virtual void InitialiseFonts()
         {
