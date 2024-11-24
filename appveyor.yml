@@ -9,26 +9,26 @@ cache:
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
-  version: 2024.1115.1
-  file_version: 2024.1115.1
+  version: 2024.1115.3
+  file_version: 2024.1115.3
 build_script:
 - cmd: >-
-    dotnet build osu.Desktop -c Release -r win-x64
+    dotnet publish osu.Desktop -c Release -r win-x64
 
-    dotnet build osu.Desktop -c Release -r linux-x64
+    dotnet publish osu.Desktop -c Release -r linux-x64
 
-    dotnet build osu.Desktop -c Release -r linux-arm64
+    dotnet publish osu.Desktop -c Release -r linux-arm64
 test: off
 artifacts:
-- path: ./osu.Desktop/bin/Release/net8.0/win-x64
+- path: ./osu.Desktop/bin/Release/net8.0/win-x64/publish
   name: osu-windows
-- path: ./osu.Desktop/bin/Release/net8.0/linux-x64
+- path: ./osu.Desktop/bin/Release/net8.0/linux-x64/publish
   name: osu-linux-x64
-- path: ./osu.Desktop/bin/Release/net8.0/linux-arm64
+- path: ./osu.Desktop/bin/Release/net8.0/linux-arm64/publish
   name: osu-linux-arm64
 deploy:
 - provider: GitHub
-  tag: 2024.1115.1
+  tag: 2024.1115.3
   auth_token:
     secure: EEbZ2OGaIPcjhGpQGzfE80TbrG14UiTPGNnQjMIKD5wzrYPQ4Kyhb3qLzMNahL1I
   repository: PercyDan54/osu
