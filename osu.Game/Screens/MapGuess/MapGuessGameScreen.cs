@@ -145,7 +145,7 @@ namespace osu.Game.Screens.MapGuess
                                         {
                                             RelativeSizeAxes = Axes.X,
                                             Text = "Restart music",
-                                            Action = restartMusic
+                                            Action = () => restartMusic()
                                         },
                                         hintButton = new RoundedButton
                                         {
@@ -239,7 +239,7 @@ namespace osu.Game.Screens.MapGuess
 
             if (correct)
             {
-                shakeContainer.FlashColour(Colour4.Green, 1000, Easing.Out);
+                shakeContainer.FlashColour(Colour4.Green, 800, Easing.Out);
                 showAnswer(true);
                 return;
             }
@@ -265,16 +265,17 @@ namespace osu.Game.Screens.MapGuess
         {
             state = MapGuessGameState.Answer;
             skipButton.Enabled.Value = false;
-            restartMusic();
+            hintButton.Enabled.Value = false;
+            restartMusic(true);
             beatmapDropdown.Current.Value = beatmap.BeatmapSetInfo;
-            Scheduler.AddDelayed(updateBeatmap, Math.Min(config.ShowAnswerLength.Value, config.PreviewLength.Value));
+            Scheduler.AddDelayed(updateBeatmap, config.ShowAnswerLength.Value + 500);
         }
 
-        private void restartMusic() => player?.Reset();
+        private void restartMusic(bool answer = false) => player?.Reset(answer);
 
         private void updateHint()
         {
-            while (!hintAvailable(++hint) && hint <= Hints.UnblurBackground)
+            while (!hintAvailable(++hint) && hint <= Hints.TitleRedacted)
             {
             }
 
@@ -294,10 +295,6 @@ namespace osu.Game.Screens.MapGuess
                     hintText.Text = $"Artist: {beatmap.Metadata.Artist}";
                     break;
 
-                case Hints.TitleRedacted:
-                    hintText.Text += $", Title: {hideChar(beatmap.Metadata.Title)} ";
-                    break;
-
                 case Hints.BlurredBackground:
                     player?.ToggleBackground(true);
                     player?.SetBackgroundBlur(Math.Max(config.BackgroundBlur.Value, 0.3f));
@@ -310,9 +307,13 @@ namespace osu.Game.Screens.MapGuess
                 case Hints.UnblurBackground:
                     player?.SetBackgroundBlur(0);
                     break;
+
+                case Hints.TitleRedacted:
+                    hintText.Text += $", Title: {hideChar(beatmap.Metadata.Title)} ";
+                    break;
             }
 
-            if (hint == Hints.UnblurBackground)
+            if (hint == Hints.TitleRedacted)
                 hintButton.Enabled.Value = false;
         }
 
@@ -339,6 +340,7 @@ namespace osu.Game.Screens.MapGuess
 
             currentTryCount = 0;
             skipButton.Enabled.Value = true;
+            hintButton.Enabled.Value = true;
             countdownText.Text = config.AutoSkip.Value.ToString();
             hintText.Text = string.Empty;
             beatmapDropdown.SearchTerm.Value = string.Empty;
@@ -356,7 +358,7 @@ namespace osu.Game.Screens.MapGuess
         private enum MapGuessGameState
         {
             Guessing,
-            Answer,
+            Answer
         }
 
         private enum Hints
@@ -365,10 +367,10 @@ namespace osu.Game.Screens.MapGuess
             Music,
             ArtistRedacted,
             Artist,
-            TitleRedacted,
             BlurredBackground,
             DecreaseBackgroundBlur,
-            UnblurBackground
+            UnblurBackground,
+            TitleRedacted
         }
 
         private bool hintAvailable(Hints hint)

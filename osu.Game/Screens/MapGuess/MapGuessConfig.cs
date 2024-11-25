@@ -36,16 +36,16 @@ namespace osu.Game.Screens.MapGuess
         {
             Value = 10000,
             Default = 10000,
-            MinValue = 3000,
+            MinValue = 1000,
             MaxValue = 60000,
             Precision = 500,
         };
 
         public BindableInt ShowAnswerLength { get; private set; } = new BindableInt
         {
-            Value = 10000,
-            Default = 10000,
-            MinValue = 3000,
+            Value = 5000,
+            Default = 5000,
+            MinValue = 1000,
             MaxValue = 60000,
             Precision = 500,
         };

@@ -6,6 +6,7 @@ using osu.Framework.Graphics;
 using osu.Game.Scoring;
 using osu.Game.Screens.Backgrounds;
 using osu.Game.Screens.Play;
+using osu.Game.Users;
 
 namespace osu.Game.Screens.MapGuess
 {
@@ -13,8 +14,11 @@ namespace osu.Game.Screens.MapGuess
     {
         private readonly MapGuessConfig config;
         private readonly double startTime;
+        private double playLength;
 
-        public BindableBool Paused { get; } = new BindableBool();
+        public BindableBool Paused { get; } = new BindableBool(true);
+
+        protected override UserActivity InitialActivity => null!;
 
         public MapGuessPlayer(Score score, double startTime, MapGuessConfig config)
             : base(score, new PlayerConfiguration
@@ -38,6 +42,7 @@ namespace osu.Game.Screens.MapGuess
             BreakOverlay.Hide();
             DrawableRuleset.Overlays.Hide();
             DrawableRuleset.Playfield.DisplayJudgements.Value = false;
+            playLength = config.PreviewLength.Value;
 
             if (!config.Music.Value)
                 Beatmap.Value.Track.Volume.Value = 0;
@@ -45,13 +50,14 @@ namespace osu.Game.Screens.MapGuess
             if (!config.ShowHitobjects.Value)
                 DrawableRuleset.Hide();
 
-            Reset();
+            Reset(false);
             Schedule(() =>
             {
                 bool showBackground = config.ShowBackground.Value;
                 ApplyToBackground(b =>
                 {
                     b.IgnoreUserSettings.Value = true;
+                    b.StoryboardReplacesBackground.Value = false;
                     b.DimWhenUserSettingsIgnored.Value = showBackground ? (config.ShowHitobjects.Value ? 0.7f : 0) : 1;
                 });
                 ToggleBackground(showBackground);
@@ -63,7 +69,7 @@ namespace osu.Game.Screens.MapGuess
         {
             base.Update();
 
-            if (GameplayClockContainer.CurrentTime >= startTime + config.PreviewLength.Value && !GameplayClockContainer.IsPaused.Value)
+            if (GameplayClockContainer.CurrentTime >= startTime + playLength && !Paused.Value)
             {
                 GameplayClockContainer.Stop();
                 Paused.Value = true;
@@ -71,10 +77,22 @@ namespace osu.Game.Screens.MapGuess
             }
         }
 
-        public void Reset()
+        public void Reset(bool answer)
         {
+            Paused.Value = false;
             GameplayClockContainer.Stop();
             SetGameplayStartTime(startTime);
+
+            if (answer)
+            {
+                playLength = config.ShowAnswerLength.Value;
+                Beatmap.Value.Track.Volume.Value = 1;
+                ApplyToBackground(b => b.DimWhenUserSettingsIgnored.Value = 0.7f);
+                ToggleBackground(true);
+                SetBackgroundBlur(0);
+                DrawableRuleset.Show();
+            }
+
             GameplayClockContainer.Start();
             Paused.Value = false;
             this.FadeIn(200, Easing.In);
