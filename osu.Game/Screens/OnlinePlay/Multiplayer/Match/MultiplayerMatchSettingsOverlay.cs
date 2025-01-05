@@ -438,7 +438,7 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
                 => MaxParticipantsField.Text = room.MaxParticipants?.ToString();
 
             private void updateRoomAutoStartDuration()
-                => typeLabel.Text = room.AutoStartDuration.GetLocalisableDescription();
+                => startModeDropdown.Current.Value = (StartMode)room.AutoStartDuration.TotalSeconds;
 
             private void updateRoomPlaylist()
                 => drawablePlaylist.Items.ReplaceRange(0, drawablePlaylist.Items.Count, room.Playlist);
@@ -567,6 +567,9 @@ namespace osu.Game.Screens.OnlinePlay.Multiplayer.Match
         {
             [Description("Off")]
             Off = 0,
+
+            [Description("10 seconds")]
+            Seconds10 = 10,
 
             [Description("30 seconds")]
             Seconds30 = 30,
