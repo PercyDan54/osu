@@ -36,6 +36,8 @@ namespace osu.Game.Screens.Play
 
         private readonly bool replayIsFailedScore;
 
+        private PlaybackSettings playbackSettings;
+
         [Resolved]
         private ScoreManager scoreManager { get; set; }
 
@@ -82,7 +84,7 @@ namespace osu.Game.Screens.Play
             if (!LoadedBeatmapSuccessfully)
                 return;
 
-            var playbackSettings = new PlaybackSettings
+            playbackSettings = new PlaybackSettings
             {
                 Depth = float.MaxValue,
                 Expanded = { BindTarget = config.GetBindable<bool>(OsuSetting.ReplayPlaybackControlsExpanded) }
@@ -159,11 +161,11 @@ namespace osu.Game.Screens.Play
                     return true;
 
                 case GlobalAction.SeekReplayBackward:
-                    SeekInDirection(-5);
+                    SeekInDirection(-5 * (float)playbackSettings.UserPlaybackRate.Value);
                     return true;
 
                 case GlobalAction.SeekReplayForward:
-                    SeekInDirection(5);
+                    SeekInDirection(5 * (float)playbackSettings.UserPlaybackRate.Value);
                     return true;
 
                 case GlobalAction.TogglePauseReplay:

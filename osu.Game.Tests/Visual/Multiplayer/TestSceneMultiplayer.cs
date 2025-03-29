@@ -33,7 +33,6 @@ using osu.Game.Rulesets.Osu.Mods;
 using osu.Game.Rulesets.Taiko;
 using osu.Game.Scoring;
 using osu.Game.Screens.OnlinePlay;
-using osu.Game.Screens.OnlinePlay.Components;
 using osu.Game.Screens.OnlinePlay.Lounge;
 using osu.Game.Screens.OnlinePlay.Lounge.Components;
 using osu.Game.Screens.OnlinePlay.Match;
@@ -58,7 +57,6 @@ namespace osu.Game.Tests.Visual.Multiplayer
         private TestMultiplayerComponents multiplayerComponents = null!;
 
         private TestMultiplayerClient multiplayerClient => multiplayerComponents.MultiplayerClient;
-        private TestMultiplayerRoomManager roomManager => multiplayerComponents.RoomManager;
 
         [Resolved]
         private OsuConfigManager config { get; set; } = null!;
@@ -83,6 +81,11 @@ namespace osu.Game.Tests.Visual.Multiplayer
             AddStep("import beatmap", () =>
             {
                 beatmaps.Import(TestResources.GetQuickTestBeatmapForImport()).WaitSafely();
+                Realm.Write(r =>
+                {
+                    foreach (var beatmapInfo in r.All<BeatmapInfo>())
+                        beatmapInfo.OnlineMD5Hash = beatmapInfo.MD5Hash;
+                });
                 importedSet = beatmaps.GetAllUsableBeatmapSets().First();
             });
 
@@ -257,7 +260,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         {
             AddStep("create room", () =>
             {
-                roomManager.AddServerSideRoom(new Room
+                multiplayerClient.AddServerSideRoom(new Room
                 {
                     Name = "Test Room",
                     Playlist =
@@ -271,7 +274,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             });
 
             AddStep("refresh rooms", () => this.ChildrenOfType<LoungeSubScreen>().Single().UpdateFilter());
-            AddUntilStep("wait for room", () => this.ChildrenOfType<DrawableRoom>().Any());
+            AddUntilStep("wait for room", () => this.ChildrenOfType<RoomPanel>().Any());
 
             AddStep("select room", () => InputManager.Key(Key.Down));
             AddStep("join room and immediately exit select", () =>
@@ -286,7 +289,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         {
             AddStep("create room", () =>
             {
-                roomManager.AddServerSideRoom(new Room
+                multiplayerClient.AddServerSideRoom(new Room
                 {
                     Name = "Test Room",
                     Playlist =
@@ -300,7 +303,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             });
 
             AddStep("refresh rooms", () => this.ChildrenOfType<LoungeSubScreen>().Single().UpdateFilter());
-            AddUntilStep("wait for room", () => this.ChildrenOfType<DrawableRoom>().Any());
+            AddUntilStep("wait for room", () => this.ChildrenOfType<RoomPanel>().Any());
 
             AddStep("select room", () => InputManager.Key(Key.Down));
             AddStep("join room", () => InputManager.Key(Key.Enter));
@@ -336,7 +339,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         {
             AddStep("create room", () =>
             {
-                roomManager.AddServerSideRoom(new Room
+                multiplayerClient.AddServerSideRoom(new Room
                 {
                     Name = "Test Room",
                     Password = "password",
@@ -351,13 +354,13 @@ namespace osu.Game.Tests.Visual.Multiplayer
             });
 
             AddStep("refresh rooms", () => this.ChildrenOfType<LoungeSubScreen>().Single().UpdateFilter());
-            AddUntilStep("wait for room", () => this.ChildrenOfType<DrawableRoom>().Any());
+            AddUntilStep("wait for room", () => this.ChildrenOfType<RoomPanel>().Any());
 
             AddStep("select room", () => InputManager.Key(Key.Down));
             AddStep("join room", () => InputManager.Key(Key.Enter));
 
-            DrawableLoungeRoom.PasswordEntryPopover? passwordEntryPopover = null;
-            AddUntilStep("password prompt appeared", () => (passwordEntryPopover = InputManager.ChildrenOfType<DrawableLoungeRoom.PasswordEntryPopover>().FirstOrDefault()) != null);
+            LoungeRoomPanel.PasswordEntryPopover? passwordEntryPopover = null;
+            AddUntilStep("password prompt appeared", () => (passwordEntryPopover = InputManager.ChildrenOfType<LoungeRoomPanel.PasswordEntryPopover>().FirstOrDefault()) != null);
             AddStep("enter password in text box", () => passwordEntryPopover.ChildrenOfType<TextBox>().First().Text = "password");
             AddStep("press join room button", () => passwordEntryPopover.ChildrenOfType<OsuButton>().First().TriggerClick());
 
@@ -789,7 +792,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
         {
             AddStep("create room", () =>
             {
-                roomManager.AddServerSideRoom(new Room
+                multiplayerClient.AddServerSideRoom(new Room
                 {
                     Name = "Test Room",
                     QueueMode = QueueMode.AllPlayers,
@@ -804,14 +807,14 @@ namespace osu.Game.Tests.Visual.Multiplayer
             });
 
             AddStep("refresh rooms", () => this.ChildrenOfType<LoungeSubScreen>().Single().UpdateFilter());
-            AddUntilStep("wait for room", () => this.ChildrenOfType<DrawableRoom>().Any());
+            AddUntilStep("wait for room", () => this.ChildrenOfType<RoomPanel>().Any());
             AddStep("select room", () => InputManager.Key(Key.Down));
 
-            AddStep("disable polling", () => this.ChildrenOfType<ListingPollingComponent>().Single().TimeBetweenPolls.Value = 0);
+            AddStep("disable polling", () => this.ChildrenOfType<LoungeListingPoller>().Single().TimeBetweenPolls.Value = 0);
             AddStep("change server-side settings", () =>
             {
-                roomManager.ServerSideRooms[0].Name = "New name";
-                roomManager.ServerSideRooms[0].Playlist =
+                multiplayerClient.ServerSideRooms[0].Name = "New name";
+                multiplayerClient.ServerSideRooms[0].Playlist =
                 [
                     new PlaylistItem(beatmaps.GetWorkingBeatmap(importedSet.Beatmaps.First(b => b.Ruleset.OnlineID == 0)).BeatmapInfo)
                     {
@@ -828,7 +831,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             AddAssert("local room has correct settings", () =>
             {
                 var localRoom = this.ChildrenOfType<MultiplayerMatchSubScreen>().Single().Room;
-                return localRoom.Name == roomManager.ServerSideRooms[0].Name && localRoom.Playlist.Single().ID == 2;
+                return localRoom.Name == multiplayerClient.ServerSideRooms[0].Name && localRoom.Playlist.Single().ID == 2;
             });
         }
 
@@ -926,7 +929,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
 
             enterGameplay();
             AddStep("join other user", () => multiplayerClient.AddUser(new APIUser { Id = 1234 }));
-            AddStep("add item as other user", () => multiplayerClient.AddUserPlaylistItem(1234, TestMultiplayerClient.CreateMultiplayerPlaylistItem(
+            AddStep("add item as other user", () => multiplayerClient.AddUserPlaylistItem(1234, new MultiplayerPlaylistItem(
                 new PlaylistItem(beatmaps.GetWorkingBeatmap(importedSet.Beatmaps.First(b => b.Ruleset.OnlineID == 0)).BeatmapInfo)
                 {
                     RulesetID = new OsuRuleset().RulesetInfo.OnlineID,
@@ -958,7 +961,7 @@ namespace osu.Game.Tests.Visual.Multiplayer
             enterGameplay();
 
             AddStep("join other user", () => multiplayerClient.AddUser(new APIUser { Id = 1234 }));
-            AddStep("add item as other user", () => multiplayerClient.AddUserPlaylistItem(1234, TestMultiplayerClient.CreateMultiplayerPlaylistItem(
+            AddStep("add item as other user", () => multiplayerClient.AddUserPlaylistItem(1234, new MultiplayerPlaylistItem(
                 new PlaylistItem(beatmaps.GetWorkingBeatmap(importedSet.Beatmaps.First(b => b.Ruleset.OnlineID == 0)).BeatmapInfo)
                 {
                     RulesetID = new OsuRuleset().RulesetInfo.OnlineID,
