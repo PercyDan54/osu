@@ -9,7 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Screens;
@@ -20,9 +19,9 @@ using osu.Game.IO.Archives;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 using osu.Game.Scoring.Legacy;
-using osu.Game.Screens.Play.HUD;
 using osu.Game.Screens.Play.PlayerSettings;
 using osu.Game.Screens.Ranking;
+using osu.Game.Screens.Select.Leaderboards;
 using osu.Game.Users;
 
 namespace osu.Game.Screens.Play
@@ -34,38 +33,49 @@ namespace osu.Game.Screens.Play
 
         private readonly Func<IBeatmap, IReadOnlyList<Mod>, Score> createScore;
 
-        private readonly bool replayIsFailedScore;
-
         private PlaybackSettings playbackSettings;
+
+        [Cached(typeof(IGameplayLeaderboardProvider))]
+        private readonly SoloGameplayLeaderboardProvider leaderboardProvider = new SoloGameplayLeaderboardProvider();
+
+        protected override UserActivity InitialActivity => new UserActivity.WatchingReplay(Score.ScoreInfo);
+
+        private bool isAutoplayPlayback => GameplayState.Mods.OfType<ModAutoplay>().Any();
+
+        private double? lastFrameTime;
 
         [Resolved]
         private ScoreManager scoreManager { get; set; }
 
         public bool SaveScore { get; set; } = false;
 
-        protected override UserActivity InitialActivity => new UserActivity.WatchingReplay(Score.ScoreInfo);
-
-        private bool isAutoplayPlayback => GameplayState.Mods.OfType<ModAutoplay>().Any();
-
-        // Disallow replays from failing. (see https://github.com/ppy/osu/issues/6108)
         protected override bool CheckModsAllowFailure()
         {
-            if (!replayIsFailedScore && !isAutoplayPlayback)
-                return false;
+            // autoplay should be able to fail if the beatmap is not humanly beatable
+            if (isAutoplayPlayback)
+                return base.CheckModsAllowFailure();
 
-            return base.CheckModsAllowFailure();
+            // non-autoplay replays should be able to fail, but only after they've exhausted their frames.
+            // note that the rank isn't checked here - that's because it is generally unreliable.
+            // stable replays, as well as lazer replays recorded prior to https://github.com/ppy/osu/pull/28058,
+            // do not even *contain* the user's rank.
+            // not to mention possible gameplay mechanics changes that could make a replay fail sooner than it really should.
+            if (GameplayClockContainer.CurrentTime >= lastFrameTime)
+                return base.CheckModsAllowFailure();
+
+            return false;
         }
 
         public ReplayPlayer(Score score, PlayerConfiguration configuration = null)
             : this((_, _) => score, configuration)
         {
-            replayIsFailedScore = score.ScoreInfo.Rank == ScoreRank.F;
         }
 
         public ReplayPlayer(Func<IBeatmap, IReadOnlyList<Mod>, Score> createScore, PlayerConfiguration configuration = null)
             : base(configuration)
         {
             this.createScore = createScore;
+            Configuration.ShowLeaderboard = true;
         }
 
         /// <summary>
@@ -84,6 +94,8 @@ namespace osu.Game.Screens.Play
             if (!LoadedBeatmapSuccessfully)
                 return;
 
+            AddInternal(leaderboardProvider);
+
             playbackSettings = new PlaybackSettings
             {
                 Depth = float.MaxValue,
@@ -99,6 +111,7 @@ namespace osu.Game.Screens.Play
         protected override void PrepareReplay()
         {
             DrawableRuleset?.SetReplayScore(Score);
+            lastFrameTime = Score.Replay.Frames.LastOrDefault()?.Time;
         }
 
         public override void OnEntering(ScreenTransitionEvent e)
@@ -131,15 +144,6 @@ namespace osu.Game.Screens.Play
 
         // Don't re-import replay scores as they're already present in the database.
         protected override Task ImportScore(Score score) => Task.CompletedTask;
-
-        public readonly BindableList<ScoreInfo> LeaderboardScores = new BindableList<ScoreInfo>();
-
-        protected override GameplayLeaderboard CreateGameplayLeaderboard() =>
-            new SoloGameplayLeaderboard(Score.ScoreInfo.User)
-            {
-                AlwaysVisible = { Value = true },
-                Scores = { BindTarget = LeaderboardScores }
-            };
 
         protected override ResultsScreen CreateResults(ScoreInfo score) => new SoloResultsScreen(score)
         {

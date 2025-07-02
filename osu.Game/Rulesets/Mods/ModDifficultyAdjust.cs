@@ -8,6 +8,7 @@ using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
 using osu.Game.Beatmaps;
 using osu.Game.Configuration;
+using osu.Game.Extensions;
 
 namespace osu.Game.Rulesets.Mods
 {
@@ -26,6 +27,8 @@ namespace osu.Game.Rulesets.Mods
         public override double ScoreMultiplier => 0.5;
 
         public override bool RequiresConfiguration => true;
+
+        public override bool ValidForFreestyleAsRequiredMod => true;
 
         public override Type[] IncompatibleMods => new[] { typeof(ModEasy), typeof(ModHardRock) };
 
@@ -65,6 +68,40 @@ namespace osu.Game.Rulesets.Mods
             }
         }
 
+        public override string ExtendedIconInformation
+        {
+            get
+            {
+                if (!IsExactlyOneSettingChanged(OverallDifficulty, DrainRate))
+                    return string.Empty;
+
+                if (!OverallDifficulty.IsDefault) return format("OD", OverallDifficulty);
+                if (!DrainRate.IsDefault) return format("HP", DrainRate);
+
+                return string.Empty;
+
+                string format(string acronym, DifficultyBindable bindable) => $"{acronym}{bindable.Value!.Value.ToStandardFormattedString(1)}";
+            }
+        }
+
+        protected bool IsExactlyOneSettingChanged(params DifficultyBindable[] difficultySettings)
+        {
+            DifficultyBindable? changedSetting = null;
+
+            foreach (var setting in difficultySettings)
+            {
+                if (setting.IsDefault)
+                    continue;
+
+                if (changedSetting != null)
+                    return false;
+
+                changedSetting = setting;
+            }
+
+            return changedSetting != null;
+        }
+
         public override IEnumerable<(LocalisableString setting, LocalisableString value)> SettingDescription
         {
             get
@@ -75,10 +112,6 @@ namespace osu.Game.Rulesets.Mods
                 if (!OverallDifficulty.IsDefault)
                     yield return ("Accuracy", $"{OverallDifficulty.Value:N1}");
             }
-        }
-
-        public void ReadFromDifficulty(IBeatmapDifficultyInfo difficulty)
-        {
         }
 
         public void ApplyToDifficulty(BeatmapDifficulty difficulty) => ApplySettings(difficulty);
