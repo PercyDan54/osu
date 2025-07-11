@@ -9,6 +9,7 @@ using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Audio.Sample;
 using osu.Framework.Audio.Track;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
@@ -24,6 +25,7 @@ using osu.Framework.Screens;
 using osu.Framework.Threading;
 using osu.Game.Beatmaps;
 using osu.Game.Collections;
+using osu.Game.Configuration;
 using osu.Game.Database;
 using osu.Game.Graphics.Carousel;
 using osu.Game.Graphics.Containers;
@@ -131,8 +133,10 @@ namespace osu.Game.Screens.SelectV2
         [Resolved]
         private IDialogOverlay? dialogOverlay { get; set; }
 
+        private Bindable<bool> configBackgroundBlur = null!;
+
         [BackgroundDependencyLoader]
-        private void load(AudioManager audio)
+        private void load(AudioManager audio, OsuConfigManager config)
         {
             errorSample = audio.Samples.Get(@"UI/generic-error");
 
@@ -166,7 +170,7 @@ namespace osu.Game.Screens.SelectV2
                                     {
                                         new Dimension(GridSizeMode.Relative, 0.5f, maxSize: 700),
                                         new Dimension(),
-                                        new Dimension(GridSizeMode.Relative, 0.5f, maxSize: 660),
+                                        new Dimension(GridSizeMode.Relative, 0.5f, minSize: 500, maxSize: 900),
                                     },
                                     Content = new[]
                                     {
@@ -240,7 +244,7 @@ namespace osu.Game.Screens.SelectV2
                                                                 RelativeSizeAxes = Axes.Both,
                                                                 RequestPresentBeatmap = b => SelectAndRun(b, OnStart),
                                                                 RequestSelection = queueBeatmapSelection,
-                                                                RequestRecommendedSelection = b => queueBeatmapSelection(difficultyRecommender?.GetRecommendedBeatmap(b) ?? b.First()),
+                                                                RequestRecommendedSelection = requestRecommendedSelection,
                                                                 NewItemsPresented = newItemsPresented,
                                                             },
                                                             noResultsPlaceholder = new NoResultsPlaceholder
@@ -273,6 +277,20 @@ namespace osu.Game.Screens.SelectV2
                 modSpeedHotkeyHandler = new ModSpeedHotkeyHandler(),
                 modSelectOverlay,
             });
+
+            configBackgroundBlur = config.GetBindable<bool>(OsuSetting.SongSelectBackgroundBlur);
+            configBackgroundBlur.BindValueChanged(e =>
+            {
+                if (!this.IsCurrentScreen())
+                    return;
+
+                updateBackgroundDim();
+            });
+        }
+
+        private void requestRecommendedSelection(IEnumerable<BeatmapInfo> b)
+        {
+            queueBeatmapSelection(difficultyRecommender?.GetRecommendedBeatmap(b) ?? b.First());
         }
 
         /// <summary>
@@ -489,16 +507,39 @@ namespace osu.Game.Screens.SelectV2
             var currentBeatmap = beatmaps.GetWorkingBeatmap(Beatmap.Value.BeatmapInfo, true);
             bool validSelection = checkBeatmapValidForSelection(currentBeatmap.BeatmapInfo, filterControl.CreateCriteria());
 
-            if (Beatmap.IsDefault || !validSelection)
+            if (validSelection)
+            {
+                carousel.CurrentSelection = currentBeatmap.BeatmapInfo;
+                return true;
+            }
+
+            // If there was no beatmap selected, pick a random one.
+            if (Beatmap.IsDefault)
             {
                 validSelection = carousel.NextRandom();
                 finaliseBeatmapSelection();
+                return validSelection;
             }
 
-            if (validSelection)
-                carousel.CurrentSelection = Beatmap.Value.BeatmapInfo;
-            else
-                Beatmap.SetDefault();
+            // If a previous non-default selection became non-valid, it was likely hidden or deleted.
+            if (!validSelection)
+            {
+                // In the case a difficulty was hidden or removed, prefer selecting another difficulty from the same set.
+                var activeSet = currentBeatmap.BeatmapSetInfo;
+                var criteria = filterControl.CreateCriteria();
+
+                var validBeatmaps = activeSet.Beatmaps.Where(b => checkBeatmapValidForSelection(b, criteria)).ToArray();
+
+                if (validBeatmaps.Any())
+                {
+                    requestRecommendedSelection(validBeatmaps);
+                    return true;
+                }
+            }
+
+            // If all else fails, use the default beatmap.
+            Beatmap.SetDefault();
+            finaliseBeatmapSelection();
 
             return validSelection;
         }
@@ -666,14 +707,16 @@ namespace osu.Game.Screens.SelectV2
 
         private void updateBackgroundDim() => ApplyToBackground(backgroundModeBeatmap =>
         {
-            backgroundModeBeatmap.BlurAmount.Value = 0;
             backgroundModeBeatmap.Beatmap = Beatmap.Value;
             backgroundModeBeatmap.IgnoreUserSettings.Value = true;
+
             backgroundModeBeatmap.DimWhenUserSettingsIgnored.Value = 0.1f;
 
             // Required to undo results screen dimming the background.
             // Probably needs more thought because this needs to be in every `ApplyToBackground` currently to restore sane defaults.
             backgroundModeBeatmap.FadeColour(Color4.White, 250);
+
+            backgroundModeBeatmap.BlurAmount.Value = revealingBackground == null && configBackgroundBlur.Value ? 20 : 0f;
         });
 
         #endregion
@@ -793,6 +836,8 @@ namespace osu.Game.Screens.SelectV2
                     skinnableContent.ScaleTo(1.2f, 600, Easing.OutQuint);
                     skinnableContent.FadeOut(200, Easing.OutQuint);
 
+                    updateBackgroundDim();
+
                     Footer?.Hide();
                 }, 200);
             }
@@ -826,6 +871,8 @@ namespace osu.Game.Screens.SelectV2
 
             revealingBackground.Cancel();
             revealingBackground = null;
+
+            updateBackgroundDim();
         }
 
         public virtual bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
