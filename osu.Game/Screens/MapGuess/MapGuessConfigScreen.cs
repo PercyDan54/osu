@@ -212,10 +212,13 @@ namespace osu.Game.Screens.MapGuess
 
             if (filteredBeatmapSets.Length == 0)
             {
+                errorText.FadeIn(500, Easing.Out);
                 errorText.Text = "No beatmap selected";
                 return;
             }
 
+            errorText.FadeOut(500, Easing.Out);
+            errorText.Text = string.Empty;
             this.Push(new MapGuessGameScreen(config, filteredBeatmapSets));
         }
 

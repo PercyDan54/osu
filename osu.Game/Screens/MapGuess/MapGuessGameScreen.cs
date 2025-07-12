@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -33,6 +34,9 @@ namespace osu.Game.Screens.MapGuess
         public override bool AllowUserExit => false;
 
         public override bool HideOverlaysOnEnter => true;
+
+        [Resolved]
+        private AudioManager audio { get; set; } = null!;
 
         [Resolved]
         private BeatmapManager beatmaps { get; set; } = null!;
@@ -320,7 +324,8 @@ namespace osu.Game.Screens.MapGuess
         private void updateBeatmap()
         {
             var selected = beatmapSets[random.Next(beatmapSets.Length)];
-            beatmap = beatmaps.GetWorkingBeatmap(selected.Beatmaps.MaxBy(b => b.StarRating));
+            beatmap = new MapGuessWorkingBeatmap(beatmaps.GetWorkingBeatmap(selected.Beatmaps.MaxBy(b => b.StarRating)), audio);
+
             var ruleset = rulesets.GetRuleset(beatmap.BeatmapInfo.Ruleset.OnlineID)?.CreateInstance();
             var autoplayMod = ruleset?.GetAutoplayMod();
 
@@ -328,6 +333,7 @@ namespace osu.Game.Screens.MapGuess
                 return;
 
             Beatmap.Value = beatmap;
+            Ruleset.Value = ruleset.RulesetInfo;
 
             var score = autoplayMod.CreateScoreFromReplayData(beatmap.GetPlayableBeatmap(ruleset.RulesetInfo), Mods.Value);
 
