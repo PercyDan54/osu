@@ -66,12 +66,6 @@ namespace osu.Game.Overlays.Settings.Sections.Custom
                     Current = config.GetBindable<float>(CustomSetting.JumpMult),
                     KeyboardStep = 0.01f
                 },
-                new SettingsSlider<float, MultiplierSlider>
-                {
-                    LabelText = "Next jump multiplier",
-                    Current = config.GetBindable<float>(CustomSetting.NextJumpMult),
-                    KeyboardStep = 0.01f
-                },
                 new SettingsCheckbox
                 {
                     LabelText = "Slider dance",

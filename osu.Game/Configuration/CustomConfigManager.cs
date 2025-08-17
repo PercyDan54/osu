@@ -27,12 +27,11 @@ namespace osu.Game.Configuration
             SetDefault(CustomSetting.DanceMover, OsuDanceMover.Momentum);
             SetDefault(CustomSetting.DanceSpinnerMover, OsuDanceSpinnerMover.Circle);
             SetDefault(CustomSetting.ReplayFramerate, 120.0, 15, 1000, 1);
-            SetDefault(CustomSetting.SpinnerChangeFramerate, false);
+            SetDefault(CustomSetting.SpinnerChangeFramerate, true);
             SetDefault(CustomSetting.SpinnerRadiusStart, 50, 5f, 350f, 1f);
             SetDefault(CustomSetting.SpinnerRadiusEnd, 50, 5f, 350f, 1f);
             SetDefault(CustomSetting.AngleOffset, 0.45f, 0f, 2f, 0.01f);
             SetDefault(CustomSetting.JumpMult, 0.6f, 0f, 2f, 0.01f);
-            SetDefault(CustomSetting.NextJumpMult, 0.25f, 0f, 2f, 0.01f);
             SetDefault(CustomSetting.SkipStackAngles, false);
             SetDefault(CustomSetting.SliderDance, true);
             SetDefault(CustomSetting.BorderBounce, true);
@@ -76,7 +75,6 @@ namespace osu.Game.Configuration
         SpinnerRadiusEnd,
         AngleOffset,
         JumpMult,
-        NextJumpMult,
         BorderBounce,
         SkipStackAngles,
         SliderDance,
@@ -112,7 +110,7 @@ namespace osu.Game.Configuration
     public enum OsuDanceMover
     {
         AxisAligned,
-        Aggresive,
+        Aggressive,
         Bezier,
         Flower,
         HalfCircle,

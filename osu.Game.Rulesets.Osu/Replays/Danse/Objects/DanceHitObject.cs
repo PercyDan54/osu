@@ -25,8 +25,8 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse.Objects
             BaseObject = baseObject;
             StartTime = baseObject.StartTime;
             EndTime = baseObject.GetEndTime();
-            StartPos = BaseObject.StackedPosition;
-            EndPos = BaseObject.StackedEndPosition;
+            StartPos = baseObject.StackedPosition;
+            EndPos = baseObject.StackedEndPosition;
         }
 
         public virtual Vector2 PositionAt(double time) => BaseObject switch
