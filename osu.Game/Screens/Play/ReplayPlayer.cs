@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using osu.Framework.Allocation;
+using osu.Framework.Graphics;
 using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Screens;
@@ -43,6 +44,7 @@ namespace osu.Game.Screens.Play
         private bool isAutoplayPlayback => GameplayState.Mods.OfType<ModAutoplay>().Any();
 
         private double? lastFrameTime;
+        private ReplayFailIndicator failIndicator;
 
         [Resolved]
         private ScoreManager scoreManager { get; set; }
@@ -106,6 +108,17 @@ namespace osu.Game.Screens.Play
                 playbackSettings.UserPlaybackRate.BindTo(master.UserPlaybackRate);
 
             HUDOverlay.PlayerSettingsOverlay.AddAtStart(playbackSettings);
+            AddInternal(failIndicator = new ReplayFailIndicator(GameplayClockContainer)
+            {
+                GoToResults = () =>
+                {
+                    if (!this.IsCurrentScreen())
+                        return;
+
+                    ValidForResume = false;
+                    this.Push(new SoloResultsScreen(Score.ScoreInfo));
+                }
+            });
         }
 
         protected override void PrepareReplay()
@@ -207,6 +220,38 @@ namespace osu.Game.Screens.Play
 
         public void OnReleased(KeyBindingReleaseEvent<GlobalAction> e)
         {
+        }
+
+        protected override void PerformFail()
+        {
+            // base logic intentionally suppressed - we have our own custom fail interaction
+            ScoreProcessor.FailScore(Score.ScoreInfo);
+            failIndicator.Display();
+        }
+
+        public override void OnSuspending(ScreenTransitionEvent e)
+        {
+            stopAllAudioEffects();
+            base.OnSuspending(e);
+        }
+
+        public override bool OnExiting(ScreenExitEvent e)
+        {
+            // safety against filters or samples from the indicator playing long after the screen is exited
+            failIndicator.RemoveAndDisposeImmediately();
+            return base.OnExiting(e);
+        }
+
+        private void stopAllAudioEffects()
+        {
+            // safety against filters or samples from the indicator playing long after the screen is exited
+            failIndicator.RemoveAndDisposeImmediately();
+
+            if (GameplayClockContainer is MasterGameplayClockContainer master)
+            {
+                playbackSettings.UserPlaybackRate.UnbindFrom(master.UserPlaybackRate);
+                master.UserPlaybackRate.SetDefault();
+            }
         }
     }
 }
