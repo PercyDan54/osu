@@ -24,7 +24,6 @@ namespace osu.Game.Screens.MapGuess
             : base(score, new PlayerConfiguration
             {
                 AllowUserInteraction = false,
-                AllowFailAnimation = false,
                 ShowResults = false
             })
         {
@@ -75,6 +74,12 @@ namespace osu.Game.Screens.MapGuess
                 Paused.Value = true;
                 this.FadeOut(500, Easing.OutQuart);
             }
+        }
+
+        protected override void PerformFail()
+        {
+            // base logic intentionally suppressed - failing in multiplayer only marks the score with F rank
+            ScoreProcessor.FailScore(Score.ScoreInfo);
         }
 
         public void Reset(bool answer)
