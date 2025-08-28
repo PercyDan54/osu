@@ -132,13 +132,13 @@ namespace osu.Game.Overlays.Settings.Sections.Custom
                 {
                     LabelText = "Duration multiplier trigger",
                     Current = config.GetBindable<float>(CustomSetting.DurationTrigger),
-                    KeyboardStep = 100f
+                    KeyboardStep = 50f
                 },
                 new SettingsSlider<float>
                 {
                     LabelText = "Stream area",
                     Current = config.GetBindable<float>(CustomSetting.StreamArea),
-                    KeyboardStep = 100f
+                    KeyboardStep = 5f
                 },
                 new SettingsSlider<float>
                 {

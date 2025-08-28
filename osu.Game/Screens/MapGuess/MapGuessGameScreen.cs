@@ -239,7 +239,7 @@ namespace osu.Game.Screens.MapGuess
             newAnswer = false;
             currentTryCount++;
 
-            bool correct = string.Equals(beatmapDropdown.Current.Value.Metadata.Title, beatmap.BeatmapSetInfo.Metadata.Title, StringComparison.OrdinalIgnoreCase);
+            bool correct = string.Equals(beatmapDropdown.Current.Value?.Metadata.Title, beatmap.BeatmapSetInfo.Metadata.Title, StringComparison.OrdinalIgnoreCase);
 
             if (correct)
             {

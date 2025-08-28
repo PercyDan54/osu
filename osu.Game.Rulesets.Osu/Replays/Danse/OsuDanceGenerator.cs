@@ -67,8 +67,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
             mover = GetMover(config.Get<OsuDanceMover>(CustomSetting.DanceMover));
             spinnerMover = config.Get<OsuDanceSpinnerMover>(CustomSetting.DanceSpinnerMover);
             borderBounce = config.Get<bool>(CustomSetting.BorderBounce);
-            normalFrameDelay = ApplyModsToRate(0, 1000.0 / 60);
-            frameDelay = ApplyModsToRate(0, 1000.0 / config.Get<double>(CustomSetting.ReplayFramerate));
+            frameDelay = normalFrameDelay = ApplyModsToRate(0, 1000.0 / config.Get<double>(CustomSetting.ReplayFramerate));
             spinRadiusStart = config.Get<float>(CustomSetting.SpinnerRadiusStart);
             spinRadiusEnd = config.Get<float>(CustomSetting.SpinnerRadiusEnd);
             sliderDance = config.Get<bool>(CustomSetting.SliderDance);
@@ -362,7 +361,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
                         switch (h.BaseObject)
                         {
                             case Spinner:
-                                frameDelay = spinnerChangeFramerate ? GetFrameDelay(time) : normalFrameDelay;
+                                frameDelay = spinnerChangeFramerate ? normalFrameDelay : GetFrameDelay(time);
                                 AddFrameToReplay(new OsuReplayFrame(time, mover.GetObjectPosition(time, h), action));
                                 break;
 

@@ -78,8 +78,6 @@ namespace osu.Game.Screens.MapGuess
 
         protected override void PerformFail()
         {
-            // base logic intentionally suppressed - failing in multiplayer only marks the score with F rank
-            ScoreProcessor.FailScore(Score.ScoreInfo);
         }
 
         public void Reset(bool answer)
