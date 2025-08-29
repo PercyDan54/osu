@@ -19,6 +19,7 @@ using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Graphics.UserInterfaceV2;
 using osu.Game.Overlays;
+using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Screens.Play.HUD;
@@ -39,6 +40,9 @@ namespace osu.Game.Screens.MapGuess
         private AudioManager audio { get; set; } = null!;
 
         [Resolved]
+        private INotificationOverlay notifications { get; set; } = null!;
+
+        [Resolved]
         private BeatmapManager beatmaps { get; set; } = null!;
 
         [Resolved]
@@ -55,7 +59,7 @@ namespace osu.Game.Screens.MapGuess
         private double countdownStartTime;
         private readonly int countdownTime;
         private readonly int totalCount;
-        private readonly BeatmapSetInfo[] beatmapSets;
+        private readonly List<BeatmapSetInfo> beatmapSets;
         private readonly OsuScreenStack screenStack;
         private readonly BeatmapDropdown beatmapDropdown;
         private readonly RoundedButton restartMusicButton;
@@ -67,7 +71,7 @@ namespace osu.Game.Screens.MapGuess
         private readonly ShakeContainer shakeContainer;
         private readonly MapGuessConfig config;
 
-        public MapGuessGameScreen(MapGuessConfig config, BeatmapSetInfo[] beatmapSets)
+        public MapGuessGameScreen(MapGuessConfig config, List<BeatmapSetInfo> beatmapSets)
         {
             this.config = config;
             this.beatmapSets = beatmapSets;
@@ -243,7 +247,7 @@ namespace osu.Game.Screens.MapGuess
 
             if (correct)
             {
-                shakeContainer.FlashColour(Colour4.Green, 800, Easing.Out);
+                shakeContainer.FlashColour(Colour4.Green, 1500, Easing.Out);
                 showAnswer(true);
                 return;
             }
@@ -323,33 +327,53 @@ namespace osu.Game.Screens.MapGuess
 
         private void updateBeatmap()
         {
-            var selected = beatmapSets[random.Next(beatmapSets.Length)];
-            beatmap = new MapGuessWorkingBeatmap(beatmaps.GetWorkingBeatmap(selected.Beatmaps.MaxBy(b => b.StarRating)), audio);
+            while (true)
+            {
+                if (beatmapSets.Count == 0)
+                {
+                    notifications.Post(new SimpleNotification
+                    {
+                        Text = "No more beatmaps available!",
+                        Transient = true
+                    });
+                    return;
+                }
 
-            var ruleset = rulesets.GetRuleset(beatmap.BeatmapInfo.Ruleset.OnlineID)?.CreateInstance();
-            var autoplayMod = ruleset?.GetAutoplayMod();
+                var selected = beatmapSets[random.Next(beatmapSets.Count)];
+                beatmap = new MapGuessWorkingBeatmap(beatmaps.GetWorkingBeatmap(selected.Beatmaps.MaxBy(b => b.StarRating)), audio);
 
-            if (ruleset == null || autoplayMod == null)
-                return;
+                var ruleset = rulesets.GetRuleset(beatmap.BeatmapInfo.Ruleset.OnlineID)?.CreateInstance();
+                var autoplayMod = ruleset?.GetAutoplayMod();
+                beatmapSets.Remove(selected);
 
-            Beatmap.Value = beatmap;
-            Ruleset.Value = ruleset.RulesetInfo;
+                if (ruleset == null || autoplayMod == null)
+                    continue;
 
-            var score = autoplayMod.CreateScoreFromReplayData(beatmap.GetPlayableBeatmap(ruleset.RulesetInfo), Mods.Value);
+                Beatmap.Value = beatmap;
+                Ruleset.Value = ruleset.RulesetInfo;
 
-            if (player != null)
-                screenStack.Exit();
+                var playableBeatmap = beatmap.GetPlayableBeatmap(ruleset.RulesetInfo);
 
-            screenStack.Push(player = new MapGuessPlayer(score, beatmap.BeatmapInfo.Metadata.PreviewTime, config));
-            restartMusicButton.Enabled.UnbindBindings();
-            restartMusicButton.Enabled.BindTo(player.Paused);
+                if (playableBeatmap.HitObjects.Count == 0)
+                    continue;
+
+                var score = autoplayMod.CreateScoreFromReplayData(playableBeatmap, Mods.Value);
+
+                if (player != null)
+                    screenStack.Exit();
+
+                screenStack.Push(player = new MapGuessPlayer(score, beatmap.BeatmapInfo.Metadata.PreviewTime, config));
+                restartMusicButton.Enabled.UnbindBindings();
+                restartMusicButton.Enabled.BindTo(player.Paused);
+                break;
+            }
 
             currentTryCount = 0;
             skipButton.Enabled.Value = true;
             hintButton.Enabled.Value = true;
             countdownText.Text = config.AutoSkip.Value.ToString();
             hintText.Text = string.Empty;
-            beatmapDropdown.SearchTerm.Value = string.Empty;
+            beatmapDropdown.Reset();
             hint = Hints.None;
             state = MapGuessGameState.Guessing;
             countdownStartTime = Time.Current;
@@ -370,11 +394,11 @@ namespace osu.Game.Screens.MapGuess
         private enum Hints
         {
             None,
-            Music,
             ArtistRedacted,
             Artist,
             BlurredBackground,
             DecreaseBackgroundBlur,
+            Music,
             UnblurBackground,
             TitleRedacted
         }
@@ -440,6 +464,13 @@ namespace osu.Game.Screens.MapGuess
                 Header.SearchTerm.BindValueChanged(_ => updateItems());
             }
 
+            public void Reset()
+            {
+                SearchTerm.Value = string.Empty;
+                Current.Value = null!;
+                base.Items = [];
+            }
+
             private void updateItems()
             {
                 string searchTerm = Header.SearchTerm.Value;
@@ -457,7 +488,7 @@ namespace osu.Game.Screens.MapGuess
             {
                 string title = metadata.Title;
 
-                if (title != metadata.TitleUnicode)
+                if (title != metadata.TitleUnicode && !string.IsNullOrEmpty(metadata.TitleUnicode))
                     title += $" ({metadata.TitleUnicode})";
 
                 return title;

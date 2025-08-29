@@ -207,10 +207,11 @@ namespace osu.Game.Screens.MapGuess
         private void startGame()
         {
             var allBeatmapSets = beatmaps.GetAllUsableBeatmapSets();
-            var filteredBeatmaps = allBeatmapSets.Select(bs => bs.Beatmaps.MaxBy(b => b.StarRating)).Where(b => config.Rulesets.Contains(b.Ruleset.OnlineID)).ToArray();
-            var filteredBeatmapSets = filteredBeatmaps.Select(b => b.BeatmapSet).ToArray();
+            var filteredBeatmaps = allBeatmapSets.Where(bs => !bs.Protected).Select(bs => bs.Beatmaps.MaxBy(b => b.StarRating))
+                                                 .Where(b => config.Rulesets.Contains(b.Ruleset.OnlineID)).ToArray();
+            var filteredBeatmapSets = filteredBeatmaps.Select(b => b.BeatmapSet).ToList();
 
-            if (filteredBeatmapSets.Length == 0)
+            if (filteredBeatmapSets.Count == 0)
             {
                 errorText.FadeIn(500, Easing.Out);
                 errorText.Text = "No beatmap selected";
