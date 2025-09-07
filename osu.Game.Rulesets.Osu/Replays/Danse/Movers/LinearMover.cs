@@ -25,7 +25,13 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse.Movers
             return rate;
         }
 
-        public override Vector2 Update(double time) => Interpolation.ValueAt(time, StartPos, EndPos, StartTime, EndTime, Easing.Out);
+        public override Vector2 Update(double time)
+        {
+            if (time >= base.StartTime && time < StartTime)
+                return StartPos;
+
+            return Interpolation.ValueAt(time, StartPos, EndPos, StartTime, EndTime, Easing.Out);
+        }
 
         public override int SetObjects(List<DanceHitObject> objects)
         {

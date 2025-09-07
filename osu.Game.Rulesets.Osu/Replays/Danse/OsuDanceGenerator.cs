@@ -193,6 +193,10 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
                     if (dst <= circle.Radius * 1.995 && next.StartTime - current.EndTime <= Math.Max(frameDelay, 3))
                     {
                         double sTime = (next.StartTime + current.EndTime) / 2;
+
+                        if (current.SliderPointEnd || next.SliderPointEnd)
+                            continue;
+
                         current.DoubleClick = true;
                         current.StartTime = current.EndTime = sTime;
                         current.StartPos = current.EndPos = (current.EndPos + next.StartPos) * 0.5f;
@@ -212,7 +216,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
 
                     if (current.EndTime + frameDelay < o.StartTime) break;
 
-                    if (!o.SliderPoint || o.SliderPointStart)
+                    if (o is not DanceSpinner && (!o.SliderPoint || o.SliderPointStart))
                     {
                         // The minimum time we can delay is one frame
                         hitObjects[j].StartTime += frameDelay;
