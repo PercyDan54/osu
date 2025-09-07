@@ -6,6 +6,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Localisation;
 using osu.Framework.Screens;
 using osu.Game.Screens;
+using osu.Game.Screens.BpGuess;
 using osu.Game.Screens.MapGuess;
 
 namespace osu.Game.Overlays.Settings.Sections
@@ -31,6 +32,11 @@ namespace osu.Game.Overlays.Settings.Sections
                 {
                     Text = "Open map guess",
                     Action = () => runner.PerformFromScreen(s => s.Push(new MapGuessConfigScreen()))
+                },
+                new SettingsButton
+                {
+                    Text = "Open BP guess",
+                    Action = () => runner.PerformFromScreen(s => s.Push(new BpGuessGameScreen()))
                 },
             };
         }

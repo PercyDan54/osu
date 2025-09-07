@@ -223,7 +223,7 @@ namespace osu.Game.Screens.MapGuess
             this.Push(new MapGuessGameScreen(config, filteredBeatmapSets));
         }
 
-        private partial class SolidBackgroundScreen : BackgroundScreen
+        public partial class SolidBackgroundScreen : BackgroundScreen
         {
             private readonly Box background;
 

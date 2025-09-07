@@ -50,8 +50,10 @@ namespace osu.Game.Screens.MapGuess
                 DrawableRuleset.Hide();
 
             Reset(false);
-            Schedule(() =>
+            ScheduleAfterChildren(() =>
             {
+                // Prevent playing combo break sound
+                ScoreProcessor.Combo.UnbindEvents();
                 bool showBackground = config.ShowBackground.Value;
                 ApplyToBackground(b =>
                 {
@@ -68,11 +70,11 @@ namespace osu.Game.Screens.MapGuess
         {
             base.Update();
 
-            if (GameplayClockContainer.CurrentTime >= startTime + playLength && !Paused.Value)
+            if (!Paused.Value && GameplayClockContainer.CurrentTime >= startTime + playLength)
             {
                 GameplayClockContainer.Stop();
                 Paused.Value = true;
-                this.FadeOut(500, Easing.OutQuart);
+                this.FadeOut(500, Easing.In);
             }
         }
 
