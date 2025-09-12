@@ -433,7 +433,7 @@ namespace osu.Game.Screens.MapGuess
                 if (!char.IsAsciiLetter(t) || i == 0 || (char.IsWhiteSpace(lastChar) && !char.IsWhiteSpace(nextChar)))
                     text += t;
                 else
-                    text += '?';
+                    text += '_';
 
                 lastChar = t;
             }
