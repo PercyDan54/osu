@@ -40,7 +40,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
                 if (lastTime < h.StartTime && time >= h.StartTime)
                 {
                     double endTime = h.EndTime;
-                    double releaseAt = endTime + AutoGenerator.KEY_UP_DELAY;
+                    double releaseAt = endTime + applyModsToTimeDelta(0, AutoGenerator.KEY_UP_DELAY);
 
                     if (i + 1 < hitObjects.Count)
                     {
@@ -53,7 +53,7 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
                             if (c.SliderPoint && !c.SliderPointStart)
                             {
                                 endTime = c.EndTime;
-                                releaseAt = endTime + AutoGenerator.KEY_UP_DELAY;
+                                releaseAt = endTime + applyModsToTimeDelta(0, AutoGenerator.KEY_UP_DELAY);
                             }
                             else
                                 break;
@@ -79,13 +79,13 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
                             {
                                 double nTime = obj.StartTime;
                                 // The minimum time we can delay is one frame
-                                releaseAt = Math.Clamp(nTime - frameDelay, endTime + frameDelay, releaseAt);
+                                releaseAt = Math.Clamp(nTime - Math.Min(frameDelay, AutoGenerator.KEY_UP_DELAY), endTime + Math.Min(frameDelay, AutoGenerator.KEY_UP_DELAY), releaseAt);
                             }
                         }
                     }
 
                     double timeDifference = applyModsToTimeDelta(previousEnd, h.StartTime);
-                    bool shouldBeLeft = !wasLeftBefore && timeDifference < 266;
+                    bool shouldBeLeft = !wasLeftBefore && (timeDifference < applyModsToTimeDelta(0, 266) || keyUpTime[1] >= h.StartTime);
 
                     if (isDoubleClick)
                     {

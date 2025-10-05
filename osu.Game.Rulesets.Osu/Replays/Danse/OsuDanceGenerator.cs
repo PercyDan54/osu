@@ -94,32 +94,32 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
             {
                 var h = hitObjects[i].BaseObject;
 
-                if (h is Slider s)
+                if (h is not Slider s)
+                    continue;
+
+                bool found = false;
+
+                // Resolving 2B conflicts
+                for (int j = i - 1; j >= 0; j--)
                 {
-                    bool found = false;
+                    var o = hitObjects[j];
 
-                    // Resolving 2B conflicts
-                    for (int j = i - 1; j >= 0; j--)
+                    if (o.EndTime >= h.StartTime)
                     {
-                        var o = hitObjects[i - 1];
+                        found = true;
+                        replaceSlider(i, ref hitObjects);
 
-                        if (o.EndTime >= h.StartTime)
-                        {
-                            found = true;
-                            replaceSlider(i, ref hitObjects);
-
-                            break;
-                        }
+                        break;
                     }
+                }
 
-                    if (!found && i + 1 < hitObjects.Count)
+                if (!found && i + 1 < hitObjects.Count)
+                {
+                    var o = hitObjects[i + 1];
+
+                    if (o.StartTime <= s.EndTime)
                     {
-                        var o = hitObjects[i + 1];
-
-                        if (o.StartTime <= s.EndTime)
-                        {
-                            replaceSlider(i, ref hitObjects);
-                        }
+                        replaceSlider(i, ref hitObjects);
                     }
                 }
             }
@@ -127,39 +127,52 @@ namespace osu.Game.Rulesets.Osu.Replays.Danse
             // Second 2B pass for spinners
             for (int i = 0; i < hitObjects.Count; i++)
             {
-                if (hitObjects[i] is DanceSpinner s)
+                if (hitObjects[i] is not DanceSpinner s)
+                    continue;
+
+                var subSpinners = new List<DanceSpinner>();
+                double startTime = s.StartTime;
+
+                if (i - 1 >= 0 && Math.Abs(hitObjects[i - 1].EndTime - startTime) < frameDelay)
                 {
-                    var subSpinners = new List<DanceSpinner>();
-                    double startTime = s.StartTime;
-
-                    for (int j = i + 1; j < hitObjects.Count; j++)
-                    {
-                        var o = hitObjects[j];
-
-                        if (o.StartTime - frameDelay >= s.EndTime) break;
-
-                        double endTime = o.StartTime - frameDelay;
-
-                        if (endTime > startTime)
-                        {
-                            subSpinners.Add(new DanceSpinner(new Spinner { StartTime = startTime, EndTime = endTime }, GetSpinnerMover(spinnerMover, startTime, endTime, s.Mover.RadiusAt(startTime), s.Mover.RadiusAt(endTime))));
-                        }
-
-                        startTime = o.EndTime + frameDelay;
-                    }
-
-                    if (subSpinners.Count > 0)
-                    {
-                        if (s.EndTime > startTime)
-                        {
-                            subSpinners.Add(new DanceSpinner(new Spinner { StartTime = startTime, EndTime = s.EndTime }, GetSpinnerMover(spinnerMover, startTime, s.EndTime, s.Mover.RadiusAt(startTime), s.Mover.RadiusAt(s.EndTime))));
-                        }
-
-                        hitObjects.RemoveAt(i);
-                        hitObjects.InsertRange(i, subSpinners);
-                        hitObjects = hitObjects.OrderBy(h => h.StartTime).ToList();
-                    }
+                    startTime += frameDelay;
                 }
+
+                for (int j = i + 1; j < hitObjects.Count; j++)
+                {
+                    var nextObj = hitObjects[j];
+
+                    if (nextObj.StartTime - frameDelay >= s.EndTime)
+                        break;
+
+                    double endTime = nextObj.StartTime - frameDelay;
+
+                    if (endTime > startTime)
+                    {
+                        subSpinners.Add(new DanceSpinner(new Spinner { StartTime = startTime, EndTime = endTime }, GetSpinnerMover(spinnerMover, startTime, endTime, s.Mover.RadiusAt(startTime), s.Mover.RadiusAt(endTime))));
+                    }
+
+                    startTime = nextObj.EndTime + frameDelay;
+                }
+
+                if (startTime == s.StartTime)
+                    continue;
+
+                if (s.EndTime > startTime)
+                {
+                    subSpinners.Add(new DanceSpinner(new Spinner { StartTime = startTime, EndTime = s.EndTime }, GetSpinnerMover(spinnerMover, startTime, s.EndTime, s.Mover.RadiusAt(startTime), s.Mover.RadiusAt(s.EndTime))));
+                }
+
+                hitObjects.RemoveAt(i);
+                hitObjects.InsertRange(i, subSpinners);
+
+                if (subSpinners.Count == 0)
+                {
+                    i--;
+                    continue;
+                }
+
+                hitObjects = hitObjects.OrderBy(h => h.StartTime).ToList();
             }
 
             for (int i = 0; i < hitObjects.Count; i++)
