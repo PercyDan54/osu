@@ -600,7 +600,9 @@ namespace osu.Game.Screens.SelectV2
 
                 if (validBeatmaps.Any())
                 {
-                    carousel.CurrentBeatmap = difficultyRecommender?.GetRecommendedBeatmap(validBeatmaps) ?? validBeatmaps.First();
+                    var beatmap = difficultyRecommender?.GetRecommendedBeatmap(validBeatmaps) ?? validBeatmaps.First();
+                    carousel.CurrentBeatmap = beatmap;
+                    debounceQueueSelection(beatmap);
                     return true;
                 }
             }
@@ -715,7 +717,7 @@ namespace osu.Game.Screens.SelectV2
 
             ensurePlayingSelected();
             updateBackgroundDim();
-            fetchOnlineInfo();
+            fetchOnlineInfo(force: true);
         }
 
         private void onLeavingScreen()
@@ -985,6 +987,14 @@ namespace osu.Game.Screens.SelectV2
 
             switch (e.Action)
             {
+                case GlobalAction.Select:
+                    // in most circumstances this is handled already by the carousel itself, but there are cases where it will not be.
+                    // one of which is filtering out all visible beatmaps and attempting to start gameplay.
+                    // in that case, users still expect a `Select` press to advance to gameplay anyway, using the ambient selected beatmap if there is one,
+                    // which matches the behaviour resulting from clicking the osu! cookie in that scenario.
+                    SelectAndRun(Beatmap.Value.BeatmapInfo, OnStart);
+                    return true;
+
                 case GlobalAction.IncreaseModSpeed:
                     return modSpeedHotkeyHandler.ChangeSpeed(0.05, flattenedMods);
 
@@ -1056,11 +1066,11 @@ namespace osu.Game.Screens.SelectV2
         private CancellationTokenSource? onlineLookupCancellation;
         private Task<APIBeatmapSet?>? currentOnlineLookup;
 
-        private void fetchOnlineInfo()
+        private void fetchOnlineInfo(bool force = false)
         {
             var beatmapSetInfo = Beatmap.Value.BeatmapSetInfo;
 
-            if (lastLookupResult.Value?.Result?.OnlineID == beatmapSetInfo.OnlineID)
+            if (lastLookupResult.Value?.Result?.OnlineID == beatmapSetInfo.OnlineID && !force)
                 return;
 
             onlineLookupCancellation?.Cancel();
