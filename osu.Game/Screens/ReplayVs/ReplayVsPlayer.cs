@@ -42,6 +42,9 @@ namespace osu.Game.Screens.ReplayVs
             if (cancellationToken.IsCancellationRequested)
                 return;
 
+            if (!LoadedBeatmapSuccessfully)
+                return;
+
             HUDOverlay.PlayerSettingsOverlay.Expire();
             HUDOverlay.HoldToQuit.Expire();
 
