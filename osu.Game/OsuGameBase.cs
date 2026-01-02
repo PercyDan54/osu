@@ -263,7 +263,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load(ReadableKeyCombinationProvider keyCombinationProvider, FrameworkConfigManager frameworkConfig)
         {
-            VersionHash = "d9d53645bb41a186b62db28b6d4a37c4";
+            VersionHash = "e0683cce56947cf0f5cb19d795924d9b";
 
             Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
