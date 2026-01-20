@@ -9,9 +9,12 @@ using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Input.Bindings;
+using osu.Framework.Input.Events;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics;
+using osu.Game.Input.Bindings;
 using osu.Game.Scoring;
 using osu.Game.Screens.OnlinePlay.Multiplayer.Spectate;
 using osu.Game.Screens.Play;
@@ -19,7 +22,7 @@ using osu.Game.Screens.Play.HUD;
 
 namespace osu.Game.Screens.ReplayVs
 {
-    public partial class ReplayVsScreen : OsuScreen
+    public partial class ReplayVsScreen : OsuScreen, IKeyBindingHandler<GlobalAction>
     {
         // Isolates beatmap/ruleset to this screen.
         public override bool DisallowExternalBeatmapRulesetChanges => true;
@@ -189,6 +192,43 @@ namespace osu.Game.Screens.ReplayVs
 
             teamRedScore.Value = team1Score;
             teamBlueScore.Value = team2Score;
+        }
+
+        public bool OnPressed(KeyBindingPressEvent<GlobalAction> e)
+        {
+            if (!AllPlayersLoaded)
+                return false;
+
+            switch (e.Action)
+            {
+                case GlobalAction.SeekReplayBackward:
+                    SeekInDirection(-5);
+                    return true;
+
+                case GlobalAction.SeekReplayForward:
+                    SeekInDirection(5);
+                    return true;
+
+                case GlobalAction.TogglePauseReplay:
+                    if (masterClockContainer.IsPaused.Value)
+                        masterClockContainer.Start();
+                    else
+                        masterClockContainer.Stop();
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void OnReleased(KeyBindingReleaseEvent<GlobalAction> e)
+        {
+        }
+
+        public void SeekInDirection(float amount)
+        {
+            double target = Math.Clamp(masterClockContainer.CurrentTime + amount * ReplayPlayer.BASE_SEEK_AMOUNT, 0, beatmap.Beatmap.GetLastObjectTime());
+
+            masterClockContainer.Seek(target);
         }
 
         private void checkAudioSource()
