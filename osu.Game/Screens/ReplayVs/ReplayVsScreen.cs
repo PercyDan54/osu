@@ -229,6 +229,13 @@ namespace osu.Game.Screens.ReplayVs
             double target = Math.Clamp(masterClockContainer.CurrentTime + amount * ReplayPlayer.BASE_SEEK_AMOUNT, 0, beatmap.Beatmap.GetLastObjectTime());
 
             masterClockContainer.Seek(target);
+
+            for (int i = 0; i < instances.Length; i++)
+            {
+                var player = instances[i];
+
+                player.SpectatorPlayerClock.Seek(target);
+            }
         }
 
         private void checkAudioSource()
