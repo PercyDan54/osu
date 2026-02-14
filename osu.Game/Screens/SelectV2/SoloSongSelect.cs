@@ -144,7 +144,7 @@ namespace osu.Game.Screens.SelectV2
 
                 if (replayGeneratingMod != null)
                 {
-                    player = new ReplayPlayer((beatmap, mods) => replayGeneratingMod.CreateScoreFromReplayData(beatmap, mods));
+                    player = new ReplayPlayer(replayGeneratingMod.CreateScoreFromReplayData);
                 }
                 else
                 {

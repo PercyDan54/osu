@@ -20,6 +20,12 @@ namespace osu.Game.Screens.Edit
     /// </summary>
     public class EditorBeatmapSkin : ISkin, IDisposable
     {
+        /// <summary>
+        /// Invoked when the beatmap skin changes.
+        /// This event is not locally scheduled to update thread or otherwise marshalled
+        /// in a way that would prevent invocation of a callback registered by a potentially-now-disposed caller.
+        /// Callers are expected to schedule locally as required.
+        /// </summary>
         public event Action? BeatmapSkinChanged;
 
         /// <summary>
@@ -55,7 +61,13 @@ namespace osu.Game.Screens.Edit
             ComboColours.BindCollectionChanged((_, _) => updateColours());
 
             if (skin.BeatmapSetResources != null)
-                skin.BeatmapSetResources.CacheInvalidated += InvokeSkinChanged;
+                skin.BeatmapSetResources.CacheInvalidated += beatmapResourcesInvalidated;
+        }
+
+        private void beatmapResourcesInvalidated()
+        {
+            Skin.RecycleSamples();
+            InvokeSkinChanged();
         }
 
         public void InvokeSkinChanged() => BeatmapSkinChanged?.Invoke();
@@ -120,7 +132,7 @@ namespace osu.Game.Screens.Edit
 
                         if (string.IsNullOrEmpty(indexString))
                             index = 1;
-                        if (int.TryParse(indexString, out int parsed))
+                        if (int.TryParse(indexString, out int parsed) && parsed >= 2)
                             index = parsed;
 
                         if (!index.HasValue)
@@ -143,7 +155,7 @@ namespace osu.Game.Screens.Edit
         public void Dispose()
         {
             if (Skin.BeatmapSetResources != null)
-                Skin.BeatmapSetResources.CacheInvalidated -= InvokeSkinChanged;
+                Skin.BeatmapSetResources.CacheInvalidated -= beatmapResourcesInvalidated;
             Skin.Dispose();
         }
 

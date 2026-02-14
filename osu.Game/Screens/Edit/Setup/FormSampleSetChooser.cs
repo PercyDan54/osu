@@ -13,6 +13,7 @@ using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
 using osu.Framework.Localisation;
 using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Localisation;
 
 namespace osu.Game.Screens.Edit.Setup
 {
@@ -22,7 +23,7 @@ namespace osu.Game.Screens.Edit.Setup
 
         public FormSampleSetChooser()
         {
-            Caption = "Custom sample sets";
+            Caption = EditorSetupStrings.CustomSampleSets;
         }
 
         [BackgroundDependencyLoader]
@@ -37,7 +38,7 @@ namespace osu.Game.Screens.Edit.Setup
 
             populateItems();
             if (beatmapSkin != null)
-                beatmapSkin.BeatmapSkinChanged += populateItems;
+                beatmapSkin.BeatmapSkinChanged += scheduleItemPopulation;
 
             Current.Value = Items.First(i => i?.SampleSetIndex > 0);
             Current.BindValueChanged(val =>
@@ -53,6 +54,8 @@ namespace osu.Game.Screens.Edit.Setup
             items.Add(new EditorBeatmapSkin.SampleSet(-1, "Add new..."));
             Items = items;
         }
+
+        private void scheduleItemPopulation() => Schedule(populateItems);
 
         protected override LocalisableString GenerateItemText(EditorBeatmapSkin.SampleSet? item)
         {
@@ -88,7 +91,7 @@ namespace osu.Game.Screens.Edit.Setup
         protected override void Dispose(bool isDisposing)
         {
             if (beatmapSkin != null)
-                beatmapSkin.BeatmapSkinChanged -= populateItems;
+                beatmapSkin.BeatmapSkinChanged -= scheduleItemPopulation;
 
             base.Dispose(isDisposing);
         }

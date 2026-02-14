@@ -159,11 +159,11 @@ namespace osu.Game.Screens.Menu
             buttonsPlay.Add(new MainMenuButton(@"replay compare", @"button-default-select", FontAwesome.Brands.Microsoft, new Color4(0, 86, 73, 255), (_, _) => OnReplayVs?.Invoke()));
             buttonsPlay.ForEach(b => b.VisibleState = ButtonSystemState.Play);
 
-            buttonsMulti.Add(new MainMenuButton("lounge", @"button-default-select", FontAwesome.Solid.Couch, new Color4(94, 63, 186, 255), onMultiplayer, Key.L, Key.M)
+            buttonsMulti.Add(new MainMenuButton(ButtonSystemStrings.Lounge, @"button-default-select", FontAwesome.Solid.Couch, new Color4(94, 63, 186, 255), onMultiplayer, Key.L, Key.M)
             {
                 Padding = new MarginPadding { Left = WEDGE_WIDTH }
             });
-            buttonsMulti.Add(new MainMenuButton("quick play", @"button-daily-select", FontAwesome.Solid.Bolt, new Color4(94, 63, 186, 255), onMatchmaking, Key.Q));
+            buttonsMulti.Add(new MainMenuButton(ButtonSystemStrings.QuickPlay, @"button-daily-select", FontAwesome.Solid.Bolt, new Color4(94, 63, 186, 255), onMatchmaking, Key.Q));
             buttonsMulti.ForEach(b => b.VisibleState = ButtonSystemState.Multi);
 
             buttonsEdit.Add(new MainMenuButton(EditorStrings.BeatmapEditor.ToLower(), @"button-default-select", OsuIcon.Beatmap, new Color4(238, 170, 0, 255), (_, _) => OnEditBeatmap?.Invoke(), Key.B,
