@@ -4,6 +4,7 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Localisation;
+using osu.Game.Overlays.Settings.Sections.Custom;
 
 namespace osu.Game.Overlays.Settings.Sections
 {
@@ -20,7 +21,7 @@ namespace osu.Game.Overlays.Settings.Sections
         {
             Children = new Drawable[]
             {
-                new CustomSettingsEntranceButton(mfpanel),
+                new CustomSettings(mfpanel),
             };
         }
     }

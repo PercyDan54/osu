@@ -9,31 +9,31 @@ using osu.Game.Screens;
 using osu.Game.Screens.BpGuess;
 using osu.Game.Screens.MapGuess;
 
-namespace osu.Game.Overlays.Settings.Sections
+namespace osu.Game.Overlays.Settings.Sections.Custom
 {
-    public partial class CustomSettingsEntranceButton : SettingsSubsection
+    public partial class CustomSettings : SettingsSubsection
     {
-        protected override LocalisableString Header => "Super secret settings";
+        protected override LocalisableString Header => "Super Secret Settings";
 
         [Resolved]
         private IPerformFromScreenRunner runner { get; set; } = null!;
 
-        public CustomSettingsEntranceButton(CustomSettingsPanel mfpanel)
+        public CustomSettings(CustomSettingsPanel panel)
         {
             Children = new Drawable[]
             {
-                new SettingsButton
+                new SettingsButtonV2
                 {
                     Text = "Open settings menu",
                     TooltipText = "Settings here is not provided by official",
-                    Action = mfpanel.ToggleVisibility
+                    Action = panel.ToggleVisibility
                 },
-                new SettingsButton
+                new SettingsButtonV2
                 {
                     Text = "Open map guess",
                     Action = () => runner.PerformFromScreen(s => s.Push(new MapGuessConfigScreen()))
                 },
-                new SettingsButton
+                new SettingsButtonV2
                 {
                     Text = "Open BP guess",
                     Action = () => runner.PerformFromScreen(s => s.Push(new BpGuessGameScreen()))

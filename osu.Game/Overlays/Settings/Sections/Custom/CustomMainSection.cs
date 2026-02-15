@@ -19,6 +19,9 @@ namespace osu.Game.Overlays.Settings.Sections.Custom
         public CustomMainSection()
         {
             Add(new DanceSettings());
+            Add(new DanceLinearMoverSettings());
+            Add(new DanceMomentumMoverSettings());
+            Add(new DanceBezierMoverSettings());
         }
     }
 }
