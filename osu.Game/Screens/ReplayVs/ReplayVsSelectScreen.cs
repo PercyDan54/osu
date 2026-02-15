@@ -14,7 +14,7 @@ using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
-using osu.Game.Graphics.UserInterfaceV2;
+using osu.Game.Overlays.Settings;
 using osu.Game.Scoring;
 using osu.Game.Screens.ReplayVs.Select;
 using osuTK;
@@ -63,7 +63,7 @@ namespace osu.Game.Screens.ReplayVs
                             },
                         }
                     },
-                    new RoundedButton
+                    new SettingsButtonV2
                     {
                         Text = "Start",
                         Action = validateAndPush,
@@ -177,7 +177,9 @@ namespace osu.Game.Screens.ReplayVs
             var teamRedScores = teamRedScoreInfos.Where(s => s.BeatmapInfo!.Equals(beatmapInfo)).Select(s => scoreManager.GetScore(s)).ToArray();
             var teamBlueScores = teamBlueScoreInfos.Where(s => s.BeatmapInfo!.Equals(beatmapInfo)).Select(s => scoreManager.GetScore(s)).ToArray();
 
-            this.Push(new ReplayVsScreen(teamRedScores, teamBlueScores, beatmapManager.GetWorkingBeatmap(beatmapInfo)));
+            var beatmap = beatmapManager.GetWorkingBeatmap(beatmapInfo);
+            Beatmap.Value = beatmap;
+            this.Push(new ReplayVsScreen(teamRedScores, teamBlueScores, beatmap));
         }
     }
 }

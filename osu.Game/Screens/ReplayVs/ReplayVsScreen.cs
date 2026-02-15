@@ -13,6 +13,7 @@ using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Input.Bindings;
 using osu.Game.Scoring;
@@ -53,6 +54,8 @@ namespace osu.Game.Screens.ReplayVs
         private readonly BindableLong teamRedScore = new BindableLong();
         private readonly BindableLong teamBlueScore = new BindableLong();
         private IAggregateAudioAdjustment? boundAdjustments;
+        private PlayerSettingsOverlay playerSettingsOverlay = null!;
+        private Bindable<bool> configSettingsOverlay = null!;
 
         public ReplayVsScreen(Score[] teamRedScores, Score[] teamBlueScores, WorkingBeatmap beatmap)
         {
@@ -63,8 +66,10 @@ namespace osu.Game.Screens.ReplayVs
             this.beatmap = beatmap;
         }
 
-        protected override void LoadComplete()
+        [BackgroundDependencyLoader]
+        private void load(OsuConfigManager config)
         {
+            configSettingsOverlay = config.GetBindable<bool>(OsuSetting.ReplaySettingsOverlay);
             Container scoreDisplayContainer;
             Beatmap.Value = beatmap;
             masterClockContainer = new MasterGameplayClockContainer(Beatmap.Value, 0);
@@ -98,6 +103,10 @@ namespace osu.Game.Screens.ReplayVs
                         },
                     }
                 }),
+                playerSettingsOverlay = new PlayerSettingsOverlay
+                {
+                    Alpha = 0,
+                },
                 new HoldForMenuButton
                 {
                     Action = this.Exit,
@@ -137,10 +146,6 @@ namespace osu.Game.Screens.ReplayVs
                 }, scoreDisplayContainer.Add);
             }
 
-            base.LoadComplete();
-
-            masterClockContainer.Reset();
-
             for (int i = 0; i < teamRedScores.Length; i++)
             {
                 instances[i].LoadScore(teamRedScores[i]);
@@ -150,8 +155,26 @@ namespace osu.Game.Screens.ReplayVs
             {
                 instances[i + teamRedScores.Length].LoadScore(teamBlueScores[i]);
             }
+        }
 
+        protected override void LoadComplete()
+        {
+            base.LoadComplete();
+
+            masterClockContainer.Reset();
+
+            // Start with adjustments from the first player to keep a sane state.
             bindAudioAdjustments(instances.First());
+
+            configSettingsOverlay.BindValueChanged(_ => updateVisibility(), true);
+        }
+
+        private void updateVisibility()
+        {
+            if (configSettingsOverlay.Value)
+                playerSettingsOverlay.Show();
+            else
+                playerSettingsOverlay.Hide();
         }
 
         private void bindAudioAdjustments(PlayerArea first)
