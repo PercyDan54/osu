@@ -6,7 +6,7 @@ using osu.Game.Screens.Select;
 
 namespace osu.Game.Screens.ReplayVs.Select
 {
-    public partial class ReplayVsSongSelect : SongSelect
+    public partial class ReplayVsSongSelect : SongSelect, ISongSelect
     {
         private readonly ReplayVsSelectScreen.TeamContainer teamContainer;
 
@@ -15,25 +15,16 @@ namespace osu.Game.Screens.ReplayVs.Select
             this.teamContainer = teamContainer;
         }
 
-        protected override BeatmapDetailArea CreateBeatmapDetailArea()
+        void ISongSelect.PresentScore(ScoreInfo score)
         {
-            return new ReplayVsBeatmapDetailArea
-            {
-                Leaderboard =
-                {
-                    ScoreSelected = scoreSelected
-                }
-            };
+            if (score.Files.Count == 0)
+                return;
+
+            teamContainer.AddScore(score);
         }
 
-        private void scoreSelected(ScoreInfo s)
+        protected override void OnStart()
         {
-            teamContainer.AddScore(s);
-        }
-
-        protected override bool OnStart()
-        {
-            return false;
         }
     }
 }
