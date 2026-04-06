@@ -73,10 +73,11 @@ namespace osu.Game.Screens.Select
                                 Colour = colourProvider.Background6,
                                 Padding = new MarginPadding { Right = 80, Vertical = 5 }
                             },
-                            new ShearedButton(80)
+                            new ShearedButton
                             {
                                 Anchor = Anchor.CentreRight,
                                 Origin = Anchor.CentreRight,
+                                Width = 80,
                                 Text = CommonStrings.Back,
                                 RelativeSizeAxes = Axes.Y,
                                 Height = 1,
@@ -106,7 +107,9 @@ namespace osu.Game.Screens.Select
             {
                 if (ScopedBeatmapSet.Value != null)
                 {
+                    this.TransformTo(nameof(Margin), new MarginPadding { Top = 5 }, transition_duration, Easing.OutQuint);
                     content.BypassAutoSizeAxes = Axes.None;
+
                     text.Clear();
                     text.AddText(SongSelectStrings.TemporarilyShowingAllBeatmapsIn);
                     text.AddText(@" ");
@@ -114,6 +117,7 @@ namespace osu.Game.Screens.Select
                 }
                 else
                 {
+                    this.TransformTo(nameof(Margin), new MarginPadding(0), transition_duration, Easing.OutQuint);
                     flashLayer.FadeOutFromOne(transition_duration, Easing.OutQuint);
                     content.BypassAutoSizeAxes = Axes.Y;
                 }
