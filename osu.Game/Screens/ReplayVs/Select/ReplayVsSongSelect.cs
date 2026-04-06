@@ -15,7 +15,7 @@ namespace osu.Game.Screens.ReplayVs.Select
             this.teamContainer = teamContainer;
         }
 
-        void ISongSelect.PresentScore(ScoreInfo score)
+        void ISongSelect.PresentScore(ScoreInfo score, ScorePresentType presentType)
         {
             if (score.Files.Count == 0)
                 return;

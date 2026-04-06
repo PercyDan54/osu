@@ -45,7 +45,6 @@ namespace osu.Game.Screens.ReplayVs
             if (!LoadedBeatmapSuccessfully)
                 return;
 
-            HUDOverlay.PlayerSettingsOverlay.Expire();
             HUDOverlay.HoldToQuit.Expire();
 
             AddInternal(new OsuSpriteText

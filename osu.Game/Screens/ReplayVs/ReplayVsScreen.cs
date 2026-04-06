@@ -54,7 +54,7 @@ namespace osu.Game.Screens.ReplayVs
         private readonly BindableLong teamRedScore = new BindableLong();
         private readonly BindableLong teamBlueScore = new BindableLong();
         private IAggregateAudioAdjustment? boundAdjustments;
-        private PlayerSettingsOverlay playerSettingsOverlay = null!;
+        private ReplayOverlay replayOverlay = null!;
         private Bindable<bool> configSettingsOverlay = null!;
 
         public ReplayVsScreen(Score[] teamRedScores, Score[] teamBlueScores, WorkingBeatmap beatmap)
@@ -71,7 +71,6 @@ namespace osu.Game.Screens.ReplayVs
         {
             configSettingsOverlay = config.GetBindable<bool>(OsuSetting.ReplaySettingsOverlay);
             Container scoreDisplayContainer;
-            Beatmap.Value = beatmap;
             masterClockContainer = new MasterGameplayClockContainer(Beatmap.Value, 0);
 
             InternalChildren = new[]
@@ -103,7 +102,7 @@ namespace osu.Game.Screens.ReplayVs
                         },
                     }
                 }),
-                playerSettingsOverlay = new PlayerSettingsOverlay
+                replayOverlay = new ReplayOverlay
                 {
                     Alpha = 0,
                 },
@@ -172,9 +171,9 @@ namespace osu.Game.Screens.ReplayVs
         private void updateVisibility()
         {
             if (configSettingsOverlay.Value)
-                playerSettingsOverlay.Show();
+                replayOverlay.Show();
             else
-                playerSettingsOverlay.Hide();
+                replayOverlay.Hide();
         }
 
         private void bindAudioAdjustments(PlayerArea first)
