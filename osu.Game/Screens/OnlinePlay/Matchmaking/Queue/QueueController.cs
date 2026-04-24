@@ -12,6 +12,7 @@ using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Screens;
 using osu.Game.Graphics;
+using osu.Game.Localisation;
 using osu.Game.Online.Matchmaking;
 using osu.Game.Online.Multiplayer;
 using osu.Game.Online.Rooms;
@@ -27,8 +28,6 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
     ///
     /// Includes support for deferring to background.
     /// </summary>
-    /// <remarks>
-    /// This is initialised and cached in the <see cref="ScreenQueue"/> but can be used throughout the system via DI.</remarks>
     public partial class QueueController : Component
     {
         public readonly Bindable<ScreenQueue.MatchmakingScreenState> CurrentState = new Bindable<ScreenQueue.MatchmakingScreenState>();
@@ -203,7 +202,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
             [BackgroundDependencyLoader]
             private void load(AudioManager audio)
             {
-                Text = "Searching for opponents...";
+                Text = MultiplayerMatchStrings.SearchingForOpponents;
 
                 Activated = () =>
                 {
@@ -255,7 +254,7 @@ namespace osu.Game.Screens.OnlinePlay.Matchmaking.Queue
                 return foundNotification = new MatchFoundNotification
                 {
                     Activated = CompletionClickAction,
-                    Text = "Your match is ready! Click to join.",
+                    Text = MultiplayerMatchStrings.MatchIsReady,
                 };
             }
 
