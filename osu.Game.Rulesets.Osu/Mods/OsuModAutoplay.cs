@@ -15,7 +15,7 @@ namespace osu.Game.Rulesets.Osu.Mods
 {
     public class OsuModAutoplay : ModAutoplay
     {
-        public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[] { typeof(OsuModMagnetised), typeof(OsuModRepel), typeof(OsuModAutopilot), typeof(OsuModSpunOut), typeof(OsuModAlternate), typeof(OsuModSingleTap) }).ToArray();
+        public override Type[] IncompatibleMods => base.IncompatibleMods.Concat(new[] { typeof(OsuModMagnetised), typeof(OsuModRepel), typeof(OsuModAutopilot), typeof(OsuModSpunOut), typeof(OsuModAlternate), typeof(OsuModSingleTap), typeof(OsuModWiggle), typeof(OsuModDepth) }).ToArray();
 
         [SettingSource("Cursor Dance", "Enable cursor dance")]
         public Bindable<bool> CursorDance { get; } = new BindableBool();

@@ -1,5 +1,5 @@
-image: Visual Studio 2022
-version: 2026.624.{build}
+image: Visual Studio 2026
+version: 2026.921.{build}
 pull_requests:
   do_not_increment_build_number: true
 skip_tags: true
@@ -9,8 +9,8 @@ cache:
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
-  version: 2026.624.0
-  file_version: 2026.624.0
+  version: 2026.921.0
+  file_version: 2026.921.0
 build_script:
 - cmd: >-
     dotnet publish osu.Desktop -c Release -r win-x64
@@ -20,15 +20,15 @@ build_script:
     dotnet publish osu.Desktop -c Release -r linux-arm64
 test: off
 artifacts:
-- path: ./osu.Desktop/bin/Release/net8.0/win-x64/publish
+- path: ./osu.Desktop/bin/Release/net10.0/win-x64/publish
   name: osu-windows
-- path: ./osu.Desktop/bin/Release/net8.0/linux-x64/publish
+- path: ./osu.Desktop/bin/Release/net10.0/linux-x64/publish
   name: osu-linux-x64
-- path: ./osu.Desktop/bin/Release/net8.0/linux-arm64/publish
+- path: ./osu.Desktop/bin/Release/net10.0/linux-arm64/publish
   name: osu-linux-arm64
 deploy:
 - provider: GitHub
-  tag: 2026.624.0-lazer
+  tag: 2026.921.0-lazer
   auth_token:
     secure: EEbZ2OGaIPcjhGpQGzfE80TbrG14UiTPGNnQjMIKD5wzrYPQ4Kyhb3qLzMNahL1I
   repository: PercyDan54/osu
